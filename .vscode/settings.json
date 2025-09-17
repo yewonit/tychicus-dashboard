@@ -1,0 +1,46 @@
+{
+  "magic.enabled": true,
+  "magic.autoGenerate": true,
+  "magic.framework": "react",
+  "magic.typescript": true,
+  "magic.ui.framework": "mui",
+  "magic.ui.styling": "emotion",
+  "magic.state.framework": "redux-toolkit",
+  "magic.api.client": "axios",
+  "magic.suggestions.enabled": true,
+  "magic.codeCompletion.enabled": true,
+  "magic.refactoring.enabled": true,
+  
+  // TypeScript 설정
+  "typescript.preferences.quoteStyle": "single",
+  "typescript.suggest.autoImports": true,
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  
+  // Material-UI 설정
+  "emmet.includeLanguages": {
+    "typescript": "html",
+    "typescriptreact": "html"
+  },
+  "emmet.triggerExpansionOnTab": true,
+  
+  // 코드 포맷팅
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit",
+    "source.fixAll.eslint": "explicit"
+  },
+  
+  // Prettier 설정
+  "prettier.enable": true,
+  "prettier.requireConfig": true,
+  
+  // ESLint 설정
+  "eslint.enable": true,
+  "eslint.format.enable": true,
+  "eslint.lintTask.enable": true,
+  
+  // React 설정
+  "typescript.preferences.jsxAttributeCompletionStyle": "auto",
+  "typescript.preferences.includePackageJsonAutoImports": "on"
+}

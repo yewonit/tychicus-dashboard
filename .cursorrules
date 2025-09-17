@@ -1,0 +1,684 @@
+# React 교회 출석 관리 시스템 - 커서룰
+
+## 프로젝트 개요
+Vue.js에서 React로 마이그레이션하는 교회 출석 관리 시스템입니다. 기존 디자인 시스템의 색상과 타이포그래피를 유지하면서 모바일 최적화된 UI를 구현합니다.
+
+## 기술 스택
+- React 18 + TypeScript
+- 단일 CSS 파일 기반 스타일 관리 (src/styles/global.css)
+- React Router v6
+- Redux Toolkit (상태 관리)
+- Material-UI + 커스텀 CSS 클래스
+- 커스텀 훅 시스템 (src/hooks/)
+- 공통 UI 컴포넌트 시스템 (src/components/ui/)
+
+## 색상 시스템
+기존 Vue 프로젝트의 민트-스카이블루 테마를 그대로 활용:
+
+```css
+:root {
+  /* 메인 색상 - 민트와 하늘색 조화 */
+  --primary: #4ecdc4;           /* 민트 그린 */
+  --primary-light: #a6e7e2;    /* 연한 민트 */
+  --primary-dark: #3aa39b;     /* 진한 민트 */
+  
+  --secondary: #5dade2;         /* 스카이 블루 */
+  --secondary-light: #8cd6ff;  /* 연한 스카이 블루 */
+  --secondary-dark: #0096ee;   /* 진한 스카이 블루 */
+  
+  --accent: #a8e6cf;           /* 연한 민트 악센트 */
+  
+  /* 시스템 색상 */
+  --success: #66bb6a;          /* 성공 그린 */
+  --warning: #ffa726;          /* 주황색 */
+  --error: #ef5350;            /* 부드러운 빨강 */
+  --info: #85c1e9;             /* 밝은 하늘색 */
+  
+  /* 그라데이션 */
+  --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  --gradient-secondary: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+  
+  /* 텍스트 색상 */
+  --text-primary: #2c3e50;     /* 메인 텍스트 */
+  --text-secondary: #455a64;   /* 보조 텍스트 */
+  --text-tertiary: #78909c;    /* 비활성 텍스트 */
+  --text-disabled: #85929e;    /* 비활성화 텍스트 */
+  
+  /* 배경 색상 */
+  --bg-primary: #fdfefe;       /* 메인 배경 */
+  --bg-secondary: #f8fdff;     /* 보조 배경 */
+  --bg-card: #f9fbfd;          /* 카드 배경 */
+  --bg-elevated: #ffffff;      /* 높은 계층 배경 */
+  
+  /* 테두리 및 구분선 */
+  --border-light: #e0f2f1;     /* 연한 테두리 */
+  --border-medium: rgba(0,0,0,0.12); /* 중간 테두리 */
+  --border-dark: rgba(0,0,0,0.25);   /* 진한 테두리 */
+}
+```
+
+## 타이포그래피 시스템
+기존 NotoSansCJKKR 폰트 시스템을 React에서 활용:
+
+```css
+:root {
+  /* 폰트 패밀리 */
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', Roboto, sans-serif;
+  
+  /* 폰트 크기 */
+  --font-size-huge: 48px;      /* 대형 제목 */
+  --font-size-xl: 36px;        /* 특대 */
+  --font-size-lg: 28px;        /* 큰 제목 */
+  --font-size-md: 22px;        /* 중간 제목 */
+  --font-size-base: 16px;      /* 기본 */
+  --font-size-sm: 14px;        /* 작은 텍스트 */
+  --font-size-xs: 12px;        /* 캡션 */
+  
+  /* 폰트 무게 */
+  --font-weight-bold: 700;
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  
+  /* 라인 높이 */
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+}
+```
+
+## 간격 시스템
+기존 4px 기반 간격 시스템 유지:
+
+```css
+:root {
+  /* 간격 - 4px 기반 */
+  --spacing-xs: 4px;    /* 1 */
+  --spacing-sm: 8px;    /* 2 */
+  --spacing-md: 16px;   /* 4 */
+  --spacing-lg: 24px;   /* 6 */
+  --spacing-xl: 32px;   /* 8 */
+  --spacing-2xl: 48px;  /* 12 */
+}
+```
+
+## 컴포넌트 구조
+모바일 우선의 컴포넌트 설계:
+
+```
+src/
+├── components/
+│   ├── ui/                    # 공통 UI 컴포넌트
+│   │   ├── Button.tsx         # 공통 버튼
+│   │   ├── FormField.tsx      # 공통 폼 필드
+│   │   ├── Card.tsx          # 공통 카드
+│   │   ├── LoadingSpinner.tsx # 로딩 스피너
+│   │   └── index.ts          # Export 파일
+│   ├── auth/                  # 인증 관련
+│   ├── attendance/            # 출석 관리
+│   ├── members/               # 회원 관리
+│   ├── main/                  # 메인 페이지
+│   └── layouts/               # 레이아웃
+├── hooks/                     # 커스텀 훅
+│   ├── useForm.ts            # 폼 상태 관리
+│   ├── useToggle.ts          # 토글 상태 관리
+│   ├── useDebounce.ts        # 디바운스
+│   └── index.ts              # Export 파일
+├── utils/                     # 유틸리티
+│   ├── validation.ts         # 폼 검증 함수
+│   ├── authUtils.ts          # 인증 유틸리티
+│   └── axiosClient.ts        # API 클라이언트
+├── store/                     # Redux 상태 관리
+│   ├── index.ts              # Store 설정
+│   └── slices/               # Redux slices
+├── types/                     # TypeScript 타입
+└── styles/                    # 글로벌 스타일
+    └── global.css            # 단일 CSS 파일
+```
+
+## 모바일 최적화 가이드라인
+
+### 터치 인터페이스
+- 최소 터치 타겟: 44px × 44px
+- 버튼 간격: 최소 8px
+- 스와이프 제스처 지원
+- 터치 피드백 (visual feedback)
+
+### 반응형 브레이크포인트
+```css
+:root {
+  --breakpoint-xs: 480px;   /* 작은 모바일 */
+  --breakpoint-sm: 768px;   /* 모바일 */
+  --breakpoint-md: 1024px;  /* 태블릿 */
+  --breakpoint-lg: 1280px;  /* 데스크톱 */
+  --breakpoint-xl: 1920px;  /* 대형 화면 */
+}
+```
+
+### 모바일 네비게이션
+- 하단 탭 네비게이션 (주요 기능)
+- 헤더의 뒤로가기/홈/취소 버튼
+- 사이드 드로어 (보조 메뉴)
+- 스크롤 시 헤더 숨김/표시
+
+## UI 컴포넌트 스타일 가이드
+
+### 버튼
+```jsx
+// 기본 버튼
+const Button = styled.button`
+  height: 48px;
+  padding: 0 24px;
+  border-radius: 24px;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 120px;
+  
+  /* Primary 버튼 */
+  &.primary {
+    background: var(--gradient-primary);
+    color: white;
+    box-shadow: 0 4px 12px rgba(78, 205, 196, 0.25);
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(78, 205, 196, 0.35);
+    }
+  }
+  
+  /* Secondary 버튼 */
+  &.secondary {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    border: 1px solid var(--border-medium);
+    
+    &:hover {
+      background: var(--bg-card);
+    }
+  }
+`;
+```
+
+### 카드
+```jsx
+const Card = styled.div`
+  background: var(--bg-elevated);
+  border-radius: 16px;
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-light);
+  
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  }
+`;
+```
+
+### 입력 필드
+```jsx
+const Input = styled.input`
+  width: 100%;
+  height: 48px;
+  padding: 0 16px;
+  border: 1px solid var(--border-medium);
+  border-radius: 12px;
+  font-size: var(--font-size-base);
+  background: var(--bg-elevated);
+  
+  &:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.1);
+  }
+  
+  &::placeholder {
+    color: var(--text-disabled);
+  }
+`;
+```
+
+## 애니메이션 가이드라인
+부드럽고 자연스러운 애니메이션:
+
+```css
+:root {
+  /* 애니메이션 지속시간 */
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+  
+  /* 이징 함수 */
+  --ease-out: cubic-bezier(0.0, 0.0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0.0, 1, 1);
+  --ease-in-out: cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+```
+
+### 공통 애니메이션
+- 페이드인: opacity 0 → 1
+- 슬라이드업: transform translateY(20px) → 0
+- 스케일: transform scale(0.95) → 1
+- 터치 피드백: transform scale(0.98)
+
+## 접근성 가이드라인
+- 충분한 색상 대비 (WCAG AA 기준)
+- 키보드 네비게이션 지원
+- 스크린 리더 지원 (aria-label, role)
+- 포커스 표시 명확화
+
+## 성능 최적화
+- React.memo 적극 활용
+- useMemo, useCallback으로 불필요한 렌더링 방지
+- 이미지 lazy loading
+- 코드 스플리팅 (React.lazy)
+- Virtual scrolling (긴 목록)
+
+### useCallback 사용 가이드라인
+
+#### ✅ 사용해야 하는 경우
+- **복잡한 계산 함수** (useMemo와 함께)
+- **자식 컴포넌트에 props로 전달** (React.memo와 함께)
+- **의존성이 자주 변경되는 함수**
+- **API 호출이나 비동기 작업**
+- **이벤트 핸들러가 다른 컴포넌트에 전달되는 경우**
+
+#### ❌ 사용하지 않아도 되는 경우
+- **의존성 배열이 비어있는 함수** (항상 같은 함수)
+- **단순한 값 반환 함수**
+- **컴포넌트 내부에서만 사용되는 함수**
+- **렌더링마다 새로 생성되어도 괜찮은 함수**
+
+#### 🎯 최적화 원칙
+1. **Premature Optimization is Evil** - 성능 문제가 실제로 발생하기 전까지는 단순하게
+2. **실제 병목 지점 찾기** - React DevTools Profiler로 실제 성능 측정
+3. **단계적 최적화** - 먼저 단순하게 구현 → 성능 문제 발생 시 측정 → 필요한 부분만 최적화
+
+#### 📝 코드 예시
+```typescript
+// ❌ 불필요한 useCallback
+const getMemberStatus = useCallback((member: Member): string => {
+  return member.isNewMember === 'Y' ? '새가족' : member.roleName;
+}, []); // 의존성 배열이 비어있음 = 매번 같은 함수
+
+// ✅ 단순한 함수로 충분
+const getMemberStatus = (member: Member): string => {
+  return member.isNewMember === 'Y' ? '새가족' : member.roleName;
+};
+
+// ✅ 필요한 useCallback (API 호출)
+const fetchMembers = useCallback(async () => {
+  const response = await api.getMembers(organizationId);
+  setMembers(response.data);
+}, [organizationId]);
+
+// ✅ 필요한 useCallback (복잡한 이벤트 핸들러)
+const handleSubmit = useCallback(async () => {
+  // 복잡한 비동기 로직
+}, [formData, validationRules, submitHandler]);
+```
+
+## 상태 관리 패턴
+Context API + useReducer 조합:
+
+```jsx
+// AuthContext 예시
+const AuthContext = createContext();
+
+const authReducer = (state, action) => {
+  switch (action.type) {
+    case 'LOGIN':
+      return { ...state, user: action.payload, isAuthenticated: true };
+    case 'LOGOUT':
+      return { ...state, user: null, isAuthenticated: false };
+    default:
+      return state;
+  }
+};
+```
+
+## 스타일 관리 가이드라인
+
+### ⚠️ 핵심 원칙: CSS 파일 기반 스타일 관리
+- **모든 스타일은 `src/styles/global.css`에서 중앙 집중 관리**
+- **CSS 클래스를 활용한 일관성 있는 디자인 시스템**
+- **styled-components 및 인라인 스타일 금지**
+
+### CSS 파일 구조
+```
+src/styles/
+└── global.css          # 모든 스타일을 한 곳에서 관리
+                        # - CSS 변수 정의
+                        # - 공통 컴포넌트 스타일
+                        # - 페이지별 스타일
+                        # - 반응형 미디어 쿼리
+```
+
+### 스타일 관리 원칙
+
+#### 1. CSS 클래스 우선 사용
+```jsx
+// ✅ 올바른 방법: CSS 클래스 사용
+<div className='service-selection-container'>
+  <h1 className='service-title'>제목</h1>
+  <button className='service-select-button'>버튼</button>
+</div>
+
+// ❌ 잘못된 방법: styled-components
+const StyledContainer = styled.div`
+  padding: 20px;
+`;
+
+// ❌ 잘못된 방법: Material-UI sx prop 남용
+<Box sx={{ padding: '20px', margin: '10px' }}>
+```
+
+#### 2. CSS 변수 적극 활용
+```css
+/* global.css에서 정의 */
+:root {
+  --primary: #4ecdc4;
+  --font-size-base: 16px;
+  --spacing-md: 16px;
+}
+
+/* 클래스에서 사용 */
+.service-title {
+  color: var(--primary);
+  font-size: var(--font-size-base);
+  margin-bottom: var(--spacing-md);
+}
+```
+
+#### 3. 컴포넌트별 네이밍 규칙
+```css
+/* 페이지별 접두사 사용 */
+.service-selection-container {}
+.service-header {}
+.service-card {}
+
+.auth-container {}
+.auth-paper {}
+.auth-button {}
+
+.member-list-container {}
+.member-card {}
+.member-item {}
+```
+
+### 주요 CSS 클래스들
+
+#### 공통 컴포넌트
+- `.common-container`: 기본 컨테이너
+- `.common-card`: 공통 카드 스타일
+- `.common-button`: 공통 버튼 (그라데이션)
+- `.common-textfield`: 공통 입력 필드
+
+#### 인증 페이지
+- `.auth-container`: 인증 페이지 컨테이너
+- `.auth-paper`: 인증 페이지 메인 카드
+- `.header-box`: 헤더 영역
+- `.user-info-box`: 사용자 정보 박스
+
+#### 서비스 선택 페이지
+- `.service-selection-container`: 메인 컨테이너
+- `.service-header`: 헤더 영역
+- `.service-title`: 메인 제목
+- `.service-subtitle`: 부제목 (그라데이션 텍스트)
+- `.service-cards-container`: 카드 컨테이너
+- `.service-card`: 개별 서비스 카드
+- `.service-icon-container`: 아이콘 영역
+- `.service-select-button`: 선택 버튼
+
+#### 레이아웃 유틸리티
+- `.input-group`: 입력 필드 그룹
+- `.button-group`: 버튼 그룹
+- `.full-width`: 전체 너비
+- `.centered`: 중앙 정렬
+
+### Material-UI 사용 가이드라인
+
+#### 허용되는 경우
+```jsx
+// ✅ 기본 컴포넌트로만 사용, 스타일은 CSS 클래스
+<Button className='common-button'>버튼</Button>
+<TextField className='common-textfield' />
+
+// ✅ CSS 변수만 활용하는 최소한의 sx prop
+<IconButton sx={{ color: 'var(--primary)' }} />
+```
+
+#### 금지되는 경우
+```jsx
+// ❌ 복잡한 스타일을 sx prop으로 정의
+<Box sx={{
+  padding: '20px',
+  margin: '10px',
+  backgroundColor: '#f0f0f0',
+  borderRadius: '8px',
+  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+}}>
+
+// ❌ 인라인 스타일
+<div style={{ padding: '20px', color: 'blue' }}>
+```
+
+### 반응형 디자인
+```css
+/* 모바일 우선 접근법 */
+.service-title {
+  font-size: var(--font-size-base);
+}
+
+/* 태블릿 */
+@media (min-width: 768px) {
+  .service-title {
+    font-size: var(--font-size-lg);
+  }
+}
+
+/* 데스크톱 */
+@media (min-width: 1024px) {
+  .service-title {
+    font-size: var(--font-size-xl);
+  }
+}
+```
+
+### 새 컴포넌트 스타일링 절차
+
+1. **global.css에 스타일 정의**
+```css
+.new-component-container {
+  background: var(--bg-elevated);
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-md);
+}
+```
+
+2. **컴포넌트에서 클래스 사용**
+```jsx
+const NewComponent = () => {
+  return (
+    <div className='new-component-container'>
+      <h2 className='new-component-title'>제목</h2>
+    </div>
+  );
+};
+```
+
+3. **Material-UI 최소화**
+```jsx
+// Material-UI는 기능만, 스타일은 CSS로
+<TextField 
+  className='common-textfield'
+  variant='outlined'
+  // sx prop 사용 금지
+/>
+```
+
+### ⚠️ 절대 금지 사항
+1. **styled-components 사용**
+2. **새로운 인라인 스타일 추가**
+3. **Material-UI sx prop으로 복잡한 스타일 정의**
+4. **CSS-in-JS 라이브러리 추가**
+
+### ✅ 권장 사항
+1. **모든 스타일을 global.css에 집중**
+2. **CSS 변수 적극 활용**
+3. **의미 있는 클래스명 사용**
+4. **반응형 디자인 고려**
+5. **일관성 있는 네이밍 규칙 준수**
+
+## 클린 코드 가이드라인
+
+### 커스텀 훅 활용
+```typescript
+// 폼 상태 관리
+import { useForm } from '../hooks';
+
+const form = useForm({
+  initialValues: { email: '', password: '' },
+  validationRules: {
+    email: validationRules.email,
+    password: validationRules.password,
+  },
+  onSubmit: async (data) => { /* 제출 로직 */ },
+});
+
+// 사용법
+<FormField
+  value={form.values.email}
+  onChange={form.handleChange('email')}
+  onBlur={form.handleBlur('email')}
+  error={form.errors.email}
+  touched={form.touched.email}
+/>
+```
+
+### 공통 컴포넌트 사용
+```typescript
+// Material-UI 대신 공통 컴포넌트 사용
+import { Button, FormField, Card, LoadingSpinner } from '../components/ui';
+
+// 로딩 상태
+if (loading) return <LoadingSpinner message="로딩 중..." />;
+
+// 폼 필드
+<FormField
+  label="이메일"
+  error={errors.email}
+  touched={touched.email}
+  helperText="이메일을 입력해주세요"
+/>
+
+// 버튼
+<Button variant="primary" loading={isSubmitting}>
+  제출
+</Button>
+```
+
+### 검증 유틸리티 활용
+```typescript
+import { validationRules, commonValidators } from '../utils/validation';
+
+// 기본 검증 규칙
+const rules = {
+  email: validationRules.email,
+  password: validationRules.password,
+  confirmPassword: (value) => 
+    validationRules.confirmPassword(value, formData.password),
+};
+
+// 복합 검증 규칙
+const rules = {
+  email: commonValidators.requiredEmail,
+  name: commonValidators.requiredName,
+  phoneNumber: commonValidators.requiredPhoneNumber,
+};
+```
+
+### 코드 구조 원칙
+
+#### 1. DRY (Don't Repeat Yourself)
+- 중복 로직은 커스텀 훅으로 추출
+- 공통 UI 패턴은 컴포넌트로 추출
+- 검증 로직은 validation 유틸리티 사용
+
+#### 2. 단일 책임 원칙
+- 컴포넌트는 하나의 책임만 가짐
+- 훅은 특정 기능에 집중
+- 유틸리티 함수는 순수 함수로 작성
+
+#### 3. 가독성 우선
+- 명확한 변수명과 함수명 사용
+- 복잡한 로직은 별도 함수로 분리
+- 주석보다는 코드 자체가 설명되도록 작성
+
+#### 4. 성능 고려
+- useCallback, useMemo 적절히 활용
+- 불필요한 리렌더링 방지
+- 컴포넌트 lazy loading 고려
+
+## 폴더 네이밍 컨벤션
+- 컴포넌트: PascalCase (Button, LoginForm)
+- 훅: camelCase (useAuth, useLocalStorage)
+- 유틸리티: camelCase (formatDate, validateEmail)
+- 상수: UPPER_SNAKE_CASE (API_ENDPOINTS, COLORS)
+
+## Git 커밋 컨벤션
+- feat: 새로운 기능
+- fix: 버그 수정
+- style: UI/스타일 변경
+- refactor: 코드 리팩토링
+- docs: 문서 수정
+- test: 테스트 추가/수정
+
+## 코드 품질 관리 규칙
+
+### ⚠️ 프리티어 오류 확인 필수
+**모든 소스 코드 수정 후 반드시 프리티어 오류를 확인하고 수정해야 합니다.**
+
+#### 🔍 프리티어 오류 확인 절차
+1. **코드 수정 완료 후 즉시 확인**
+   ```bash
+   npx prettier --check src/
+   ```
+
+2. **오류 발견 시 자동 수정**
+   ```bash
+   npx prettier --write src/
+   ```
+
+3. **특정 파일만 수정**
+   ```bash
+   npx prettier --write src/components/main/ComponentName.tsx
+   ```
+
+#### 📋 프리티어 오류 확인 체크리스트
+- [ ] 코드 수정 완료
+- [ ] 프리티어 오류 확인 (`npx prettier --check`)
+- [ ] 오류 발견 시 자동 수정 (`npx prettier --write`)
+- [ ] 컴파일 오류 없음 확인
+- [ ] 커밋 전 최종 확인
+
+#### 🚫 절대 금지 사항
+- **프리티어 오류가 있는 상태로 커밋 금지**
+- **컴파일 오류가 있는 상태로 커밋 금지**
+- **린트 오류가 있는 상태로 커밋 금지**
+
+#### ✅ 권장 사항
+- **코드 수정 후 즉시 프리티어 확인**
+- **IDE에서 프리티어 확장 프로그램 사용**
+- **커밋 전 자동 포맷팅 실행**
+- **일관된 코드 스타일 유지**
+
+### 🎯 코드 품질 목표
+- **0개의 프리티어 오류**
+- **0개의 컴파일 오류**
+- **0개의 린트 오류**
+- **일관된 코드 스타일**
+
+이 가이드라인을 따라 일관성 있고 사용자 친화적인 React 앱을 구축하세요!
