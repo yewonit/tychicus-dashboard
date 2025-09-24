@@ -134,3 +134,83 @@ export interface SnackbarState {
   color: 'success' | 'warning' | 'error' | 'info';
   timeout: number;
 }
+
+// 출석 관련 API 타입들
+export interface WeeklyStats {
+  totalMembers: number;
+  totalPresent: number;
+  attendanceRate: number;
+  newFamily: number;
+  activeMembers: number;
+  activeAttendanceRate: number;
+  lastWeek?: {
+    totalMembers: number;
+    totalPresent: number;
+    attendanceRate: number;
+    newFamily: number;
+    activeMembers: number;
+    activeAttendanceRate: number;
+  };
+}
+
+export interface WeeklyGraphData {
+  week: string;
+  month: string;
+  weekLabel: string;
+  출석: number;
+}
+
+export interface ContinuousAttendanceMember {
+  name: string;
+  team: string;
+  role: string | null;
+  consecutiveWeeks: number;
+}
+
+export interface ContinuousAttendanceStats {
+  consecutive4Weeks: number;
+  consecutive3Weeks: number;
+  consecutive2Weeks: number;
+  members: {
+    consecutive4Weeks: ContinuousAttendanceMember[];
+    consecutive3Weeks: ContinuousAttendanceMember[];
+    consecutive2Weeks: ContinuousAttendanceMember[];
+  };
+}
+
+export interface AttendanceTrendData {
+  week: string;
+  month: string;
+  weekLabel: string;
+  출석: number;
+}
+
+// 조직 구조 API 타입들
+export interface Gook {
+  id: number;
+  season_id: number;
+  organization_code: string;
+  organization_name: string;
+  organization_description: string;
+  upper_organization_id: number;
+  start_date: string;
+  end_date: string;
+  is_deleted: string;
+  created_at: string;
+  updated_at: string;
+  creator_id: number;
+  updater_id: number;
+  creator_ip: string;
+  updater_ip: string;
+  access_service_id: string;
+}
+
+export interface Group {
+  organization_name: any;
+  id: number;
+  name: string;
+  gookId: number;
+  gookName?: string;
+  memberCount?: number;
+  leader?: string;
+}

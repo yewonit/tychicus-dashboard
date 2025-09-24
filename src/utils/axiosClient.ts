@@ -13,7 +13,7 @@ const env = {
   },
   development: {
     AUTH_BASE_URL: 'https://attendance-dev.icoramdeo.com/auth',
-    API_BASE_URL: 'https://attendance-dev.icoramdeo.com/api',
+    API_BASE_URL: 'https://attendance-dev.icoramdeo.com/api', // 개발 서버 API 사용
     ADMIN_CONTACT: 'admin@example.com',
   },
   local: {

@@ -10,14 +10,14 @@ interface AttendanceChartProps {
   attendanceData2025: any;
   selectedGuk?: string;
   selectedGroup?: string;
-  chartType?: 'guk' | 'group' | 'sun';
+  chartType?: 'gook' | 'group' | 'sun';
 }
 
 const AttendanceChart: React.FC<AttendanceChartProps> = ({
   attendanceData2025,
   selectedGuk = '전체',
   selectedGroup = '전체',
-  chartType = 'guk',
+  chartType = 'gook',
 }) => {
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstance = useRef<Chart | null>(null);
@@ -66,11 +66,11 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
   // 차트 타입에 따른 제목과 데이터 설정
   const getChartConfig = () => {
     switch (chartType) {
-      case 'guk':
+      case 'gook':
         return {
           title: '국별 출석 수 현황',
-          data: getGukData(),
-          summaryData: getGukSummary(),
+          data: getGookData(),
+          summaryData: getGookSummary(),
         };
       case 'group':
         return {
@@ -94,33 +94,42 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
   };
 
   // 국별 데이터 처리
-  const getGukData = () => {
-    if (!attendanceData2025?.organizationStats?.guk) return [];
+  const getGookData = () => {
+    if (
+      !attendanceData2025?.organizationStats?.gook ||
+      !Array.isArray(Object.entries(attendanceData2025.organizationStats.gook))
+    ) {
+      return [];
+    }
 
-    return Object.entries(attendanceData2025.organizationStats.guk).map(
-      ([gukName, stats]: [string, any]) => {
+    return Object.entries(attendanceData2025.organizationStats.gook).map(
+      ([gookName, stats]: [string, any]) => {
         // 직전 주간 데이터 (가장 최근 주차)
         const lastWeek =
-          attendanceData2025.weeklyData[
-            attendanceData2025.weeklyData.length - 1
-          ];
+          Array.isArray(attendanceData2025.weeklyData) &&
+          attendanceData2025.weeklyData.length > 0
+            ? attendanceData2025.weeklyData[
+                attendanceData2025.weeklyData.length - 1
+              ]
+            : null;
         let 주일청년예배 = 0,
           수요기도회 = 0,
           두란노모임 = 0,
           대예배 = 0;
 
-        if (lastWeek?.attendance?.guk?.[gukName]) {
+        if (lastWeek?.attendance?.gook?.[gookName]) {
           주일청년예배 =
-            lastWeek.attendance.guk[gukName]['주일청년예배']?.present || 0;
+            lastWeek.attendance.gook[gookName]['주일청년예배']?.present || 0;
           수요기도회 =
-            lastWeek.attendance.guk[gukName]['수요제자기도회']?.present || 0;
+            lastWeek.attendance.gook[gookName]['수요제자기도회']?.present || 0;
           두란노모임 =
-            lastWeek.attendance.guk[gukName]['두란노사역자모임']?.present || 0;
-          대예배 = lastWeek.attendance.guk[gukName]['대예배']?.present || 0;
+            lastWeek.attendance.gook[gookName]['두란노사역자모임']?.present ||
+            0;
+          대예배 = lastWeek.attendance.gook[gookName]['대예배']?.present || 0;
         }
 
         return {
-          guk: gukName,
+          gook: gookName,
           주일청년예배,
           수요기도회,
           두란노모임,
@@ -136,16 +145,16 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
       return [];
 
     // 선택된 국에 속한 그룹들만 필터링
-    const gukGroups = Object.keys(
+    const gookGroups = Object.keys(
       attendanceData2025.organizationStats.group
     ).filter((groupName: string) => {
-      const gukName = Object.keys(attendanceData2025.gukGroupMapping).find(
-        guk => attendanceData2025.gukGroupMapping[guk].includes(groupName)
+      const gookName = Object.keys(attendanceData2025.gookGroupMapping).find(
+        gook => attendanceData2025.gookGroupMapping[gook].includes(groupName)
       );
-      return gukName === selectedGuk;
+      return gookName === selectedGuk;
     });
 
-    return gukGroups.map(groupName => {
+    return gookGroups.map(groupName => {
       const stats = attendanceData2025.organizationStats.group[groupName];
       const lastWeek =
         attendanceData2025.weeklyData[attendanceData2025.weeklyData.length - 1];
@@ -279,14 +288,14 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
   };
 
   // 국별 요약 데이터
-  const getGukSummary = () => {
-    if (!attendanceData2025?.organizationStats?.guk) return {};
+  const getGookSummary = () => {
+    if (!attendanceData2025?.organizationStats?.gook) return {};
 
     const totalMembers = Object.values(
-      attendanceData2025.organizationStats.guk
+      attendanceData2025.organizationStats.gook
     ).reduce((sum: number, stats: any) => sum + (stats.totalMembers || 0), 0);
 
-    const totalAttendance = getGukData().reduce(
+    const totalAttendance = getGookData().reduce(
       (sum, item) => sum + item.주일청년예배,
       0
     );
@@ -369,7 +378,7 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
   };
 
   // 2025년 평균 출석 수 계산 함수
-  const get2025AverageAttendance = (gukName: string, worshipType: string) => {
+  const get2025AverageAttendance = (gookName: string, worshipType: string) => {
     if (!attendanceData2025?.weeklyData) return 0;
 
     let totalAttendance = 0;
@@ -377,9 +386,9 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
 
     attendanceData2025.weeklyData.forEach((week: any) => {
       if (
-        week.attendance?.guk?.[gukName]?.[worshipType]?.present !== undefined
+        week.attendance?.gook?.[gookName]?.[worshipType]?.present !== undefined
       ) {
-        totalAttendance += week.attendance.guk[gukName][worshipType].present;
+        totalAttendance += week.attendance.gook[gookName][worshipType].present;
         weekCount++;
       }
     });
@@ -392,7 +401,8 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
     if (!chartRef.current) return;
 
     const config = getChartConfig();
-    if (!config.data || config.data.length === 0) return;
+    if (!config.data || !Array.isArray(config.data) || config.data.length === 0)
+      return;
 
     // 기존 차트 인스턴스 제거
     if (chartInstance.current) {
@@ -403,32 +413,48 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
     if (!ctx) return;
 
     const chartData = {
-      labels: config.data.map(item => item.guk || item.group || item.sun),
+      labels: Array.isArray(config.data)
+        ? config.data.map(
+            item =>
+              (item as any).gook ||
+              (item as any).group ||
+              (item as any).sun ||
+              'Unknown'
+          )
+        : [],
       datasets: [
         {
           label: '대예배',
-          data: config.data.map(item => item.대예배),
+          data: Array.isArray(config.data)
+            ? config.data.map(item => item.대예배 || 0)
+            : [],
           backgroundColor: 'rgba(153, 102, 255, 0.8)',
           borderColor: 'rgba(153, 102, 255, 1)',
           borderWidth: 1,
         },
         {
           label: '주일청년예배',
-          data: config.data.map(item => item.주일청년예배),
+          data: Array.isArray(config.data)
+            ? config.data.map(item => item.주일청년예배 || 0)
+            : [],
           backgroundColor: 'rgba(54, 162, 235, 0.8)',
           borderColor: 'rgba(54, 162, 235, 1)',
           borderWidth: 1,
         },
         {
           label: '수요기도회',
-          data: config.data.map(item => item.수요기도회),
+          data: Array.isArray(config.data)
+            ? config.data.map(item => item.수요기도회 || 0)
+            : [],
           backgroundColor: 'rgba(255, 206, 86, 0.8)',
           borderColor: 'rgba(255, 206, 86, 1)',
           borderWidth: 1,
         },
         {
           label: '두란노사역모임',
-          data: config.data.map(item => item.두란노모임),
+          data: Array.isArray(config.data)
+            ? config.data.map(item => item.두란노모임 || 0)
+            : [],
           backgroundColor: 'rgba(75, 192, 192, 0.8)',
           borderColor: 'rgba(75, 192, 192, 1)',
           borderWidth: 1,
@@ -460,17 +486,17 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
           tooltip: {
             callbacks: {
               title: function (context) {
-                const gukName = context[0].label;
+                const gookName = context[0].label;
                 const worshipType = context[0].dataset.label;
-                return `${gukName} - ${worshipType}`;
+                return `${gookName} - ${worshipType}`;
               },
               label: function (context) {
                 const value = context.parsed.y;
                 return `출석 수: ${value}명`;
               },
               afterBody: function (context) {
-                if (chartType === 'guk') {
-                  const gukName = context[0].label;
+                if (chartType === 'gook') {
+                  const gookName = context[0].label;
                   const worshipType = context[0].dataset.label;
 
                   // 예배 타입을 데이터 키로 변환
@@ -530,7 +556,7 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
 
                   // 2025년 평균 출석 수
                   const average2025 = get2025AverageAttendance(
-                    gukName,
+                    gookName,
                     worshipKey
                   );
 
@@ -561,12 +587,12 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
 
   const config = getChartConfig();
 
-  if (!config.data || config.data.length === 0) {
+  if (!config.data || !Array.isArray(config.data) || config.data.length === 0) {
     return (
       <div className='chart-container'>
         <h3 className='chart-title'>{config.title}</h3>
         <div className='no-data-message'>
-          {chartType === 'guk' && '국별 데이터가 없습니다.'}
+          {chartType === 'gook' && '국별 데이터가 없습니다.'}
           {chartType === 'group' && '그룹별 데이터가 없습니다.'}
           {chartType === 'sun' &&
             `순별 데이터가 없습니다. (선택된 그룹: ${selectedGroup})`}
@@ -590,16 +616,26 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
             <div className='stat-item'>
               <div className='label'>총 출석</div>
               <div className='value'>
-                {config.data.reduce((sum, item) => sum + item.대예배, 0)}명
+                {Array.isArray(config.data)
+                  ? config.data.reduce(
+                      (sum, item) => sum + (item.대예배 || 0),
+                      0
+                    )
+                  : 0}
+                명
               </div>
             </div>
             <div className='stat-item'>
               <div className='label'>평균</div>
               <div className='value'>
-                {Math.round(
-                  config.data.reduce((sum, item) => sum + item.대예배, 0) /
-                    config.data.length
-                )}
+                {Array.isArray(config.data) && config.data.length > 0
+                  ? Math.round(
+                      config.data.reduce(
+                        (sum, item) => sum + (item.대예배 || 0),
+                        0
+                      ) / config.data.length
+                    )
+                  : 0}
                 명
               </div>
             </div>
@@ -612,19 +648,26 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
             <div className='stat-item'>
               <div className='label'>총 출석</div>
               <div className='value'>
-                {config.data.reduce((sum, item) => sum + item.주일청년예배, 0)}
+                {Array.isArray(config.data)
+                  ? config.data.reduce(
+                      (sum, item) => sum + (item.주일청년예배 || 0),
+                      0
+                    )
+                  : 0}
                 명
               </div>
             </div>
             <div className='stat-item'>
               <div className='label'>평균</div>
               <div className='value'>
-                {Math.round(
-                  config.data.reduce(
-                    (sum, item) => sum + item.주일청년예배,
-                    0
-                  ) / config.data.length
-                )}
+                {Array.isArray(config.data) && config.data.length > 0
+                  ? Math.round(
+                      config.data.reduce(
+                        (sum, item) => sum + (item.주일청년예배 || 0),
+                        0
+                      ) / config.data.length
+                    )
+                  : 0}
                 명
               </div>
             </div>
@@ -637,16 +680,26 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
             <div className='stat-item'>
               <div className='label'>총 출석</div>
               <div className='value'>
-                {config.data.reduce((sum, item) => sum + item.수요기도회, 0)}명
+                {Array.isArray(config.data)
+                  ? config.data.reduce(
+                      (sum, item) => sum + (item.수요기도회 || 0),
+                      0
+                    )
+                  : 0}
+                명
               </div>
             </div>
             <div className='stat-item'>
               <div className='label'>평균</div>
               <div className='value'>
-                {Math.round(
-                  config.data.reduce((sum, item) => sum + item.수요기도회, 0) /
-                    config.data.length
-                )}
+                {Array.isArray(config.data) && config.data.length > 0
+                  ? Math.round(
+                      config.data.reduce(
+                        (sum, item) => sum + (item.수요기도회 || 0),
+                        0
+                      ) / config.data.length
+                    )
+                  : 0}
                 명
               </div>
             </div>
@@ -659,16 +712,26 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
             <div className='stat-item'>
               <div className='label'>총 출석</div>
               <div className='value'>
-                {config.data.reduce((sum, item) => sum + item.두란노모임, 0)}명
+                {Array.isArray(config.data)
+                  ? config.data.reduce(
+                      (sum, item) => sum + (item.두란노모임 || 0),
+                      0
+                    )
+                  : 0}
+                명
               </div>
             </div>
             <div className='stat-item'>
               <div className='label'>평균</div>
               <div className='value'>
-                {Math.round(
-                  config.data.reduce((sum, item) => sum + item.두란노모임, 0) /
-                    config.data.length
-                )}
+                {Array.isArray(config.data) && config.data.length > 0
+                  ? Math.round(
+                      config.data.reduce(
+                        (sum, item) => sum + (item.두란노모임 || 0),
+                        0
+                      ) / config.data.length
+                    )
+                  : 0}
                 명
               </div>
             </div>

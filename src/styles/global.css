@@ -2066,6 +2066,21 @@ html {
 /* ========================
    Dashboard 페이지 스타일
    ======================== */
+
+/* 에러 메시지 스타일 */
+.error-message {
+  color: var(--error);
+  font-size: var(--font-size-xs);
+  margin-top: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: rgba(239, 83, 80, 0.1);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--error);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
 .dashboard-container {
   padding: 10px;
   min-height: 100vh;
@@ -5218,7 +5233,6 @@ html {
   }
 }
 
-
 /* ========================
    VisitationDetail 스타일
    ======================== */
@@ -5319,7 +5333,7 @@ html {
 }
 
 .visitation-detail-section h3::before {
-  content: "";
+  content: '';
   width: 4px;
   height: 24px;
   background: var(--gradient-primary);
@@ -5424,7 +5438,7 @@ html {
 }
 
 .visitation-detail-no-photo::before {
-  content: "📷";
+  content: '📷';
   font-size: var(--font-size-lg);
   display: block;
   margin-bottom: var(--spacing-xs);
