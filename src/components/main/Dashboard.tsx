@@ -1,80 +1,28 @@
-import React, { useMemo, useState } from 'react';
+import axios from 'axios';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
-  CartesianGrid,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
+  AttendanceTrendData,
+  ContinuousAttendanceStats,
+  Gook,
+  Group,
+  WeeklyGraphData,
+  WeeklyStats,
+} from '../../types';
+import axiosClient from '../../utils/axiosClient';
+import logger from '../../utils/logger';
 import AttendanceChart from './AttendanceChart';
-
-// 더미 데이터 임포트 (나중에 실제 데이터로 교체)
-const attendanceData = {
-  overallStats: {
-    totalMembers: 250,
-    totalPresent: 180,
-    attendanceRate: 72,
-  },
-  gukStats: {
-    '1국': { totalMembers: 50, totalPresent: 38, attendanceRate: 76 },
-    '2국': { totalMembers: 45, totalPresent: 32, attendanceRate: 71 },
-    '3국': { totalMembers: 55, totalPresent: 40, attendanceRate: 73 },
-  },
-  members: [],
-};
-
-const attendanceData2025 = {
-  organizationStats: {
-    guk: {
-      '1국': { totalMembers: 50 },
-      '2국': { totalMembers: 45 },
-      '3국': { totalMembers: 55 },
-    },
-  },
-  weeklyData: [
-    {
-      month: 7,
-      attendance: {
-        guk: { '1국': { 주일청년예배: { present: 38, total: 50 } } },
-      },
-    },
-  ],
-};
-
-const newQuickStatsData = {
-  thisWeekNewFamily: 5,
-};
-
-const weekOverWeekData = {
-  growth: {
-    totalNewFamily: 2,
-  },
-};
-
-const recentActivities = [
-  {
-    id: 1,
-    member: '김민수',
-    type: '심방',
-    group: '1국 김철수 그룹',
-    date: '2025-01-15',
-    time: '14:00',
-  },
-  {
-    id: 2,
-    member: '이영희',
-    type: '지역모임',
-    group: '2국 박영수 그룹',
-    date: '2025-01-14',
-    time: '19:00',
-  },
-];
+import AttendancePopup from './AttendancePopup';
+import AttendanceTrendChart from './AttendanceTrendChart';
+import ConsecutiveAbsence from './ConsecutiveAbsence';
+import ConsecutiveAttendance from './ConsecutiveAttendance';
+import DashboardFilter from './DashboardFilter';
+import QuickStats from './QuickStats';
 
 const Dashboard: React.FC = () => {
-  const [selectedGuk, setSelectedGuk] = useState('전체');
-  const [selectedGroup, setSelectedGroup] = useState('전체');
+  const [selectedGukId, setSelectedGukId] = useState<number | '전체'>('전체');
+  const [selectedGroupId, setSelectedGroupId] = useState<number | '전체'>(
+    '전체'
+  );
   const [showAttendancePopup, setShowAttendancePopup] = useState(false);
   const [attendancePopupData, setAttendancePopupData] = useState<{
     title: string;
@@ -84,70 +32,387 @@ const Dashboard: React.FC = () => {
     data: [],
   });
 
-  // 국 목록 생성
-  const guks = ['전체', ...Object.keys(attendanceData?.gukStats || {})];
+  // API 데이터 상태
+  const [gooks, setGooks] = useState<Gook[]>([]);
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [loading, setLoading] = useState({
+    gooks: false,
+    groups: false,
+    weeklyStats: false,
+    weeklyGraph: false,
+    continuousAttendance: false,
+    attendanceTrend: false,
+  });
+  const [error, setError] = useState({
+    gooks: null as string | null,
+    groups: null as string | null,
+    weeklyStats: null as string | null,
+    weeklyGraph: null as string | null,
+    continuousAttendance: null as string | null,
+    attendanceTrend: null as string | null,
+  });
 
-  // 선택된 국에 따른 그룹 목록
-  const availableGroups = useMemo(() => {
-    if (selectedGuk === '전체') {
-      return ['전체'];
+  // 출석 관련 데이터 상태
+  const [weeklyStats, setWeeklyStats] = useState<WeeklyStats | null>(null);
+  const [weeklyGraphData, setWeeklyGraphData] = useState<WeeklyGraphData[]>([]);
+  const [continuousAttendanceStats, setContinuousAttendanceStats] =
+    useState<ContinuousAttendanceStats | null>(null);
+  const [attendanceTrendData, setAttendanceTrendData] = useState<
+    AttendanceTrendData[]
+  >([]);
+
+  // 국 데이터 가져오기
+  const fetchGooks = async (year?: number) => {
+    try {
+      setLoading(prev => ({ ...prev, gooks: true }));
+      setError(prev => ({ ...prev, gooks: null }));
+
+      const params = year ? { year } : {};
+      // 국/그룹 데이터는 운영 서버에서 가져오기
+      const response = await axios.get(
+        'https://attendance.icoramdeo.com/api/organizations/gooks',
+        {
+          params,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      // API 응답 데이터 구조 확인 및 안전하게 처리
+      const responseData = response.data;
+      if (Array.isArray(responseData)) {
+        setGooks(responseData);
+      } else if (responseData && Array.isArray(responseData.data)) {
+        setGooks(responseData.data);
+      } else if (responseData && Array.isArray(responseData.gooks)) {
+        setGooks(responseData.gooks);
+      } else {
+        logger.warn('예상하지 못한 API 응답 구조:', responseData);
+        setGooks([]);
+      }
+    } catch (err: any) {
+      logger.error('국 데이터를 가져오는데 실패했습니다:', err);
+      setError(prev => ({
+        ...prev,
+        gooks:
+          err.response?.data?.message || '국 데이터를 가져오는데 실패했습니다.',
+      }));
+    } finally {
+      setLoading(prev => ({ ...prev, gooks: false }));
     }
-    return ['전체', '김철수', '박영수', '이민호'];
-  }, [selectedGuk]);
+  };
 
-  // 2025년 주일 청년예배 주차별 출석 트렌드 데이터
-  const weeklyAttendanceTrends = useMemo(() => {
-    const sampleData = [];
-    for (let i = 1; i <= 8; i++) {
-      sampleData.push({
-        week: `W${i}`,
-        month: '8월',
-        weekLabel: `8월 W${i}`,
-        출석: Math.floor(Math.random() * 50) + 150,
+  // 그룹 데이터 가져오기
+  const fetchGroups = async (gookId: number) => {
+    try {
+      setLoading(prev => ({ ...prev, groups: true }));
+      setError(prev => ({ ...prev, groups: null }));
+
+      // 그룹 데이터도 운영 서버에서 가져오기
+      const response = await axios.get(
+        'https://attendance.icoramdeo.com/api/organizations/groups',
+        {
+          params: { gookId },
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      // API 응답 데이터 구조 확인 및 안전하게 처리
+      const responseData = response.data;
+      logger.info('그룹 API 응답', 'Dashboard', { gookId, responseData });
+
+      let groupsData: Group[] = [];
+      if (Array.isArray(responseData)) {
+        groupsData = responseData;
+      } else if (responseData && Array.isArray(responseData.data)) {
+        groupsData = responseData.data;
+      } else if (responseData && Array.isArray(responseData.groups)) {
+        groupsData = responseData.groups;
+      } else {
+        logger.warn('예상하지 못한 그룹 API 응답 구조:', responseData);
+        groupsData = [];
+      }
+
+      // 그룹 데이터 구조 확인
+      if (groupsData.length > 0) {
+        logger.info('첫 번째 그룹 데이터 구조', 'Dashboard', groupsData[0]);
+      }
+
+      setGroups(groupsData);
+    } catch (err: any) {
+      logger.error('그룹 데이터를 가져오는데 실패했습니다:', err);
+      setError(prev => ({
+        ...prev,
+        groups:
+          err.response?.data?.message ||
+          '그룹 데이터를 가져오는데 실패했습니다.',
+      }));
+    } finally {
+      setLoading(prev => ({ ...prev, groups: false }));
+    }
+  };
+
+  // 주간 통계 가져오기
+  const fetchWeeklyStats = async (
+    gookId?: number | '전체',
+    groupId?: number | '전체'
+  ) => {
+    try {
+      setLoading(prev => ({ ...prev, weeklyStats: true }));
+      setError(prev => ({ ...prev, weeklyStats: null }));
+
+      const params: any = {};
+
+      // 국 ID 설정
+      if (gookId && gookId !== '전체') {
+        params.gook = gookId;
+      }
+
+      // 그룹 ID 설정
+      if (groupId && groupId !== '전체') {
+        params.group = groupId;
+      }
+
+      const response = await axiosClient.get('/attendances/weekly', { params });
+
+      // API 응답 구조 확인을 위한 로깅
+      logger.info('주간 통계 API 응답', 'Dashboard', {
+        params,
+        responseData: response.data,
+        hasLastWeek: !!response.data?.lastWeek,
       });
+
+      setWeeklyStats(response.data);
+    } catch (err: any) {
+      logger.error('주간 통계를 가져오는데 실패했습니다:', err);
+      setError(prev => ({
+        ...prev,
+        weeklyStats:
+          err.response?.data?.message || '주간 통계를 가져오는데 실패했습니다.',
+      }));
+    } finally {
+      setLoading(prev => ({ ...prev, weeklyStats: false }));
     }
-    return sampleData;
+  };
+
+  // 주간 그래프 데이터 가져오기
+  const fetchWeeklyGraph = async (
+    gookId?: number | '전체',
+    groupId?: number | '전체'
+  ) => {
+    try {
+      setLoading(prev => ({ ...prev, weeklyGraph: true }));
+      setError(prev => ({ ...prev, weeklyGraph: null }));
+
+      const params: any = {};
+
+      // 국 ID 설정
+      if (gookId && gookId !== '전체') {
+        params.gook = gookId;
+      }
+
+      // 그룹 ID 설정
+      if (groupId && groupId !== '전체') {
+        params.group = groupId;
+      }
+
+      const response = await axiosClient.get('/attendances/graph', { params });
+
+      // API 응답 구조에 따라 안전하게 처리
+      const responseData = response.data;
+      if (Array.isArray(responseData)) {
+        setWeeklyGraphData(responseData);
+      } else if (responseData && Array.isArray(responseData.data)) {
+        setWeeklyGraphData(responseData.data);
+      } else if (responseData && Array.isArray(responseData.graph)) {
+        setWeeklyGraphData(responseData.graph);
+      } else {
+        logger.warn('예상하지 못한 주간 그래프 API 응답 구조:', responseData);
+        setWeeklyGraphData([]);
+      }
+    } catch (err: any) {
+      logger.error('주간 그래프 데이터를 가져오는데 실패했습니다:', err);
+      setError(prev => ({
+        ...prev,
+        weeklyGraph:
+          err.response?.data?.message ||
+          '주간 그래프 데이터를 가져오는데 실패했습니다.',
+      }));
+      setWeeklyGraphData([]); // 오류 시 빈 배열로 설정
+    } finally {
+      setLoading(prev => ({ ...prev, weeklyGraph: false }));
+    }
+  };
+
+  // 연속 결석/출석자 데이터 가져오기
+  const fetchContinuousAttendance = async (
+    gookId?: number | '전체',
+    groupId?: number | '전체'
+  ) => {
+    try {
+      setLoading(prev => ({ ...prev, continuousAttendance: true }));
+      setError(prev => ({ ...prev, continuousAttendance: null }));
+
+      const params: any = {};
+
+      // 국 ID 설정
+      if (gookId && gookId !== '전체') {
+        params.gook = gookId;
+      }
+
+      // 그룹 ID 설정
+      if (groupId && groupId !== '전체') {
+        params.group = groupId;
+      }
+
+      const response = await axiosClient.get('/attendances/continuous', {
+        params,
+      });
+      setContinuousAttendanceStats(response.data);
+    } catch (err: any) {
+      logger.error('연속 출석 데이터를 가져오는데 실패했습니다:', err);
+      setError(prev => ({
+        ...prev,
+        continuousAttendance:
+          err.response?.data?.message ||
+          '연속 출석 데이터를 가져오는데 실패했습니다.',
+      }));
+    } finally {
+      setLoading(prev => ({ ...prev, continuousAttendance: false }));
+    }
+  };
+
+  // 회기 내 전체 청년예배 출석 트렌드 가져오기
+  const fetchAttendanceTrend = async () => {
+    try {
+      setLoading(prev => ({ ...prev, attendanceTrend: true }));
+      setError(prev => ({ ...prev, attendanceTrend: null }));
+
+      const response = await axiosClient.get('/attendances/trend');
+
+      // API 응답 구조에 따라 안전하게 처리
+      const responseData = response.data;
+      logger.info('출석 트렌드 API 응답', 'Dashboard', responseData);
+
+      let trendData: AttendanceTrendData[] = [];
+
+      // 실제 API 응답 구조: data.weeklySundayYoungAdultAttendanceTrends.xAxis
+      if (
+        responseData?.data?.weeklySundayYoungAdultAttendanceTrends?.xAxis &&
+        Array.isArray(
+          responseData.data.weeklySundayYoungAdultAttendanceTrends.xAxis
+        )
+      ) {
+        trendData =
+          responseData.data.weeklySundayYoungAdultAttendanceTrends.xAxis.map(
+            (item: any) => ({
+              weekLabel: item.xAxisName,
+              출석: item.count,
+            })
+          );
+      } else if (Array.isArray(responseData)) {
+        trendData = responseData;
+      } else if (responseData && Array.isArray(responseData.data)) {
+        trendData = responseData.data;
+      } else if (responseData && Array.isArray(responseData.trend)) {
+        trendData = responseData.trend;
+      } else {
+        logger.warn(
+          '예상하지 못한 출석 트렌드 API 응답 구조:',
+          'Dashboard',
+          responseData
+        );
+        trendData = [];
+      }
+
+      logger.info('처리된 트렌드 데이터', 'Dashboard', {
+        dataLength: trendData.length,
+        firstItem: trendData[0],
+        lastItem: trendData[trendData.length - 1],
+      });
+
+      setAttendanceTrendData(trendData);
+    } catch (err: any) {
+      logger.error(
+        '출석 트렌드 데이터를 가져오는데 실패했습니다:',
+        'Dashboard',
+        err
+      );
+      setError(prev => ({
+        ...prev,
+        attendanceTrend:
+          err.response?.data?.message ||
+          '출석 트렌드 데이터를 가져오는데 실패했습니다.',
+      }));
+      setAttendanceTrendData([]); // 오류 시 빈 배열로 설정
+    } finally {
+      setLoading(prev => ({ ...prev, attendanceTrend: false }));
+    }
+  };
+
+  // 컴포넌트 마운트 시 국 데이터 가져오기
+  useEffect(() => {
+    fetchGooks();
+    fetchAttendanceTrend(); // 트렌드 데이터는 국/그룹 선택과 무관
   }, []);
 
-  // 연속 결석 통계 데이터
-  const consecutiveAbsenceStats = {
-    sunday: {
-      consecutive4Weeks: 5,
-      consecutive3Weeks: 8,
-      consecutive2Weeks: 12,
-      members: {
-        consecutive4Weeks: [
-          { name: '김철수', role: '순장', team: '1순', consecutiveWeeks: 4 },
-          { name: '이영희', role: null, team: '2순', consecutiveWeeks: 4 },
-        ],
-        consecutive3Weeks: [
-          { name: '박민수', role: '부순장', team: '3순', consecutiveWeeks: 3 },
-        ],
-        consecutive2Weeks: [
-          { name: '최영수', role: null, team: '4순', consecutiveWeeks: 2 },
-        ],
-      },
-    },
-  };
+  // 국/그룹 선택이 변경될 때마다 출석 데이터 가져오기
+  useEffect(() => {
+    fetchWeeklyStats(selectedGukId, selectedGroupId);
+    fetchWeeklyGraph(selectedGukId, selectedGroupId);
+    fetchContinuousAttendance(selectedGukId, selectedGroupId);
+  }, [selectedGukId, selectedGroupId]);
 
-  // 연속 출석 통계 데이터
-  const consecutiveStats = {
-    wednesday: {
-      consecutive4Weeks: 15,
-      consecutive3Weeks: 22,
-      consecutive2Weeks: 35,
-    },
-    friday: {
-      consecutive4Weeks: 12,
-      consecutive3Weeks: 18,
-      consecutive2Weeks: 28,
-    },
-    special: {
-      consecutive4Weeks: 20,
-      consecutive3Weeks: 30,
-      consecutive2Weeks: 45,
-    },
-  };
+  // 선택된 국이 변경될 때 그룹 데이터 가져오기
+  useEffect(() => {
+    if (selectedGukId !== '전체') {
+      fetchGroups(selectedGukId);
+    } else {
+      setGroups([]);
+    }
+  }, [selectedGukId]);
+
+  // 선택된 국에 따른 그룹 목록 (API 데이터 기반)
+  const availableGroups = useMemo((): {
+    value: number | '전체';
+    label: string;
+  }[] => {
+    logger.info('availableGroups 계산', 'Dashboard', {
+      selectedGukId,
+      groupsLength: groups.length,
+    });
+
+    if (selectedGukId === '전체') {
+      return [{ value: '전체', label: '전체' }];
+    }
+
+    const groupOptions = Array.isArray(groups)
+      ? groups.map(group => ({
+          value: group.id,
+          label: group.organization_name || group.name || `그룹 ${group.id}`,
+        }))
+      : [];
+
+    logger.info('그룹 옵션들', 'Dashboard', groupOptions);
+
+    return [{ value: '전체', label: '전체' }, ...groupOptions];
+  }, [selectedGukId, groups]);
+
+  // 선택된 그룹의 이름 계산
+  const selectedGroupName = useMemo(() => {
+    if (selectedGroupId === '전체') {
+      return '전체';
+    }
+    const selectedGroup = groups.find(group => group.id === selectedGroupId);
+    return selectedGroup
+      ? selectedGroup.organization_name ||
+          selectedGroup.name ||
+          `그룹 ${selectedGroup.id}`
+      : '전체';
+  }, [selectedGroupId, groups]);
 
   // 연속 출석 인원 데이터 계산
   const getConsecutiveAttendanceMembers = (_type: string) => {
@@ -177,456 +442,97 @@ const Dashboard: React.FC = () => {
           <p>코람데오 청년회 현황을 한눈에 확인하세요</p>
         </div>
 
-        <div className='dashboard-filter-section'>
-          <div className='filter-group'>
-            <label className='filter-label'>국 선택:</label>
-            <select
-              className='filter-select'
-              value={selectedGuk}
-              onChange={e => {
-                setSelectedGuk(e.target.value);
-                setSelectedGroup('전체');
-              }}
-            >
-              {guks.map(guk => (
-                <option key={guk} value={guk}>
-                  {guk}
-                </option>
-              ))}
-            </select>
-          </div>
+        <DashboardFilter
+          selectedGukId={selectedGukId}
+          selectedGroupId={selectedGroupId}
+          selectedGroupName={selectedGroupName}
+          gooks={gooks}
+          groups={groups}
+          availableGroups={availableGroups}
+          loading={loading}
+          error={error}
+          onGukChange={value => {
+            setSelectedGukId(value);
+            setSelectedGroupId('전체');
+          }}
+          onGroupChange={setSelectedGroupId}
+        />
 
-          <div className='filter-group'>
-            <label className='filter-label'>그룹 선택:</label>
-            <select
-              className='filter-select'
-              value={selectedGroup}
-              onChange={e => setSelectedGroup(e.target.value)}
-            >
-              {availableGroups.map(group => (
-                <option key={group} value={group}>
-                  {group}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
+        <QuickStats weeklyStats={weeklyStats} loading={loading.weeklyStats} />
 
-        <div className='quick-stats-grid'>
-          <div className='quick-stat-card'>
-            <div className='quick-stat-label'>전체 구성원 수</div>
-            <div className='quick-stat-value'>
-              {Object.values(attendanceData2025.organizationStats.guk).reduce(
-                (sum, guk) => sum + guk.totalMembers,
-                0
-              )}
-            </div>
-            <div className='quick-stat-growth positive'>
-              <span className='growth-icon'>↗</span>
-              전주 대비 +0명
-            </div>
-          </div>
-
-          <div className='quick-stat-card'>
-            <div className='quick-stat-label'>이번주 출석 수</div>
-            <div className='quick-stat-value'>180</div>
-            <div className='quick-stat-growth positive'>
-              <span className='growth-icon'>↗</span>
-              전주 대비 +5명
-            </div>
-          </div>
-
-          <div className='quick-stat-card'>
-            <div className='quick-stat-label'>이번주 새가족</div>
-            <div className='quick-stat-value'>
-              {newQuickStatsData.thisWeekNewFamily}
-            </div>
-            <div className='quick-stat-growth positive'>
-              <span className='growth-icon'>↗</span>
-              전주 대비 +{weekOverWeekData.growth.totalNewFamily}명
-            </div>
-          </div>
-
-          <div className='quick-stat-card'>
-            <div className='quick-stat-label'>전체 출석률</div>
-            <div className='quick-stat-value'>72%</div>
-            <div className='quick-stat-growth positive'>
-              <span className='growth-icon'>↗</span>
-              전주 대비 +2%
-            </div>
-          </div>
-
-          <div className='quick-stat-card'>
-            <div className='quick-stat-label'>활성인원 출석률</div>
-            <div className='quick-stat-value'>85%</div>
-            <div className='quick-stat-growth positive'>
-              <span className='growth-icon'>↗</span>
-              전주 대비 +3%
-            </div>
-          </div>
-        </div>
-
-        {/* AttendanceChart 섹션 */}
         <AttendanceChart
-          attendanceData2025={attendanceData2025}
-          selectedGuk={selectedGuk}
-          selectedGroup={selectedGroup}
+          attendanceData2025={{
+            organizationStats: {
+              gook: {},
+              group: {},
+              sun: {},
+            },
+            weeklyData: [],
+            gookGroupMapping: {},
+            groupSunMapping: {},
+          }}
+          selectedGuk={
+            selectedGukId === '전체'
+              ? '전체'
+              : gooks.find(g => g.id === selectedGukId)?.organization_name ||
+                '전체'
+          }
+          selectedGroup={
+            selectedGroupId === '전체'
+              ? '전체'
+              : groups.find(g => g.id === selectedGroupId)?.organization_name ||
+                groups.find(g => g.id === selectedGroupId)?.name ||
+                '전체'
+          }
           chartType={
-            selectedGuk === '전체'
-              ? 'guk'
-              : selectedGroup === '전체'
-                ? 'group'
-                : 'sun'
+            selectedGukId === '전체'
+              ? 'gook' // 국과 그룹이 모두 전체 → 국별 출석 수 현황
+              : selectedGroupId === '전체'
+                ? 'group' // 국은 선택, 그룹은 전체 → 그룹별 출석 수 현황
+                : 'sun' // 국과 그룹 모두 선택 → 순별 출석 수 현황
           }
         />
 
-        {/* 연속 결석자 정보 섹션 */}
-        <div className='consecutive-absence-section'>
-          <h3 className='chart-title'>최근 4주 청년예배 연속 결석 현황</h3>
-          <div className='absence-grid'>
-            <div className='absence-card high-severity'>
-              <h4 className='absence-title'>🚨 4주 연속 결석자</h4>
-              <div className='absence-stats'>
-                <div className='absence-stat-value high-severity'>
-                  {consecutiveAbsenceStats?.sunday?.consecutive4Weeks || 0}명
-                </div>
-              </div>
-              <div className='absence-list'>
-                {(
-                  consecutiveAbsenceStats?.sunday?.members?.consecutive4Weeks ||
-                  []
-                )
-                  .slice(0, 5)
-                  .map((member, index) => (
-                    <div key={index} className='absence-item'>
-                      <div className='absence-member-info'>
-                        <span className='absence-member-name'>
-                          {member.name}
-                        </span>
-                        {member.role && (
-                          <span className='absence-member-role'>
-                            {member.role}
-                          </span>
-                        )}
-                        <span className='absence-team-name'>{member.team}</span>
-                      </div>
-                      <span className='absence-badge high-severity'>
-                        {member.consecutiveWeeks}주 연속
-                      </span>
-                    </div>
-                  ))}
-              </div>
-            </div>
+        <ConsecutiveAbsence
+          continuousAttendanceStats={continuousAttendanceStats}
+          loading={loading.continuousAttendance}
+          error={error.continuousAttendance}
+        />
 
-            <div className='absence-card medium-severity'>
-              <h4 className='absence-title'>⚠️ 3주 연속 결석자</h4>
-              <div className='absence-stats'>
-                <div className='absence-stat-value medium-severity'>
-                  {consecutiveAbsenceStats?.sunday?.consecutive3Weeks || 0}명
-                </div>
-              </div>
-              <div className='absence-list'>
-                {(
-                  consecutiveAbsenceStats?.sunday?.members?.consecutive3Weeks ||
-                  []
-                )
-                  .slice(0, 5)
-                  .map((member, index) => (
-                    <div key={index} className='absence-item'>
-                      <div className='absence-member-info'>
-                        <span className='absence-member-name'>
-                          {member.name}
-                        </span>
-                        {member.role && (
-                          <span className='absence-member-role'>
-                            {member.role}
-                          </span>
-                        )}
-                        <span className='absence-team-name'>{member.team}</span>
-                      </div>
-                      <span className='absence-badge medium-severity'>
-                        {member.consecutiveWeeks}주 연속
-                      </span>
-                    </div>
-                  ))}
-              </div>
-            </div>
-
-            <div className='absence-card low-severity'>
-              <h4 className='absence-title'>🔄 2주 연속 결석자</h4>
-              <div className='absence-stats'>
-                <div className='absence-stat-value low-severity'>
-                  {consecutiveAbsenceStats?.sunday?.consecutive2Weeks || 0}명
-                </div>
-              </div>
-              <div className='absence-list'>
-                {(
-                  consecutiveAbsenceStats?.sunday?.members?.consecutive2Weeks ||
-                  []
-                )
-                  .slice(0, 5)
-                  .map((member, index) => (
-                    <div key={index} className='absence-item'>
-                      <div className='absence-member-info'>
-                        <span className='absence-member-name'>
-                          {member.name}
-                        </span>
-                        {member.role && (
-                          <span className='absence-member-role'>
-                            {member.role}
-                          </span>
-                        )}
-                        <span className='absence-team-name'>{member.team}</span>
-                      </div>
-                      <span className='absence-badge low-severity'>
-                        {member.consecutiveWeeks}주 연속
-                      </span>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 연속 출석 통계 섹션 */}
-        <div className='consecutive-attendance-section'>
-          <h3 className='chart-title'>최근 4주 연속 출석 현황</h3>
-          <div className='consecutive-grid'>
-            <div className='consecutive-card'>
-              <h4 className='consecutive-title'>🙏 수요제자기도회</h4>
-              <div className='consecutive-stats'>
-                <div className='consecutive-stat'>
-                  <div className='consecutive-stat-value'>
-                    {consecutiveStats.wednesday.consecutive4Weeks}
-                  </div>
-                  <div className='consecutive-stat-label'>4주 연속</div>
-                </div>
-                <div className='consecutive-stat'>
-                  <div className='consecutive-stat-value'>
-                    {consecutiveStats.wednesday.consecutive3Weeks}
-                  </div>
-                  <div className='consecutive-stat-label'>3주 연속</div>
-                </div>
-                <div className='consecutive-stat'>
-                  <div className='consecutive-stat-value'>
-                    {consecutiveStats.wednesday.consecutive2Weeks}
-                  </div>
-                  <div className='consecutive-stat-label'>2주 연속</div>
-                </div>
-              </div>
-              {selectedGuk !== '전체' && (
-                <button
-                  className='view-button'
-                  onClick={() =>
-                    openAttendancePopup(
-                      'wednesday',
-                      '수요제자기도회 4주간 연속 출석 인원'
-                    )
-                  }
-                >
-                  출석인원 확인
-                </button>
-              )}
-            </div>
-
-            <div className='consecutive-card'>
-              <h4 className='consecutive-title'>⛪ 두란노사역자모임</h4>
-              <div className='consecutive-stats'>
-                <div className='consecutive-stat'>
-                  <div className='consecutive-stat-value'>
-                    {consecutiveStats.friday.consecutive4Weeks}
-                  </div>
-                  <div className='consecutive-stat-label'>4주 연속</div>
-                </div>
-                <div className='consecutive-stat'>
-                  <div className='consecutive-stat-value'>
-                    {consecutiveStats.friday.consecutive3Weeks}
-                  </div>
-                  <div className='consecutive-stat-label'>3주 연속</div>
-                </div>
-                <div className='consecutive-stat'>
-                  <div className='consecutive-stat-value'>
-                    {consecutiveStats.friday.consecutive2Weeks}
-                  </div>
-                  <div className='consecutive-stat-label'>2주 연속</div>
-                </div>
-              </div>
-              {selectedGuk !== '전체' && (
-                <button
-                  className='view-button'
-                  onClick={() =>
-                    openAttendancePopup(
-                      'friday',
-                      '두란노사역자모임 4주간 연속 출석 인원'
-                    )
-                  }
-                >
-                  출석인원 확인
-                </button>
-              )}
-            </div>
-
-            <div className='consecutive-card'>
-              <h4 className='consecutive-title'>🎯 대예배</h4>
-              <div className='consecutive-stats'>
-                <div className='consecutive-stat'>
-                  <div className='consecutive-stat-value'>
-                    {consecutiveStats.special.consecutive4Weeks}
-                  </div>
-                  <div className='consecutive-stat-label'>4주 연속</div>
-                </div>
-                <div className='consecutive-stat'>
-                  <div className='consecutive-stat-value'>
-                    {consecutiveStats.special.consecutive3Weeks}
-                  </div>
-                  <div className='consecutive-stat-label'>3주 연속</div>
-                </div>
-                <div className='consecutive-stat'>
-                  <div className='consecutive-stat-value'>
-                    {consecutiveStats.special.consecutive2Weeks}
-                  </div>
-                  <div className='consecutive-stat-label'>2주 연속</div>
-                </div>
-              </div>
-              {selectedGuk !== '전체' && (
-                <button
-                  className='view-button'
-                  onClick={() =>
-                    openAttendancePopup(
-                      'special',
-                      '대예배 4주간 연속 출석 인원'
-                    )
-                  }
-                >
-                  출석인원 확인
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
+        <ConsecutiveAttendance
+          selectedGukId={selectedGukId}
+          onOpenAttendancePopup={openAttendancePopup}
+        />
 
         {/* 차트 섹션 */}
         <div className='charts-grid'>
-          <div className='chart-card'>
-            <h3 className='chart-title'>주차별 청년예배 출석 트렌드</h3>
-            <ResponsiveContainer width='100%' height={350}>
-              <LineChart
-                data={weeklyAttendanceTrends}
-                margin={{ top: 20, right: 30, left: 20, bottom: 80 }}
-              >
-                <CartesianGrid strokeDasharray='3 3' stroke='#E5E7EB' />
-                <XAxis
-                  dataKey='weekLabel'
-                  stroke='#6B7280'
-                  interval={0}
-                  tick={{ fontSize: 11, textAnchor: 'end' }}
-                  height={70}
-                  angle={-45}
-                />
-                <YAxis stroke='#6B7280' />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'white',
-                    border: '1px solid #E5E7EB',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                  }}
-                  labelFormatter={value => `주차: ${value}`}
-                  formatter={(value, _name) => [`${value}명`, '출석 인원']}
-                />
-                <Line
-                  type='monotone'
-                  dataKey='출석'
-                  stroke='#26428B'
-                  strokeWidth={3}
-                  dot={{ fill: '#26428B', strokeWidth: 2, r: 6 }}
-                  activeDot={{ r: 8, stroke: '#26428B', strokeWidth: 2 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
+          <AttendanceTrendChart
+            attendanceTrendData={attendanceTrendData}
+            loading={loading.attendanceTrend}
+            error={error.attendanceTrend}
+          />
         </div>
 
         {/* 최근 활동 섹션 */}
         <div className='activities-section'>
           <h3 className='chart-title'>최근 활동 (심방, 지역모임)</h3>
-          {recentActivities.slice(0, 10).map(activity => (
-            <div key={activity.id} className='activity-item'>
-              <div
-                className='activity-icon'
-                style={{
-                  backgroundColor:
-                    activity.type === '심방' ? '#E3AF64' : '#26428B',
-                }}
-              >
-                {activity.type === '심방' ? '🏠' : '📍'}
-              </div>
-              <div className='activity-content'>
-                <div className='activity-title'>
-                  {activity.member} - {activity.type}
-                </div>
-                <div className='activity-subtitle'>{activity.group}</div>
-              </div>
-              <div className='activity-time'>
-                {activity.date}
-                <br />
-                {activity.time}
-              </div>
-            </div>
-          ))}
+          <div
+            style={{
+              textAlign: 'center',
+              padding: '40px',
+              color: 'var(--text-secondary)',
+            }}
+          >
+            최근 활동 데이터를 불러오는 중...
+          </div>
         </div>
 
-        {/* 출석 인원 팝업창 */}
-        {showAttendancePopup && (
-          <div
-            className='popup-overlay'
-            onClick={() => setShowAttendancePopup(false)}
-          >
-            <div className='popup-container' onClick={e => e.stopPropagation()}>
-              <div className='popup-header'>
-                <h3 className='popup-title'>{attendancePopupData.title}</h3>
-                <button
-                  className='close-button'
-                  onClick={() => setShowAttendancePopup(false)}
-                >
-                  ×
-                </button>
-              </div>
-              <div className='popup-content'>
-                <div className='attendance-list'>
-                  {attendancePopupData.data.length > 0 ? (
-                    attendancePopupData.data.map(
-                      (member: any, index: number) => (
-                        <div key={index} className='attendance-item'>
-                          <div className='member-info'>
-                            <span className='member-name'>{member.name}</span>
-                            {member.role && (
-                              <span className='member-role'>{member.role}</span>
-                            )}
-                            <span className='team-name'>{member.team}</span>
-                          </div>
-                          <span className='consecutive-badge'>
-                            {member.consecutiveWeeks}주 연속
-                          </span>
-                        </div>
-                      )
-                    )
-                  ) : (
-                    <div
-                      style={{
-                        textAlign: 'center',
-                        padding: '20px',
-                        color: 'var(--text-secondary)',
-                      }}
-                    >
-                      연속 출석한 인원이 없습니다.
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        <AttendancePopup
+          isOpen={showAttendancePopup}
+          title={attendancePopupData.title}
+          data={attendancePopupData.data}
+          onClose={() => setShowAttendancePopup(false)}
+        />
       </div>
     </>
   );

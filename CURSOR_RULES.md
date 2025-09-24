@@ -389,6 +389,52 @@ const env = {
 
 ## 🔧 코드 품질 관리 규칙
 
+### 📝 로깅 규칙
+
+#### ⚠️ 절대 금지 사항
+
+- **데이터 내용을 확인하는 `console.log` 사용 금지**
+- **API 응답 데이터를 콘솔에 출력하는 `console.log` 사용 금지**
+- **디버깅용 `console.log` 사용 금지**
+
+#### ✅ 올바른 로깅 방법
+
+```typescript
+// ❌ 잘못된 방법
+console.log('API 응답:', response.data);
+console.log('사용자 데이터:', userData);
+console.log('그룹 목록:', groups);
+
+// ✅ 올바른 방법
+import logger from '../utils/logger';
+
+logger.error('API 호출 실패:', error);
+logger.warn('예상하지 못한 응답 구조:', responseData);
+logger.info('사용자 로그인 성공');
+```
+
+#### 🎯 로깅 사용 가이드라인
+
+1. **에러 로깅**: `logger.error()` - 예외 상황과 오류
+2. **경고 로깅**: `logger.warn()` - 주의가 필요한 상황
+3. **정보 로깅**: `logger.info()` - 중요한 비즈니스 로직
+4. **디버그 로깅**: `logger.debug()` - 개발 시에만 사용
+
+#### 🚫 금지되는 로깅 패턴
+
+```typescript
+// ❌ 데이터 덤프
+console.log('=== API 호출 ===');
+console.log('선택된 국:', gookName);
+console.log('사용 가능한 그룹 목록:', groups);
+console.log('최종 API 파라미터:', params);
+
+// ❌ 디버깅 로그
+console.log('그룹 찾기 시도:', groupName);
+console.log('찾은 그룹:', selectedGroup);
+console.log('그룹 ID 설정:', selectedGroup.id);
+```
+
 ### 필수 체크 규칙
 
 코드를 수정한 후에는 **반드시** 아래 단계를 순서대로 실행해야 합니다:
