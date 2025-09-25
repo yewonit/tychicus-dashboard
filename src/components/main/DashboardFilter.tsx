@@ -32,15 +32,6 @@ const DashboardFilter: React.FC<DashboardFilterProps> = ({
   onGukChange,
   onGroupChange,
 }) => {
-  // 디버깅을 위한 로그
-  console.log('DashboardFilter 렌더링:', {
-    selectedGukId,
-    selectedGroupId,
-    selectedGroupName,
-    availableGroupsLength: availableGroups.length,
-    availableGroups,
-    loadingGroups: loading.groups,
-  });
   const guks: { value: number | '전체'; label: string }[] = [
     { value: '전체', label: '전체' },
     ...(Array.isArray(gooks)

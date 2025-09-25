@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { logUserAction } from '../../utils/logger';
+import { logUserAction, logger } from '../../utils/logger';
 
 // 타입 정의
 interface Visitation {
@@ -288,7 +288,11 @@ const VisitationManagement: React.FC = () => {
     try {
       setVisitations(mockVisitations);
     } catch (error) {
-      console.error('심방 데이터를 불러오는데 실패했습니다:', error);
+      logger.error(
+        '심방 데이터를 불러오는데 실패했습니다:',
+        'VisitationManagement',
+        error
+      );
       setVisitations(mockVisitations);
     } finally {
       setLoading(false);
@@ -299,7 +303,11 @@ const VisitationManagement: React.FC = () => {
     try {
       setStats(mockStats);
     } catch (error) {
-      console.error('심방 통계를 불러오는데 실패했습니다:', error);
+      logger.error(
+        '심방 통계를 불러오는데 실패했습니다:',
+        'VisitationManagement',
+        error
+      );
       setStats(mockStats);
     }
   };
@@ -369,7 +377,11 @@ const VisitationManagement: React.FC = () => {
         method: visitationData.심방방법,
       });
     } catch (error) {
-      console.error('심방 기록 저장에 실패했습니다:', error);
+      logger.error(
+        '심방 기록 저장에 실패했습니다:',
+        'VisitationManagement',
+        error
+      );
     }
   };
 

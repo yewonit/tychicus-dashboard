@@ -230,11 +230,19 @@ const Dashboard: React.FC = () => {
       } else if (responseData && Array.isArray(responseData.graph)) {
         setWeeklyGraphData(responseData.graph);
       } else {
-        logger.warn('예상하지 못한 주간 그래프 API 응답 구조:', responseData);
+        logger.warn(
+          '예상하지 못한 주간 그래프 API 응답 구조:',
+          'Dashboard',
+          responseData
+        );
         setWeeklyGraphData([]);
       }
     } catch (err: any) {
-      logger.error('주간 그래프 데이터를 가져오는데 실패했습니다:', err);
+      logger.error(
+        '주간 그래프 데이터를 가져오는데 실패했습니다:',
+        'Dashboard',
+        err
+      );
       setError(prev => ({
         ...prev,
         weeklyGraph:

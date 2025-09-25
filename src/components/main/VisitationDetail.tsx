@@ -1,20 +1,42 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { logUserAction } from '../../utils/logger';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { logUserAction, logger } from '../../utils/logger';
+
+// 타입 정의
+interface Visitation {
+  id: number;
+  대상자_이름: string;
+  대상자_국: string;
+  대상자_그룹: string;
+  대상자_순: string;
+  대상자_순장: string;
+  대상자_생일연도: number;
+  심방날짜: string;
+  심방방법: string;
+  진행자_이름: string;
+  진행자_직분: string;
+  진행자_국: string;
+  진행자_그룹: string;
+  진행자_순: string;
+  진행자_생일연도: number;
+  심방내용: string;
+  대상자_사진: string | null;
+  작성일시: string;
+}
 
 // 기수 계산 함수
-const calculateGeneration = birthYear => {
+const calculateGeneration = (birthYear: number): string => {
   if (!birthYear) return '';
   const yearString = birthYear.toString();
   return yearString.slice(-2); // 뒤의 2자리 추출
 };
 
 const VisitationDetail: React.FC = () => {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [visitation, setVisitation] = useState(null);
+  const [visitation, setVisitation] = useState<Visitation | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
     심방내용: '',
@@ -23,27 +45,15 @@ const VisitationDetail: React.FC = () => {
   });
   const [isImproving, setIsImproving] = useState(false);
   const [improvedContent, setImprovedContent] = useState('');
-  const [lastModified, setLastModified] = useState(null);
+  const [lastModified, setLastModified] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchVisitationDetail();
-  }, [id]);
+  const fetchVisitationDetail = useCallback(async () => {
+    if (!id) return;
 
-  useEffect(() => {
-    if (visitation && !isEditing) {
-      setEditForm({
-        심방내용: visitation.심방내용,
-        심방날짜: visitation.심방날짜,
-        심방방법: visitation.심방방법,
-      });
-    }
-  }, [visitation, isEditing]);
-
-  const fetchVisitationDetail = async () => {
     try {
       setLoading(true);
       // 실제 API 호출 대신 목업 데이터 사용
-      const mockVisitations = [
+      const mockVisitations: Visitation[] = [
         {
           id: 1,
           대상자_이름: '김민수',
@@ -164,12 +174,30 @@ const VisitationDetail: React.FC = () => {
         setError('심방 기록을 찾을 수 없습니다.');
       }
     } catch (error) {
-      console.error('심방 상세 정보를 불러오는데 실패했습니다:', error);
+      logger.error(
+        '심방 상세 정보를 불러오는데 실패했습니다:',
+        'VisitationDetail',
+        error
+      );
       setError('심방 상세 정보를 불러오는데 실패했습니다.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    fetchVisitationDetail();
+  }, [fetchVisitationDetail]);
+
+  useEffect(() => {
+    if (visitation && !isEditing) {
+      setEditForm({
+        심방내용: visitation.심방내용,
+        심방날짜: visitation.심방날짜,
+        심방방법: visitation.심방방법,
+      });
+    }
+  }, [visitation, isEditing]);
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -179,6 +207,8 @@ const VisitationDetail: React.FC = () => {
   };
 
   const handleSave = async () => {
+    if (!visitation) return;
+
     try {
       // 실제 API 호출 대신 목업 업데이트
       const currentTime = new Date().toLocaleString('ko-KR', {
@@ -190,7 +220,7 @@ const VisitationDetail: React.FC = () => {
         second: '2-digit',
       });
 
-      const updatedVisitation = {
+      const updatedVisitation: Visitation = {
         ...visitation,
         ...editForm,
       };
@@ -207,12 +237,14 @@ const VisitationDetail: React.FC = () => {
       // 성공 메시지
       alert('심방 기록이 성공적으로 수정되었습니다.');
     } catch (error) {
-      console.error('심방 기록 수정에 실패했습니다:', error);
+      logger.error('심방 기록 수정에 실패했습니다:', 'VisitationDetail', error);
       alert('심방 기록 수정에 실패했습니다.');
     }
   };
 
   const handleCancel = () => {
+    if (!visitation) return;
+
     setEditForm({
       심방내용: visitation.심방내용,
       심방날짜: visitation.심방날짜,
@@ -225,6 +257,8 @@ const VisitationDetail: React.FC = () => {
   };
 
   const handleDelete = () => {
+    if (!visitation) return;
+
     if (window.confirm('이 심방 기록을 삭제하시겠습니까?')) {
       logUserAction('심방 기록 삭제', 'VisitationDetail', {
         visitationId: id,
@@ -266,7 +300,7 @@ const VisitationDetail: React.FC = () => {
 
       alert('내용이 성공적으로 개선되었습니다!');
     } catch (error) {
-      console.error('내용 개선에 실패했습니다:', error);
+      logger.error('내용 개선에 실패했습니다:', 'VisitationDetail', error);
       alert('내용 개선에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setIsImproving(false);
