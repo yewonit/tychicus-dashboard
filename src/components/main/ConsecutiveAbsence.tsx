@@ -12,22 +12,38 @@ const ConsecutiveAbsence: React.FC<ConsecutiveAbsenceProps> = ({
   loading,
   error,
 }) => {
-  // 디버깅을 위한 로그
-  console.log('ConsecutiveAbsence 렌더링:', {
-    loading,
-    error,
-    continuousAttendanceStats,
-    hasData: !!continuousAttendanceStats,
-    consecutive4Weeks: continuousAttendanceStats?.consecutive4Weeks,
-    consecutive3Weeks: continuousAttendanceStats?.consecutive3Weeks,
-    consecutive2Weeks: continuousAttendanceStats?.consecutive2Weeks,
-    members4Weeks:
-      continuousAttendanceStats?.members?.consecutive4Weeks?.length,
-    members3Weeks:
-      continuousAttendanceStats?.members?.consecutive3Weeks?.length,
-    members2Weeks:
-      continuousAttendanceStats?.members?.consecutive2Weeks?.length,
-  });
+  // absenteeList 데이터에서 연속 결석 통계 추출
+  const getAbsenceStats = () => {
+    const absenteeList = continuousAttendanceStats?.absenteeList;
+
+    // absenteeList 데이터가 있으면 사용, 없으면 기존 구조 사용
+    if (absenteeList) {
+      return {
+        consecutive4Weeks: absenteeList['4weeks']?.length || 0,
+        consecutive3Weeks: absenteeList['3weeks']?.length || 0,
+        consecutive2Weeks: absenteeList['2weeks']?.length || 0,
+        members: {
+          consecutive4Weeks: absenteeList['4weeks'] || [],
+          consecutive3Weeks: absenteeList['3weeks'] || [],
+          consecutive2Weeks: absenteeList['2weeks'] || [],
+        },
+      };
+    }
+
+    // 기존 구조 사용 (fallback)
+    return {
+      consecutive4Weeks: continuousAttendanceStats?.consecutive4Weeks || 0,
+      consecutive3Weeks: continuousAttendanceStats?.consecutive3Weeks || 0,
+      consecutive2Weeks: continuousAttendanceStats?.consecutive2Weeks || 0,
+      members: continuousAttendanceStats?.members || {
+        consecutive4Weeks: [],
+        consecutive3Weeks: [],
+        consecutive2Weeks: [],
+      },
+    };
+  };
+
+  const absenceStats = getAbsenceStats();
   if (loading) {
     return (
       <div className='consecutive-absence-section'>
@@ -64,11 +80,11 @@ const ConsecutiveAbsence: React.FC<ConsecutiveAbsenceProps> = ({
           <h4 className='absence-title'>🚨 4주 연속 결석자</h4>
           <div className='absence-stats'>
             <div className='absence-stat-value high-severity'>
-              {continuousAttendanceStats?.consecutive4Weeks || 0}명
+              {absenceStats.consecutive4Weeks}명
             </div>
           </div>
           <div className='absence-list'>
-            {(continuousAttendanceStats?.members?.consecutive4Weeks || [])
+            {(absenceStats.members.consecutive4Weeks || [])
               .slice(0, 5)
               .map((member, index) => (
                 <div key={index} className='absence-item'>
@@ -91,11 +107,11 @@ const ConsecutiveAbsence: React.FC<ConsecutiveAbsenceProps> = ({
           <h4 className='absence-title'>⚠️ 3주 연속 결석자</h4>
           <div className='absence-stats'>
             <div className='absence-stat-value medium-severity'>
-              {continuousAttendanceStats?.consecutive3Weeks || 0}명
+              {absenceStats.consecutive3Weeks}명
             </div>
           </div>
           <div className='absence-list'>
-            {(continuousAttendanceStats?.members?.consecutive3Weeks || [])
+            {(absenceStats.members.consecutive3Weeks || [])
               .slice(0, 5)
               .map((member, index) => (
                 <div key={index} className='absence-item'>
@@ -118,11 +134,11 @@ const ConsecutiveAbsence: React.FC<ConsecutiveAbsenceProps> = ({
           <h4 className='absence-title'>🔄 2주 연속 결석자</h4>
           <div className='absence-stats'>
             <div className='absence-stat-value low-severity'>
-              {continuousAttendanceStats?.consecutive2Weeks || 0}명
+              {absenceStats.consecutive2Weeks}명
             </div>
           </div>
           <div className='absence-list'>
-            {(continuousAttendanceStats?.members?.consecutive2Weeks || [])
+            {(absenceStats.members.consecutive2Weeks || [])
               .slice(0, 5)
               .map((member, index) => (
                 <div key={index} className='absence-item'>

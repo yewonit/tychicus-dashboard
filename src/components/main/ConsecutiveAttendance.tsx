@@ -1,32 +1,69 @@
 import React from 'react';
+import { ContinuousAttendanceStats } from '../../types';
 
 interface ConsecutiveAttendanceProps {
   selectedGukId: number | '전체';
+  continuousAttendanceStats: ContinuousAttendanceStats | null;
+  loading: boolean;
+  error: string | null;
   onOpenAttendancePopup: (type: string, title: string) => void;
 }
 
 const ConsecutiveAttendance: React.FC<ConsecutiveAttendanceProps> = ({
   selectedGukId,
+  continuousAttendanceStats,
+  loading,
+  error,
   onOpenAttendancePopup,
 }) => {
-  // 연속 출석 통계 데이터
-  const consecutiveStats = {
-    wednesday: {
-      consecutive4Weeks: 15,
-      consecutive3Weeks: 22,
-      consecutive2Weeks: 35,
-    },
-    friday: {
-      consecutive4Weeks: 12,
-      consecutive3Weeks: 18,
-      consecutive2Weeks: 28,
-    },
-    special: {
-      consecutive4Weeks: 20,
-      consecutive3Weeks: 30,
-      consecutive2Weeks: 45,
-    },
+  // API 데이터에서 연속 출석 통계 추출
+  const getConsecutiveStats = (
+    type:
+      | 'wednesdayYoungAdult'
+      | 'fridayYoungAdult'
+      | 'sunday'
+      | 'sundayYoungAdult'
+  ) => {
+    const data = continuousAttendanceStats?.[type];
+    return {
+      consecutive4Weeks: data?.['4weeks'] || 0,
+      consecutive3Weeks: data?.['3weeks'] || 0,
+      consecutive2Weeks: data?.['2weeks'] || 0,
+    };
   };
+
+  const wednesdayStats = getConsecutiveStats('wednesdayYoungAdult');
+  const fridayStats = getConsecutiveStats('fridayYoungAdult');
+  const sundayStats = getConsecutiveStats('sunday');
+  const sundayYoungAdultStats = getConsecutiveStats('sundayYoungAdult');
+
+  if (loading) {
+    return (
+      <div className='consecutive-attendance-section'>
+        <h3 className='chart-title'>최근 4주 연속 출석 현황</h3>
+        <div style={{ textAlign: 'center', padding: '40px' }}>
+          연속 출석 데이터를 불러오는 중...
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className='consecutive-attendance-section'>
+        <h3 className='chart-title'>최근 4주 연속 출석 현황</h3>
+        <div
+          style={{
+            textAlign: 'center',
+            padding: '40px',
+            color: 'var(--error)',
+          }}
+        >
+          ⚠️ {error}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className='consecutive-attendance-section'>
@@ -37,19 +74,19 @@ const ConsecutiveAttendance: React.FC<ConsecutiveAttendanceProps> = ({
           <div className='consecutive-stats'>
             <div className='consecutive-stat'>
               <div className='consecutive-stat-value'>
-                {consecutiveStats.wednesday.consecutive4Weeks}
+                {wednesdayStats.consecutive4Weeks}
               </div>
               <div className='consecutive-stat-label'>4주 연속</div>
             </div>
             <div className='consecutive-stat'>
               <div className='consecutive-stat-value'>
-                {consecutiveStats.wednesday.consecutive3Weeks}
+                {wednesdayStats.consecutive3Weeks}
               </div>
               <div className='consecutive-stat-label'>3주 연속</div>
             </div>
             <div className='consecutive-stat'>
               <div className='consecutive-stat-value'>
-                {consecutiveStats.wednesday.consecutive2Weeks}
+                {wednesdayStats.consecutive2Weeks}
               </div>
               <div className='consecutive-stat-label'>2주 연속</div>
             </div>
@@ -74,19 +111,19 @@ const ConsecutiveAttendance: React.FC<ConsecutiveAttendanceProps> = ({
           <div className='consecutive-stats'>
             <div className='consecutive-stat'>
               <div className='consecutive-stat-value'>
-                {consecutiveStats.friday.consecutive4Weeks}
+                {fridayStats.consecutive4Weeks}
               </div>
               <div className='consecutive-stat-label'>4주 연속</div>
             </div>
             <div className='consecutive-stat'>
               <div className='consecutive-stat-value'>
-                {consecutiveStats.friday.consecutive3Weeks}
+                {fridayStats.consecutive3Weeks}
               </div>
               <div className='consecutive-stat-label'>3주 연속</div>
             </div>
             <div className='consecutive-stat'>
               <div className='consecutive-stat-value'>
-                {consecutiveStats.friday.consecutive2Weeks}
+                {fridayStats.consecutive2Weeks}
               </div>
               <div className='consecutive-stat-label'>2주 연속</div>
             </div>
@@ -107,23 +144,60 @@ const ConsecutiveAttendance: React.FC<ConsecutiveAttendanceProps> = ({
         </div>
 
         <div className='consecutive-card'>
-          <h4 className='consecutive-title'>🎯 대예배</h4>
+          <h4 className='consecutive-title'>⛪ 주일청년예배</h4>
           <div className='consecutive-stats'>
             <div className='consecutive-stat'>
               <div className='consecutive-stat-value'>
-                {consecutiveStats.special.consecutive4Weeks}
+                {sundayYoungAdultStats.consecutive4Weeks}
               </div>
               <div className='consecutive-stat-label'>4주 연속</div>
             </div>
             <div className='consecutive-stat'>
               <div className='consecutive-stat-value'>
-                {consecutiveStats.special.consecutive3Weeks}
+                {sundayYoungAdultStats.consecutive3Weeks}
               </div>
               <div className='consecutive-stat-label'>3주 연속</div>
             </div>
             <div className='consecutive-stat'>
               <div className='consecutive-stat-value'>
-                {consecutiveStats.special.consecutive2Weeks}
+                {sundayYoungAdultStats.consecutive2Weeks}
+              </div>
+              <div className='consecutive-stat-label'>2주 연속</div>
+            </div>
+          </div>
+          {selectedGukId !== '전체' && (
+            <button
+              className='view-button'
+              onClick={() =>
+                onOpenAttendancePopup(
+                  'sundayYoungAdult',
+                  '주일청년예배 4주간 연속 출석 인원'
+                )
+              }
+            >
+              출석인원 확인
+            </button>
+          )}
+        </div>
+
+        <div className='consecutive-card'>
+          <h4 className='consecutive-title'>🎯 대예배</h4>
+          <div className='consecutive-stats'>
+            <div className='consecutive-stat'>
+              <div className='consecutive-stat-value'>
+                {sundayStats.consecutive4Weeks}
+              </div>
+              <div className='consecutive-stat-label'>4주 연속</div>
+            </div>
+            <div className='consecutive-stat'>
+              <div className='consecutive-stat-value'>
+                {sundayStats.consecutive3Weeks}
+              </div>
+              <div className='consecutive-stat-label'>3주 연속</div>
+            </div>
+            <div className='consecutive-stat'>
+              <div className='consecutive-stat-value'>
+                {sundayStats.consecutive2Weeks}
               </div>
               <div className='consecutive-stat-label'>2주 연속</div>
             </div>

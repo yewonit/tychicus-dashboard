@@ -19,24 +19,29 @@ const QuickStats: React.FC<QuickStatsProps> = ({ weeklyStats, loading }) => {
 
   // 각 필드별 전주 대비 데이터 계산
   const membersGrowth = calculateGrowth(
-    weeklyStats?.totalMembers || 0,
-    weeklyStats?.lastWeek?.totalMembers
+    weeklyStats?.allMemberCount || (weeklyStats as any)?.totalMembers || 0,
+    weeklyStats?.lastWeek?.allMemberCount ||
+      (weeklyStats?.lastWeek as any)?.totalMembers
   );
   const presentGrowth = calculateGrowth(
-    weeklyStats?.totalPresent || 0,
-    weeklyStats?.lastWeek?.totalPresent
+    weeklyStats?.weeklyAttendanceMemberCount ||
+      (weeklyStats as any)?.totalPresent ||
+      0,
+    weeklyStats?.lastWeek?.weeklyAttendanceMemberCount ||
+      (weeklyStats?.lastWeek as any)?.totalPresent
   );
   const newFamilyGrowth = calculateGrowth(
-    weeklyStats?.newFamily || 0,
-    weeklyStats?.lastWeek?.newFamily
+    weeklyStats?.weeklyNewMemberCount || (weeklyStats as any)?.newFamily || 0,
+    weeklyStats?.lastWeek?.weeklyNewMemberCount ||
+      (weeklyStats?.lastWeek as any)?.newFamily
   );
   const attendanceRateGrowth = calculateGrowth(
     weeklyStats?.attendanceRate || 0,
     weeklyStats?.lastWeek?.attendanceRate
   );
   const activeAttendanceRateGrowth = calculateGrowth(
-    weeklyStats?.activeAttendanceRate || 0,
-    weeklyStats?.lastWeek?.activeAttendanceRate
+    (weeklyStats as any)?.activeAttendanceRate || 0,
+    (weeklyStats?.lastWeek as any)?.activeAttendanceRate
   );
 
   return (
@@ -44,7 +49,11 @@ const QuickStats: React.FC<QuickStatsProps> = ({ weeklyStats, loading }) => {
       <div className='quick-stat-card'>
         <div className='quick-stat-label'>전체 구성원 수</div>
         <div className='quick-stat-value'>
-          {loading ? '로딩 중...' : weeklyStats?.totalMembers || 0}
+          {loading
+            ? '로딩 중...'
+            : weeklyStats?.allMemberCount ||
+              (weeklyStats as any)?.totalMembers ||
+              0}
         </div>
         <div
           className={`quick-stat-growth ${membersGrowth.isPositive ? 'positive' : 'negative'}`}
@@ -60,7 +69,11 @@ const QuickStats: React.FC<QuickStatsProps> = ({ weeklyStats, loading }) => {
       <div className='quick-stat-card'>
         <div className='quick-stat-label'>이번주 출석 수</div>
         <div className='quick-stat-value'>
-          {loading ? '로딩 중...' : weeklyStats?.totalPresent || 0}
+          {loading
+            ? '로딩 중...'
+            : weeklyStats?.weeklyAttendanceMemberCount ||
+              (weeklyStats as any)?.totalPresent ||
+              0}
         </div>
         <div
           className={`quick-stat-growth ${presentGrowth.isPositive ? 'positive' : 'negative'}`}
@@ -76,7 +89,11 @@ const QuickStats: React.FC<QuickStatsProps> = ({ weeklyStats, loading }) => {
       <div className='quick-stat-card'>
         <div className='quick-stat-label'>이번주 새가족</div>
         <div className='quick-stat-value'>
-          {loading ? '로딩 중...' : weeklyStats?.newFamily || 0}
+          {loading
+            ? '로딩 중...'
+            : weeklyStats?.weeklyNewMemberCount ||
+              (weeklyStats as any)?.newFamily ||
+              0}
         </div>
         <div
           className={`quick-stat-growth ${newFamilyGrowth.isPositive ? 'positive' : 'negative'}`}
@@ -110,7 +127,7 @@ const QuickStats: React.FC<QuickStatsProps> = ({ weeklyStats, loading }) => {
         <div className='quick-stat-value'>
           {loading
             ? '로딩 중...'
-            : `${weeklyStats?.activeAttendanceRate || 0}%`}
+            : `${(weeklyStats as any)?.activeAttendanceRate || 0}%`}
         </div>
         <div
           className={`quick-stat-growth ${activeAttendanceRateGrowth.isPositive ? 'positive' : 'negative'}`}

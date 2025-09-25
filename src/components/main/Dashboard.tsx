@@ -462,14 +462,21 @@ const Dashboard: React.FC = () => {
 
         <AttendanceChart
           attendanceData2025={{
-            organizationStats: {
-              gook: {},
-              group: {},
-              sun: {},
+            attendanceXAxis: [],
+            attendanceYAxisMax: 10,
+            attendanceCounts: [],
+            attendanceAggregationSum: {
+              sunday: 0,
+              sundayYoungAdult: 0,
+              wednesdayYoungAdult: 0,
+              fridayYoungAdult: 0,
             },
-            weeklyData: [],
-            gookGroupMapping: {},
-            groupSunMapping: {},
+            attendanceAggregationAverage: {
+              sunday: 0,
+              sundayYoungAdult: 0,
+              wednesdayYoungAdult: 0,
+              fridayYoungAdult: 0,
+            },
           }}
           selectedGuk={
             selectedGukId === '전체'
@@ -501,6 +508,9 @@ const Dashboard: React.FC = () => {
 
         <ConsecutiveAttendance
           selectedGukId={selectedGukId}
+          continuousAttendanceStats={continuousAttendanceStats}
+          loading={loading.continuousAttendance}
+          error={error.continuousAttendance}
           onOpenAttendancePopup={openAttendancePopup}
         />
 

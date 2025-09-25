@@ -137,20 +137,22 @@ export interface SnackbarState {
 
 // 출석 관련 API 타입들
 export interface WeeklyStats {
-  totalMembers: number;
-  totalPresent: number;
+  allMemberCount: number;
+  weeklyAttendanceMemberCount: number;
+  weeklyNewMemberCount: number;
   attendanceRate: number;
-  newFamily: number;
-  activeMembers: number;
-  activeAttendanceRate: number;
   lastWeek?: {
-    totalMembers: number;
-    totalPresent: number;
+    allMemberCount: number;
+    weeklyAttendanceMemberCount: number;
+    weeklyNewMemberCount: number;
     attendanceRate: number;
-    newFamily: number;
-    activeMembers: number;
-    activeAttendanceRate: number;
   };
+  // 기존 필드명과의 호환성을 위한 옵셔널 필드들
+  totalMembers?: number;
+  totalPresent?: number;
+  newFamily?: number;
+  activeMembers?: number;
+  activeAttendanceRate?: number;
 }
 
 export interface WeeklyGraphData {
@@ -175,6 +177,33 @@ export interface ContinuousAttendanceStats {
     consecutive4Weeks: ContinuousAttendanceMember[];
     consecutive3Weeks: ContinuousAttendanceMember[];
     consecutive2Weeks: ContinuousAttendanceMember[];
+  };
+  // 연속 출석 현황 API 응답 구조 (continuousAttendeeCount)
+  wednesdayYoungAdult?: {
+    '4weeks': number;
+    '3weeks': number;
+    '2weeks': number;
+  };
+  fridayYoungAdult?: {
+    '4weeks': number;
+    '3weeks': number;
+    '2weeks': number;
+  };
+  sunday?: {
+    '4weeks': number;
+    '3weeks': number;
+    '2weeks': number;
+  };
+  sundayYoungAdult?: {
+    '4weeks': number;
+    '3weeks': number;
+    '2weeks': number;
+  };
+  // 연속 결석 현황 API 응답 구조 (absenteeList)
+  absenteeList?: {
+    '4weeks': ContinuousAttendanceMember[];
+    '3weeks': ContinuousAttendanceMember[];
+    '2weeks': ContinuousAttendanceMember[];
   };
 }
 
