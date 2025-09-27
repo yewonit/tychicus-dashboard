@@ -71,9 +71,7 @@ const ConsecutiveAbsence: React.FC<ConsecutiveAbsenceProps> = ({
     return (
       <div className='consecutive-absence-section'>
         <h3 className='chart-title'>최근 4주 청년예배 연속 결석 현황</h3>
-        <div className='center-loading'>
-          연속 결석 데이터를 불러오는 중...
-        </div>
+        <div className='center-loading'>연속 결석 데이터를 불러오는 중...</div>
       </div>
     );
   }
@@ -82,9 +80,7 @@ const ConsecutiveAbsence: React.FC<ConsecutiveAbsenceProps> = ({
     return (
       <div className='consecutive-absence-section'>
         <h3 className='chart-title'>최근 4주 청년예배 연속 결석 현황</h3>
-        <div className='center-loading error-text'>
-          ⚠️ {error}
-        </div>
+        <div className='center-loading error-text'>⚠️ {error}</div>
       </div>
     );
   }

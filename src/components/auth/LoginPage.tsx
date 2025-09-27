@@ -53,10 +53,7 @@ const LoginPage: React.FC = () => {
     return (
       <div className='auth-loading-container'>
         <CircularProgress size={60} className='primary-color' />
-        <Typography
-          variant='body1'
-          className='mt-2 text-secondary-color'
-        >
+        <Typography variant='body1' className='mt-2 text-secondary-color'>
           인증 상태를 확인하고 있습니다...
         </Typography>
       </div>
@@ -130,7 +127,11 @@ const LoginPage: React.FC = () => {
             >
               {isSubmitting ? (
                 <>
-                  <CircularProgress size={20} className='mr-1' style={{ color: 'white' }} />
+                  <CircularProgress
+                    size={20}
+                    className='mr-1'
+                    style={{ color: 'white' }}
+                  />
                   로그인 중...
                 </>
               ) : (
@@ -144,10 +145,7 @@ const LoginPage: React.FC = () => {
         <div className='mt-4 text-center'>
           <Typography variant='body2' className='text-tertiary-color'>
             문제가 있으신가요?{' '}
-            <a
-              href='mailto:admin@icoramdeo.com'
-              className='primary-link'
-            >
+            <a href='mailto:admin@icoramdeo.com' className='primary-link'>
               관리자에게 문의하세요
             </a>
           </Typography>

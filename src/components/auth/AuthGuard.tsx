@@ -19,10 +19,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     return (
       <div className='auth-loading-container'>
         <CircularProgress size={60} className='primary-color' />
-        <Typography
-          variant='body1'
-          className='mt-2 text-secondary-color'
-        >
+        <Typography variant='body1' className='mt-2 text-secondary-color'>
           인증 상태를 확인하고 있습니다...
         </Typography>
       </div>
