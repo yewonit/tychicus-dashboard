@@ -30,16 +30,8 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   );
 
   if (fullScreen) {
-    return (
-      <div className='loading-container'>
-        {content}
-      </div>
-    );
+    return <div className='loading-container'>{content}</div>;
   }
 
-  return (
-    <div className='loading-inline'>
-      {content}
-    </div>
-  );
+  return <div className='loading-inline'>{content}</div>;
 };

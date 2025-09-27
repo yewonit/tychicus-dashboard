@@ -51,11 +51,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   );
 
   if (fullScreen) {
-    return (
-      <div className='loading-container'>
-        {content}
-      </div>
-    );
+    return <div className='loading-container'>{content}</div>;
   }
 
   return content;
