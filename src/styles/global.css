@@ -29,16 +29,16 @@
   --caramel-essence: #E3AF64;
   
   /* ========================
-     기존 색상 (호환성 유지)
+     기존 변수를 DUGIGO 토큰으로 교체 (전체 적용)
      ======================== */
-  /* 메인 색상 */
-  --primary: #4ecdc4;
-  --primary-light: #a6e7e2;
-  --primary-dark: #3aa39b;
-  --secondary: #5dade2;
-  --secondary-light: #8cd6ff;
-  --secondary-dark: #0096ee;
-  --accent: #a8e6cf;
+  /* 메인 색상 - DUGIGO 매핑 */
+  --primary: var(--royal-blue);
+  --primary-light: var(--dark-sky-blue);
+  --primary-dark: #1a2c6b;
+  --secondary: var(--dark-sky-blue);
+  --secondary-light: #b5c9e8;
+  --secondary-dark: #7a9bd1;
+  --accent: var(--caramel-essence);
 
   /* 시스템 색상 */
   --success: #66bb6a;
@@ -83,31 +83,31 @@
   --gradient-secondary: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
   --gradient-primary-hover: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary-dark) 100%);
 
-  /* 텍스트 색상 */
-  --text-primary: #2c3e50;
-  --text-secondary: #455a64;
-  --text-tertiary: #78909c;
+  /* 텍스트 색상 - DUGIGO 매핑 */
+  --text-primary: var(--charleston-green);
+  --text-secondary: var(--text-secondary-dugigo);
+  --text-tertiary: var(--text-muted-dugigo);
   --text-disabled: #85929e;
 
-  /* 배경 색상 */
-  --bg-primary: #fdfefe;
-  --bg-secondary: #f8fdff;
-  --bg-card: #f9fbfd;
-  --bg-elevated: #ffffff;
+  /* 배경 색상 - DUGIGO 매핑 */
+  --bg-primary: var(--alabaster-white);
+  --bg-secondary: var(--pastel-gray);
+  --bg-card: var(--bg-card-dugigo);
+  --bg-elevated: var(--bg-card-dugigo);
 
-  /* 테두리 색상 */
-  --border-light: #e0f2f1;
-  --border-medium: rgba(0, 0, 0, 0.12);
+  /* 테두리 색상 - DUGIGO 매핑 */
+  --border-light: var(--border-subtle);
+  --border-medium: var(--border-neutral);
   --border-dark: rgba(0, 0, 0, 0.25);
   --border-focus: var(--primary);
-  --border-card: var(--border-light);
+  --border-card: var(--border-subtle);
 
-  /* 그림자 */
-  --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.05);
-  --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --shadow-heavy: 0 20px 60px rgba(0, 0, 0, 0.1);
-  --shadow-button: 0 10px 30px rgba(125, 211, 252, 0.3);
-  --shadow-button-hover: 0 15px 40px rgba(125, 211, 252, 0.4);
+  /* 그림자 - DUGIGO 매핑 */
+  --shadow-light: var(--shadow-light-dugigo);
+  --shadow-medium: var(--shadow-medium-dugigo);
+  --shadow-heavy: var(--shadow-heavy-dugigo);
+  --shadow-button: var(--shadow-medium-dugigo);
+  --shadow-button-hover: var(--shadow-heavy-dugigo);
 
   /* 간격 - 4px 기반 */
   --spacing-xs: 4px; /* 1 */
