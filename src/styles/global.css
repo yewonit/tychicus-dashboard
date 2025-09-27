@@ -3375,18 +3375,18 @@ html {
 }
 
 .visitation-method-badge.만남 {
-  background: rgba(151, 180, 222, 0.2);
-  color: var(--secondary-dark);
+  background: var(--method-meeting-bg);
+  color: var(--method-meeting-text);
 }
 
 .visitation-method-badge.통화 {
-  background: rgba(38, 58, 153, 0.2);
-  color: var(--secondary-dark);
+  background: var(--method-call-bg);
+  color: var(--method-call-text);
 }
 
 .visitation-method-badge.카카오톡 {
-  background: rgba(220, 208, 190, 0.3);
-  color: var(--text-primary);
+  background: var(--method-kakao-bg);
+  color: var(--method-kakao-text);
 }
 
 .visitation-empty-message {
@@ -5660,18 +5660,18 @@ html {
 }
 
 .visitation-detail-method-badge.만남 {
-  background: rgba(151, 180, 222, 0.2);
-  color: var(--secondary-dark);
+  background: var(--method-meeting-bg);
+  color: var(--method-meeting-text);
 }
 
 .visitation-detail-method-badge.통화 {
-  background: rgba(38, 58, 153, 0.2);
-  color: var(--secondary-dark);
+  background: var(--method-call-bg);
+  color: var(--method-call-text);
 }
 
 .visitation-detail-method-badge.카카오톡 {
-  background: rgba(220, 208, 190, 0.3);
-  color: var(--text-secondary);
+  background: var(--method-kakao-bg);
+  color: var(--method-kakao-text);
 }
 
 .visitation-detail-content-text {
