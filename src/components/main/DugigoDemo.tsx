@@ -178,7 +178,7 @@ const DugigoDemo: React.FC = () => {
           </div>
         </div>
       </Modal>
-        </div>
+      </div>
       )}
     </div>
   );

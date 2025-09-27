@@ -6,6 +6,7 @@ import DugigoLayout from './components/layouts/DugigoLayout';
 import MainLayout from './components/layouts/MainLayout';
 import { MobileRestrictionOverlay } from './components/ui';
 import Dashboard from './components/main/Dashboard';
+import DugigoDashboard from './components/main/DugigoDashboard';
 import DugigoDemo from './components/main/DugigoDemo';
 import ForumManagement from './components/main/ForumManagement';
 import MemberDetail from './components/main/MemberDetail';
