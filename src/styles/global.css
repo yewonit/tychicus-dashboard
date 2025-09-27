@@ -6718,6 +6718,31 @@ html {
   background: var(--surface-muted);
 }
 
+/* 테이블 상태 배지 세분화 */
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: white;
+}
+
+.status-badge.present {
+  background: var(--state-success);
+}
+
+.status-badge.absent {
+  background: var(--state-danger);
+}
+
+.status-badge.late {
+  background: var(--state-warning);
+}
+
+.status-badge.excused {
+  background: var(--text-secondary-dugigo);
+}
+
 .dugigo-table-header-cell {
   padding: 16px;
   font-weight: 600;
