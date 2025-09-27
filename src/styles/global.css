@@ -2459,15 +2459,15 @@ html {
 }
 
 .quick-stat-growth.positive {
-  color: var(--success-light);
-  background: rgba(16, 185, 129, 0.1);
-  border-color: rgba(16, 185, 129, 0.2);
+  color: var(--state-success);
+  background: rgba(40, 167, 69, 0.1);
+  border-color: rgba(40, 167, 69, 0.2);
 }
 
 .quick-stat-growth.negative {
-  color: var(--error-light);
-  background: rgba(239, 68, 68, 0.1);
-  border-color: rgba(239, 68, 68, 0.2);
+  color: var(--state-danger);
+  background: rgba(220, 53, 69, 0.1);
+  border-color: rgba(220, 53, 69, 0.2);
 }
 
 .growth-icon {
@@ -6948,6 +6948,24 @@ html {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
   color: var(--brand-text);
+}
+
+/* 차트 하이라이트 그라데이션 */
+.dugigo-chart-container.highlight {
+  background: var(--gradient-indigo);
+  color: white;
+}
+
+.dugigo-chart-container.highlight .dugigo-chart-title {
+  color: white;
+}
+
+.dugigo-chart-container.highlight .dugigo-chart-summary-label {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.dugigo-chart-container.highlight .dugigo-chart-summary-value {
+  color: white;
 }
 
 /* 반응형 차트 */
