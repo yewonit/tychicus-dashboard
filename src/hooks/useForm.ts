@@ -21,9 +21,7 @@ export interface UseFormReturn<T> {
   setTouched: (field: keyof T) => void;
   validateField: (field: keyof T) => string;
   validateForm: () => boolean;
-  handleChange: (
-    field: keyof T
-  ) => (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleChange: (field: keyof T) => (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleBlur: (field: keyof T) => () => void;
   handleSubmit: (e: React.FormEvent) => Promise<void>;
   resetForm: () => void;
@@ -36,9 +34,7 @@ export function useForm<T extends Record<string, any>>({
 }: UseFormProps<T>): UseFormReturn<T> {
   const [values, setValues] = useState<T>(initialValues);
   const [errors, setErrors] = useState<Partial<Record<keyof T, string>>>({});
-  const [touched, setTouchedState] = useState<
-    Partial<Record<keyof T, boolean>>
-  >({});
+  const [touched, setTouchedState] = useState<Partial<Record<keyof T, boolean>>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 단일 필드 값 업데이트
@@ -142,9 +138,7 @@ export function useForm<T extends Record<string, any>>({
   }, [initialValues]);
 
   // 폼 유효성 계산
-  const isValid = Object.keys(validationRules).every(
-    field => !validateField(field as keyof T)
-  );
+  const isValid = Object.keys(validationRules).every(field => !validateField(field as keyof T));
 
   return {
     values,

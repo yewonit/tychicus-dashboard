@@ -1,30 +1,13 @@
-import {
-  LoginRequest,
-  LoginResponse,
-  TokenData,
-  TokenValidationResponse,
-  UserData,
-} from '../types';
-import {
-  clearAuthData,
-  getAccessToken,
-  getRefreshToken,
-  saveTokens,
-  saveUserData,
-} from './authUtils';
+import { LoginRequest, LoginResponse, TokenData, TokenValidationResponse, UserData } from '../types';
+import { clearAuthData, getAccessToken, getRefreshToken, saveTokens, saveUserData } from './authUtils';
 import axiosClient, { authClient } from './axiosClient';
 
 /**
  * 로그인 API 호출
  */
-export const login = async (
-  credentials: LoginRequest
-): Promise<LoginResponse> => {
+export const login = async (credentials: LoginRequest): Promise<LoginResponse> => {
   try {
-    const response = await authClient.post<LoginResponse>(
-      '/login',
-      credentials
-    );
+    const response = await authClient.post<LoginResponse>('/login', credentials);
 
     // 토큰과 사용자 데이터 저장
     saveTokens(response.data.tokens);

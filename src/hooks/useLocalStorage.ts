@@ -27,8 +27,7 @@ export function useLocalStorage<T>(
     (value: T | ((val: T) => T)) => {
       try {
         // 함수인 경우 현재 값을 인자로 전달
-        const valueToStore =
-          value instanceof Function ? value(storedValue) : value;
+        const valueToStore = value instanceof Function ? value(storedValue) : value;
         setStoredValue(valueToStore);
 
         // 로컬 스토리지에 저장
@@ -57,10 +56,7 @@ export function useLocalStorage<T>(
         try {
           setStoredValue(JSON.parse(e.newValue));
         } catch (error) {
-          console.error(
-            `Error parsing localStorage value for key "${key}":`,
-            error
-          );
+          console.error(`Error parsing localStorage value for key "${key}":`, error);
         }
       }
     };

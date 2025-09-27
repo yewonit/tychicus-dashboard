@@ -157,9 +157,7 @@ const ForumManagement: React.FC = () => {
     <div>
       <div className='forum-header'>
         <h1 className='forum-title'>포럼 관리</h1>
-        <p className='forum-subtitle'>
-          청년들이 예배 후 작성한 포럼 내용을 조회하고 관리할 수 있습니다
-        </p>
+        <p className='forum-subtitle'>청년들이 예배 후 작성한 포럼 내용을 조회하고 관리할 수 있습니다</p>
       </div>
 
       <div className='search-filter-section'>
@@ -170,11 +168,7 @@ const ForumManagement: React.FC = () => {
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
         />
-        <select
-          className='period-select'
-          value={selectedPeriod}
-          onChange={e => setSelectedPeriod(e.target.value)}
-        >
+        <select className='period-select' value={selectedPeriod} onChange={e => setSelectedPeriod(e.target.value)}>
           <option value='all'>전체기간</option>
           <option value='today'>오늘</option>
           <option value='week'>최근 7일</option>
@@ -209,16 +203,10 @@ const ForumManagement: React.FC = () => {
             <div className='message-preview'>{forum.message}</div>
 
             <div className='action-buttons'>
-              <button
-                className='view-button'
-                onClick={() => handleViewDetails(forum.id)}
-              >
+              <button className='view-button' onClick={() => handleViewDetails(forum.id)}>
                 상세보기
               </button>
-              <button
-                className='delete-button'
-                onClick={() => handleDelete(forum.id)}
-              >
+              <button className='delete-button' onClick={() => handleDelete(forum.id)}>
                 삭제
               </button>
             </div>
@@ -227,10 +215,7 @@ const ForumManagement: React.FC = () => {
       </div>
 
       <div className='pagination'>
-        <button
-          className='page-button'
-          onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-        >
+        <button className='page-button' onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}>
           &lt; 이전
         </button>
         {[1, 2, 3, 4, 5].map(page => (
@@ -242,10 +227,7 @@ const ForumManagement: React.FC = () => {
             {page}
           </button>
         ))}
-        <button
-          className='page-button'
-          onClick={() => setCurrentPage(Math.min(5, currentPage + 1))}
-        >
+        <button className='page-button' onClick={() => setCurrentPage(Math.min(5, currentPage + 1))}>
           다음 &gt;
         </button>
       </div>
@@ -256,9 +238,7 @@ const ForumManagement: React.FC = () => {
     <div>
       <div className='prayer-header'>
         <h1 className='prayer-title'>한줄 기도문 관리</h1>
-        <p className='prayer-subtitle'>
-          청년들이 예배 후 작성한 한줄 기도문을 조회하고 관리할 수 있습니다
-        </p>
+        <p className='prayer-subtitle'>청년들이 예배 후 작성한 한줄 기도문을 조회하고 관리할 수 있습니다</p>
       </div>
 
       <div className='prayer-search-filter-section'>
@@ -305,16 +285,10 @@ const ForumManagement: React.FC = () => {
             <div className='prayer-date'>{prayer.date}</div>
             <div className='prayer-content'>{prayer.content}</div>
             <div className='prayer-actions'>
-              <button
-                className='prayer-view-button'
-                onClick={() => handleViewDetails(prayer.id, 'prayer')}
-              >
+              <button className='prayer-view-button' onClick={() => handleViewDetails(prayer.id, 'prayer')}>
                 수정
               </button>
-              <button
-                className='prayer-delete-button'
-                onClick={() => handleDelete(prayer.id)}
-              >
+              <button className='prayer-delete-button' onClick={() => handleDelete(prayer.id)}>
                 삭제
               </button>
             </div>
@@ -323,10 +297,7 @@ const ForumManagement: React.FC = () => {
       </div>
 
       <div className='prayer-pagination'>
-        <button
-          className='prayer-page-button'
-          onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-        >
+        <button className='prayer-page-button' onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}>
           &lt; 이전
         </button>
         {[1, 2, 3, 4, 5].map(page => (
@@ -338,10 +309,7 @@ const ForumManagement: React.FC = () => {
             {page}
           </button>
         ))}
-        <button
-          className='prayer-page-button'
-          onClick={() => setCurrentPage(Math.min(5, currentPage + 1))}
-        >
+        <button className='prayer-page-button' onClick={() => setCurrentPage(Math.min(5, currentPage + 1))}>
           다음 &gt;
         </button>
       </div>
@@ -380,23 +348,18 @@ const ForumManagement: React.FC = () => {
             <div className='content-section'>
               <h3 className='section-title'>예배드리면서 받은 은혜</h3>
               <p className='section-content'>
-                하나님의 사랑을 더 깊이 느낄 수 있었고, 특히 용서에 대한 말씀이
-                마음에 와 닿았습니다.
+                하나님의 사랑을 더 깊이 느낄 수 있었고, 특히 용서에 대한 말씀이 마음에 와 닿았습니다.
               </p>
             </div>
 
             <div className='content-section'>
               <h3 className='section-title'>말씀속에서 붙잡은 기도제목</h3>
-              <p className='section-content'>
-                새로운 직장에서 지혜롭게 일할 수 있도록 기도하겠습니다.
-              </p>
+              <p className='section-content'>새로운 직장에서 지혜롭게 일할 수 있도록 기도하겠습니다.</p>
             </div>
 
             <div className='content-section'>
               <h3 className='section-title'>이번주 실천사항</h3>
-              <p className='section-content'>
-                매일 새벽기도 시간을 갖고 하루를 시작하겠습니다.
-              </p>
+              <p className='section-content'>매일 새벽기도 시간을 갖고 하루를 시작하겠습니다.</p>
             </div>
 
             <div className='content-section'>
@@ -426,14 +389,9 @@ const ForumManagement: React.FC = () => {
 
     return (
       <div className='prayer-modal-overlay' onClick={handleCloseModal}>
-        <div
-          className='prayer-modal-content'
-          onClick={e => e.stopPropagation()}
-        >
+        <div className='prayer-modal-content' onClick={e => e.stopPropagation()}>
           <div className='prayer-modal-header'>
-            <h2 className='prayer-modal-title'>
-              {prayer.name}님의 한줄 기도문
-            </h2>
+            <h2 className='prayer-modal-title'>{prayer.name}님의 한줄 기도문</h2>
             <button className='prayer-close-button' onClick={handleCloseModal}>
               ×
             </button>
@@ -472,10 +430,7 @@ const ForumManagement: React.FC = () => {
             <button className='prayer-edit-button' onClick={handleEdit}>
               수정하기
             </button>
-            <button
-              className='prayer-close-modal-button'
-              onClick={handleCloseModal}
-            >
+            <button className='prayer-close-modal-button' onClick={handleCloseModal}>
               닫기
             </button>
           </div>

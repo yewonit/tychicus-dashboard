@@ -31,21 +31,9 @@
   --gray-600: #909090;
 
   /* 그라데이션 */
-  --gradient-primary: linear-gradient(
-    135deg,
-    var(--primary) 0%,
-    var(--secondary) 100%
-  );
-  --gradient-secondary: linear-gradient(
-    135deg,
-    var(--secondary) 0%,
-    var(--primary) 100%
-  );
-  --gradient-primary-hover: linear-gradient(
-    135deg,
-    var(--primary-dark) 0%,
-    var(--secondary-dark) 100%
-  );
+  --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  --gradient-secondary: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+  --gradient-primary-hover: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary-dark) 100%);
 
   /* 텍스트 색상 */
   --text-primary: #2c3e50;
@@ -82,9 +70,7 @@
   --spacing-2xl: 48px; /* 12 */
 
   /* 폰트 패밀리 */
-  --font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', Roboto,
-    sans-serif;
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', Roboto, sans-serif;
 
   /* 폰트 크기 - rem 단위 통합 */
   --font-size-xs: 0.75rem; /* 12px - 캡션 */
@@ -128,8 +114,8 @@ body {
   margin: 0;
   padding: 0;
   font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
-    'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans',
+    'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--bg-primary);
@@ -593,15 +579,11 @@ html {
   border-radius: var(--radius-md);
 }
 
-.common-textfield
-  .MuiOutlinedInput-root:hover
-  .MuiOutlinedInput-notchedOutline {
+.common-textfield .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
   border-color: var(--primary);
 }
 
-.common-textfield
-  .MuiOutlinedInput-root.Mui-focused
-  .MuiOutlinedInput-notchedOutline {
+.common-textfield .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.1);
 }
@@ -618,11 +600,7 @@ html {
 }
 
 .common-button:hover {
-  background: linear-gradient(
-    135deg,
-    var(--primary-dark) 0%,
-    var(--secondary-dark) 100%
-  );
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary-dark) 100%);
   transform: translateY(-1px);
   box-shadow: 0 6px 16px rgba(78, 205, 196, 0.35);
 }
@@ -1686,9 +1664,7 @@ html {
   border-color: var(--primary);
 }
 
-.form-field
-  .MuiOutlinedInput-root.Mui-focused
-  .MuiOutlinedInput-notchedOutline {
+.form-field .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.1);
 }

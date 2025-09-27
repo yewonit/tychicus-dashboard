@@ -145,19 +145,13 @@ export const createValidator = (...validators: ((value: any) => string)[]) => {
  */
 export const commonValidators = {
   // 필수 이메일
-  requiredEmail: createValidator(
-    value => validationRules.required(value, '이메일'),
-    validationRules.email
-  ),
+  requiredEmail: createValidator(value => validationRules.required(value, '이메일'), validationRules.email),
 
   // 필수 비밀번호
   requiredPassword: createValidator(validationRules.password),
 
   // 필수 이름
-  requiredName: createValidator(
-    value => validationRules.required(value, '이름'),
-    validationRules.koreanOnly
-  ),
+  requiredName: createValidator(value => validationRules.required(value, '이름'), validationRules.koreanOnly),
 
   // 필수 전화번호
   requiredPhoneNumber: createValidator(

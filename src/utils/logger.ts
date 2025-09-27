@@ -47,12 +47,7 @@ class Logger {
   /**
    * 로그 엔트리 생성
    */
-  private createLogEntry(
-    level: LogLevel,
-    message: string,
-    context?: string,
-    metadata?: any
-  ): LogEntry {
+  private createLogEntry(level: LogLevel, message: string, context?: string, metadata?: any): LogEntry {
     return {
       timestamp: new Date().toISOString(),
       level,
@@ -128,12 +123,7 @@ class Logger {
    * 디버그 로그
    */
   public debug(message: string, context?: string, metadata?: any): void {
-    const entry = this.createLogEntry(
-      LogLevel.DEBUG,
-      message,
-      context,
-      metadata
-    );
+    const entry = this.createLogEntry(LogLevel.DEBUG, message, context, metadata);
     this.log(entry);
   }
 
@@ -141,12 +131,7 @@ class Logger {
    * 정보 로그
    */
   public info(message: string, context?: string, metadata?: any): void {
-    const entry = this.createLogEntry(
-      LogLevel.INFO,
-      message,
-      context,
-      metadata
-    );
+    const entry = this.createLogEntry(LogLevel.INFO, message, context, metadata);
     this.log(entry);
   }
 
@@ -154,12 +139,7 @@ class Logger {
    * 경고 로그
    */
   public warn(message: string, context?: string, metadata?: any): void {
-    const entry = this.createLogEntry(
-      LogLevel.WARN,
-      message,
-      context,
-      metadata
-    );
+    const entry = this.createLogEntry(LogLevel.WARN, message, context, metadata);
     this.log(entry);
   }
 
@@ -167,12 +147,7 @@ class Logger {
    * 에러 로그
    */
   public error(message: string, context?: string, metadata?: any): void {
-    const entry = this.createLogEntry(
-      LogLevel.ERROR,
-      message,
-      context,
-      metadata
-    );
+    const entry = this.createLogEntry(LogLevel.ERROR, message, context, metadata);
     this.log(entry);
   }
 
@@ -186,12 +161,7 @@ class Logger {
   /**
    * API 호출 로그
    */
-  public apiCall(
-    method: string,
-    url: string,
-    context?: string,
-    metadata?: any
-  ): void {
+  public apiCall(method: string, url: string, context?: string, metadata?: any): void {
     this.info(`API Call: ${method} ${url}`, context, metadata);
   }
 
@@ -211,30 +181,19 @@ class Logger {
 export const logger = Logger.getInstance();
 
 // 편의 함수들 내보내기
-export const logDebug = (message: string, context?: string, metadata?: any) =>
-  logger.debug(message, context, metadata);
+export const logDebug = (message: string, context?: string, metadata?: any) => logger.debug(message, context, metadata);
 
-export const logInfo = (message: string, context?: string, metadata?: any) =>
-  logger.info(message, context, metadata);
+export const logInfo = (message: string, context?: string, metadata?: any) => logger.info(message, context, metadata);
 
-export const logWarn = (message: string, context?: string, metadata?: any) =>
-  logger.warn(message, context, metadata);
+export const logWarn = (message: string, context?: string, metadata?: any) => logger.warn(message, context, metadata);
 
-export const logError = (message: string, context?: string, metadata?: any) =>
-  logger.error(message, context, metadata);
+export const logError = (message: string, context?: string, metadata?: any) => logger.error(message, context, metadata);
 
-export const logUserAction = (
-  action: string,
-  context?: string,
-  metadata?: any
-) => logger.userAction(action, context, metadata);
+export const logUserAction = (action: string, context?: string, metadata?: any) =>
+  logger.userAction(action, context, metadata);
 
-export const logApiCall = (
-  method: string,
-  url: string,
-  context?: string,
-  metadata?: any
-) => logger.apiCall(method, url, context, metadata);
+export const logApiCall = (method: string, url: string, context?: string, metadata?: any) =>
+  logger.apiCall(method, url, context, metadata);
 
 export const logException = (error: Error, context?: string, metadata?: any) =>
   logger.exception(error, context, metadata);

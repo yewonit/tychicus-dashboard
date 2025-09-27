@@ -72,40 +72,37 @@ export const useAuth = () => {
   /**
    * 로그인 처리
    */
-  const handleLogin = useCallback(
-    async (credentials: LoginRequest): Promise<void> => {
-      try {
-        setAuthState(prev => ({ ...prev, loading: true, error: null }));
+  const handleLogin = useCallback(async (credentials: LoginRequest): Promise<void> => {
+    try {
+      setAuthState(prev => ({ ...prev, loading: true, error: null }));
 
-        const loginResponse = await login(credentials);
+      const loginResponse = await login(credentials);
 
-        setAuthState({
-          isAuthenticated: true,
-          user: loginResponse.userData,
-          loading: false,
-          error: null,
-        });
-      } catch (error: any) {
-        let errorMessage = '로그인에 실패했습니다.';
-        if (error.response?.status === 401) {
-          errorMessage = '이메일 또는 비밀번호가 올바르지 않습니다.';
-        } else if (error.response?.status === 500) {
-          errorMessage = '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
-        } else if (error.message) {
-          errorMessage = error.message;
-        }
-
-        setAuthState(prev => ({
-          ...prev,
-          loading: false,
-          error: errorMessage,
-        }));
-
-        throw error;
+      setAuthState({
+        isAuthenticated: true,
+        user: loginResponse.userData,
+        loading: false,
+        error: null,
+      });
+    } catch (error: any) {
+      let errorMessage = '로그인에 실패했습니다.';
+      if (error.response?.status === 401) {
+        errorMessage = '이메일 또는 비밀번호가 올바르지 않습니다.';
+      } else if (error.response?.status === 500) {
+        errorMessage = '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+      } else if (error.message) {
+        errorMessage = error.message;
       }
-    },
-    []
-  );
+
+      setAuthState(prev => ({
+        ...prev,
+        loading: false,
+        error: errorMessage,
+      }));
+
+      throw error;
+    }
+  }, []);
 
   /**
    * 로그아웃 처리

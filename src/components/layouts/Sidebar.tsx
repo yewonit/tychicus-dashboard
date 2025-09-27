@@ -106,9 +106,7 @@ const Sidebar: React.FC = () => {
           <div className='sidebar-user-avatar'>👤</div>
           <div className='sidebar-user-details'>
             <div className='sidebar-user-name'>{user?.name || '사용자'}</div>
-            <div className='sidebar-user-role'>
-              {user?.roles?.[0]?.roleName || ''}
-            </div>
+            <div className='sidebar-user-role'>{user?.roles?.[0]?.roleName || ''}</div>
           </div>
         </div>
       </div>

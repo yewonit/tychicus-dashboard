@@ -1,10 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  AttendanceTrendData,
-  ContinuousAttendanceStats,
-  Gook,
-  Group,
-} from '../../types';
+import { AttendanceTrendData, ContinuousAttendanceStats, Gook, Group } from '../../types';
 import { getAccessibleOrganizations } from '../../utils/authService';
 import axiosClient from '../../utils/axiosClient';
 import AttendanceChart from './AttendanceChart';
@@ -17,9 +12,7 @@ import QuickStats from './QuickStats';
 
 const Dashboard: React.FC = () => {
   const [selectedGukId, setSelectedGukId] = useState<number | '전체'>('전체');
-  const [selectedGroupId, setSelectedGroupId] = useState<number | '전체'>(
-    '전체'
-  );
+  const [selectedGroupId, setSelectedGroupId] = useState<number | '전체'>('전체');
   const [showAttendancePopup, setShowAttendancePopup] = useState(false);
   const [attendancePopupData, setAttendancePopupData] = useState<{
     title: string;
@@ -87,17 +80,11 @@ const Dashboard: React.FC = () => {
       fridayYoungAdult: number;
     };
   } | null>(null);
-  const [continuousAttendanceStats, setContinuousAttendanceStats] =
-    useState<ContinuousAttendanceStats | null>(null);
-  const [attendanceTrendData, setAttendanceTrendData] = useState<
-    AttendanceTrendData[]
-  >([]);
+  const [continuousAttendanceStats, setContinuousAttendanceStats] = useState<ContinuousAttendanceStats | null>(null);
+  const [attendanceTrendData, setAttendanceTrendData] = useState<AttendanceTrendData[]>([]);
 
   // 새로운 API 응답 구조에 맞게 데이터 변환 (group이 2차원 배열)
-  const transformAccessibleDataToGooksAndGroups = (accessibleData: {
-    gook: string[];
-    group: string[][];
-  }) => {
+  const transformAccessibleDataToGooksAndGroups = (accessibleData: { gook: string[]; group: string[][] }) => {
     const transformedGooks: Gook[] = accessibleData.gook.map((name, index) => ({
       id: index + 1, // 임시 ID 생성
       name: `${name}국`, // "1" → "1국"
@@ -125,20 +112,15 @@ const Dashboard: React.FC = () => {
 
       const accessibleData = await getAccessibleOrganizations();
 
-      const { gooks, groups } =
-        transformAccessibleDataToGooksAndGroups(accessibleData);
+      const { gooks, groups } = transformAccessibleDataToGooksAndGroups(accessibleData);
 
       setGooks(gooks);
       setGroups(groups);
     } catch (err: any) {
       setError(prev => ({
         ...prev,
-        gooks:
-          err.response?.data?.message ||
-          '조직 데이터를 가져오는데 실패했습니다.',
-        groups:
-          err.response?.data?.message ||
-          '조직 데이터를 가져오는데 실패했습니다.',
+        gooks: err.response?.data?.message || '조직 데이터를 가져오는데 실패했습니다.',
+        groups: err.response?.data?.message || '조직 데이터를 가져오는데 실패했습니다.',
       }));
     } finally {
       setLoading(prev => ({ ...prev, gooks: false, groups: false }));
@@ -146,10 +128,7 @@ const Dashboard: React.FC = () => {
   }, []);
 
   // 주간 통계 가져오기
-  const fetchWeeklyStats = async (
-    gookId?: number | '전체',
-    groupId?: number | '전체'
-  ) => {
+  const fetchWeeklyStats = async (gookId?: number | '전체', groupId?: number | '전체') => {
     try {
       setLoading(prev => ({ ...prev, weeklyStats: true }));
       setError(prev => ({ ...prev, weeklyStats: null }));
@@ -184,8 +163,7 @@ const Dashboard: React.FC = () => {
     } catch (err: any) {
       setError(prev => ({
         ...prev,
-        weeklyStats:
-          err.response?.data?.message || '주간 통계를 가져오는데 실패했습니다.',
+        weeklyStats: err.response?.data?.message || '주간 통계를 가져오는데 실패했습니다.',
       }));
     } finally {
       setLoading(prev => ({ ...prev, weeklyStats: false }));
@@ -239,9 +217,7 @@ const Dashboard: React.FC = () => {
       } catch (err: any) {
         setError(prev => ({
           ...prev,
-          weeklyGraph:
-            err.response?.data?.message ||
-            '주간 그래프 데이터를 가져오는데 실패했습니다.',
+          weeklyGraph: err.response?.data?.message || '주간 그래프 데이터를 가져오는데 실패했습니다.',
         }));
       } finally {
         setLoading(prev => ({ ...prev, weeklyGraph: false }));
@@ -251,10 +227,7 @@ const Dashboard: React.FC = () => {
   );
 
   // 연속 결석/출석자 데이터 가져오기
-  const fetchContinuousAttendance = async (
-    gookId?: number | '전체',
-    groupId?: number | '전체'
-  ) => {
+  const fetchContinuousAttendance = async (gookId?: number | '전체', groupId?: number | '전체') => {
     try {
       setLoading(prev => ({ ...prev, continuousAttendance: true }));
       setError(prev => ({ ...prev, continuousAttendance: null }));
@@ -303,9 +276,7 @@ const Dashboard: React.FC = () => {
     } catch (err: any) {
       setError(prev => ({
         ...prev,
-        continuousAttendance:
-          err.response?.data?.message ||
-          '연속 출석 데이터를 가져오는데 실패했습니다.',
+        continuousAttendance: err.response?.data?.message || '연속 출석 데이터를 가져오는데 실패했습니다.',
       }));
     } finally {
       setLoading(prev => ({ ...prev, continuousAttendance: false }));
@@ -328,17 +299,12 @@ const Dashboard: React.FC = () => {
       // 실제 API 응답 구조: data.weeklySundayYoungAdultAttendanceTrends.xAxis
       if (
         responseData?.data?.weeklySundayYoungAdultAttendanceTrends?.xAxis &&
-        Array.isArray(
-          responseData.data.weeklySundayYoungAdultAttendanceTrends.xAxis
-        )
+        Array.isArray(responseData.data.weeklySundayYoungAdultAttendanceTrends.xAxis)
       ) {
-        trendData =
-          responseData.data.weeklySundayYoungAdultAttendanceTrends.xAxis.map(
-            (item: any) => ({
-              weekLabel: item.xAxisName,
-              출석: item.count,
-            })
-          );
+        trendData = responseData.data.weeklySundayYoungAdultAttendanceTrends.xAxis.map((item: any) => ({
+          weekLabel: item.xAxisName,
+          출석: item.count,
+        }));
       } else if (Array.isArray(responseData)) {
         trendData = responseData;
       } else if (responseData && Array.isArray(responseData.data)) {
@@ -353,9 +319,7 @@ const Dashboard: React.FC = () => {
     } catch (err: any) {
       setError(prev => ({
         ...prev,
-        attendanceTrend:
-          err.response?.data?.message ||
-          '출석 트렌드 데이터를 가져오는데 실패했습니다.',
+        attendanceTrend: err.response?.data?.message || '출석 트렌드 데이터를 가져오는데 실패했습니다.',
       }));
       setAttendanceTrendData([]); // 오류 시 빈 배열로 설정
     } finally {
@@ -389,9 +353,7 @@ const Dashboard: React.FC = () => {
     }
 
     // 선택된 국에 해당하는 그룹만 필터링
-    const filteredGroups = Array.isArray(groups)
-      ? groups.filter(group => group.gookId === selectedGukId)
-      : [];
+    const filteredGroups = Array.isArray(groups) ? groups.filter(group => group.gookId === selectedGukId) : [];
 
     const groupOptions = filteredGroups.map(group => ({
       value: group.id,
@@ -407,9 +369,7 @@ const Dashboard: React.FC = () => {
       return '전체';
     }
     const selectedGroup = groups.find(group => group.id === selectedGroupId);
-    return selectedGroup
-      ? selectedGroup.name || `그룹 ${selectedGroup.id}`
-      : '전체';
+    return selectedGroup ? selectedGroup.name || `그룹 ${selectedGroup.id}` : '전체';
   }, [selectedGroupId, groups]);
 
   // 연속 출석 인원 데이터 계산 (continuousAttendeeCount 사용)
@@ -465,11 +425,7 @@ const Dashboard: React.FC = () => {
   };
 
   // 연속 주차 계산 헬퍼 함수 (키에서 숫자 추출)
-  const getConsecutiveWeeks = (
-    member: any,
-    attendeeData: any,
-    type: string
-  ) => {
+  const getConsecutiveWeeks = (member: any, attendeeData: any, type: string) => {
     const typeData = attendeeData[type === 'special' ? 'sunday' : type];
     if (!typeData) return 0;
 
@@ -522,15 +478,9 @@ const Dashboard: React.FC = () => {
 
         <AttendanceChart
           attendanceData2025={weeklyGraphData}
-          selectedGuk={
-            selectedGukId === '전체'
-              ? '전체'
-              : gooks.find(g => g.id === selectedGukId)?.name || '전체'
-          }
+          selectedGuk={selectedGukId === '전체' ? '전체' : gooks.find(g => g.id === selectedGukId)?.name || '전체'}
           selectedGroup={
-            selectedGroupId === '전체'
-              ? '전체'
-              : groups.find(g => g.id === selectedGroupId)?.name || '전체'
+            selectedGroupId === '전체' ? '전체' : groups.find(g => g.id === selectedGroupId)?.name || '전체'
           }
           chartType={
             selectedGukId === '전체'

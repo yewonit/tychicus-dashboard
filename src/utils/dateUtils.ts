@@ -70,10 +70,7 @@ export const getDayOfWeekFromDate = (date: string | Date): number => {
 /**
  * 가장 가까운 과거 요일 찾기
  */
-export const getNearestPastDayOfWeek = (
-  targetDayOfWeek: number,
-  fromDate: Date = new Date()
-): Date => {
+export const getNearestPastDayOfWeek = (targetDayOfWeek: number, fromDate: Date = new Date()): Date => {
   const currentDayOfWeek = getDay(fromDate);
   const daysToSubtract = (currentDayOfWeek - targetDayOfWeek + 7) % 7;
 
@@ -87,10 +84,7 @@ export const getNearestPastDayOfWeek = (
 /**
  * 가장 가까운 미래 요일 찾기
  */
-export const getNearestFutureDayOfWeek = (
-  targetDayOfWeek: number,
-  fromDate: Date = new Date()
-): Date => {
+export const getNearestFutureDayOfWeek = (targetDayOfWeek: number, fromDate: Date = new Date()): Date => {
   const currentDayOfWeek = getDay(fromDate);
   const daysToAdd = (targetDayOfWeek - currentDayOfWeek + 7) % 7;
 
@@ -104,10 +98,7 @@ export const getNearestFutureDayOfWeek = (
 /**
  * 자정을 넘기는 모임인지 확인
  */
-export const isOvernightMeeting = (
-  startTime: string,
-  endTime: string
-): boolean => {
+export const isOvernightMeeting = (startTime: string, endTime: string): boolean => {
   if (!startTime || !endTime) return false;
 
   try {
@@ -152,10 +143,7 @@ export const isValidTime = (time: string): boolean => {
 /**
  * 날짜 범위 생성 (시작일부터 종료일까지)
  */
-export const createDateRange = (
-  startDate: string,
-  endDate: string
-): string[] => {
+export const createDateRange = (startDate: string, endDate: string): string[] => {
   try {
     const start = parseISO(startDate);
     const end = parseISO(endDate);
@@ -233,10 +221,7 @@ export const getWeekOfMonth = (date: Date) => {
   }
 
   const weekNumber =
-    Math.floor(
-      (sundayOfWeek.getTime() - firstSundayOfMonth.getTime()) /
-        (7 * 24 * 60 * 60 * 1000)
-    ) + 1;
+    Math.floor((sundayOfWeek.getTime() - firstSundayOfMonth.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1;
 
   return {
     month: month + 1,
@@ -248,11 +233,7 @@ export const getWeekOfMonth = (date: Date) => {
  * 월의 마지막 주차 계산 (MeetingHistoryView용)
  */
 export const getLastWeekOfMonth = (date: Date): number => {
-  const lastDayOfPrevMonth = new Date(
-    date.getFullYear(),
-    date.getMonth() + 1,
-    0
-  );
+  const lastDayOfPrevMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
   const lastSundayOfMonth = new Date(lastDayOfPrevMonth);
 
   while (lastSundayOfMonth.getDay() !== 0) {
@@ -265,10 +246,7 @@ export const getLastWeekOfMonth = (date: Date): number => {
   }
 
   const weeksCount =
-    Math.floor(
-      (lastSundayOfMonth.getTime() - firstSundayOfMonth.getTime()) /
-        (7 * 24 * 60 * 60 * 1000)
-    ) + 1;
+    Math.floor((lastSundayOfMonth.getTime() - firstSundayOfMonth.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1;
 
   return Math.min(weeksCount, 5);
 };

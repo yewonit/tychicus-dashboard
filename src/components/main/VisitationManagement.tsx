@@ -265,8 +265,7 @@ const VisitationManagement: React.FC = () => {
   const [visitations, setVisitations] = useState<Visitation[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [selectedVisitation, setSelectedVisitation] =
-    useState<Visitation | null>(null);
+  const [selectedVisitation, setSelectedVisitation] = useState<Visitation | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterDepartment, setFilterDepartment] = useState('전체');
   const [filterGroup, setFilterGroup] = useState('전체');
@@ -375,12 +374,9 @@ const VisitationManagement: React.FC = () => {
 
   const filteredVisitations = visitations.filter(visitation => {
     const matchesSearch = visitation.대상자_이름.includes(searchTerm);
-    const matchesDepartment =
-      filterDepartment === '전체' || visitation.대상자_국 === filterDepartment;
-    const matchesGroup =
-      filterGroup === '전체' || visitation.대상자_그룹 === filterGroup;
-    const matchesTeam =
-      filterTeam === '전체' || visitation.대상자_순 === filterTeam;
+    const matchesDepartment = filterDepartment === '전체' || visitation.대상자_국 === filterDepartment;
+    const matchesGroup = filterGroup === '전체' || visitation.대상자_그룹 === filterGroup;
+    const matchesTeam = filterTeam === '전체' || visitation.대상자_순 === filterTeam;
 
     return matchesSearch && matchesDepartment && matchesGroup && matchesTeam;
   });
@@ -403,16 +399,12 @@ const VisitationManagement: React.FC = () => {
       <div className='visitation-stats-grid'>
         <div className='visitation-stat-card'>
           <h3>이번 달 심방</h3>
-          <div className='visitation-stat-value'>
-            {stats.this_month_visitations || 0}
-          </div>
+          <div className='visitation-stat-value'>{stats.this_month_visitations || 0}</div>
           <p>최근 30일 내 심방 수</p>
         </div>
         <div className='visitation-stat-card'>
           <h3>이번 주 심방</h3>
-          <div className='visitation-stat-value'>
-            {stats.this_week_visitations || 0}
-          </div>
+          <div className='visitation-stat-value'>{stats.this_week_visitations || 0}</div>
           <p>최근 7일 내 심방 수</p>
         </div>
         <div className='visitation-stat-card'>
@@ -423,11 +415,7 @@ const VisitationManagement: React.FC = () => {
                 const thisMonthVisitations = mockVisitations.filter(v => {
                   const visitDate = new Date(v.심방날짜);
                   const now = new Date();
-                  const startOfMonth = new Date(
-                    now.getFullYear(),
-                    now.getMonth(),
-                    1
-                  );
+                  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
                   return visitDate >= startOfMonth;
                 });
                 const keywords = extractKeywords(
@@ -438,9 +426,7 @@ const VisitationManagement: React.FC = () => {
                   keywords.map((kw, idx) => (
                     <div key={idx} className='visitation-keyword-item'>
                       <span className='visitation-keyword-text'>{kw.word}</span>
-                      <span className='visitation-keyword-count'>
-                        {kw.count}
-                      </span>
+                      <span className='visitation-keyword-count'>{kw.count}</span>
                     </div>
                   ))
                 ) : (
@@ -459,9 +445,7 @@ const VisitationManagement: React.FC = () => {
                 const thisWeekVisitations = mockVisitations.filter(v => {
                   const visitDate = new Date(v.심방날짜);
                   const now = new Date();
-                  const startOfWeek = new Date(
-                    now.setDate(now.getDate() - now.getDay())
-                  );
+                  const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
                   startOfWeek.setHours(0, 0, 0, 0);
                   return visitDate >= startOfWeek;
                 });
@@ -473,9 +457,7 @@ const VisitationManagement: React.FC = () => {
                   keywords.map((kw, idx) => (
                     <div key={idx} className='visitation-keyword-item'>
                       <span className='visitation-keyword-text'>{kw.word}</span>
-                      <span className='visitation-keyword-count'>
-                        {kw.count}
-                      </span>
+                      <span className='visitation-keyword-count'>{kw.count}</span>
                     </div>
                   ))
                 ) : (
@@ -521,11 +503,7 @@ const VisitationManagement: React.FC = () => {
               </option>
             ))}
           </select>
-          <select
-            value={filterTeam}
-            onChange={e => setFilterTeam(e.target.value)}
-            className='visitation-filter-select'
-          >
+          <select value={filterTeam} onChange={e => setFilterTeam(e.target.value)} className='visitation-filter-select'>
             <option value='전체'>소속순</option>
             {teams.map(team => (
               <option key={team} value={team}>
@@ -547,10 +525,7 @@ const VisitationManagement: React.FC = () => {
           >
             🃏 카드
           </button>
-          <button
-            onClick={handleCreateVisitation}
-            className='visitation-add-button'
-          >
+          <button onClick={handleCreateVisitation} className='visitation-add-button'>
             ✨ 새 심방 기록
           </button>
         </div>
@@ -574,37 +549,20 @@ const VisitationManagement: React.FC = () => {
             <tbody>
               {filteredVisitations.length > 0 ? (
                 filteredVisitations
-                  .sort(
-                    (a, b) =>
-                      new Date(b.심방날짜).getTime() -
-                      new Date(a.심방날짜).getTime()
-                  )
+                  .sort((a, b) => new Date(b.심방날짜).getTime() - new Date(a.심방날짜).getTime())
                   .map(visitation => (
-                    <tr
-                      key={visitation.id}
-                      onClick={() => handleViewVisitation(visitation)}
-                    >
-                      <td className='visitation-table-cell-bold'>
-                        {visitation.심방날짜}
-                      </td>
-                      <td className='visitation-table-cell-bold'>
-                        {visitation.대상자_이름}
-                      </td>
+                    <tr key={visitation.id} onClick={() => handleViewVisitation(visitation)}>
+                      <td className='visitation-table-cell-bold'>{visitation.심방날짜}</td>
+                      <td className='visitation-table-cell-bold'>{visitation.대상자_이름}</td>
                       <td className='visitation-table-cell-secondary'>
                         {calculateGeneration(visitation.대상자_생일연도)}
                       </td>
                       <td>{visitation.대상자_국}</td>
                       <td>{visitation.대상자_그룹}</td>
                       <td>{visitation.대상자_순장}</td>
-                      <td className='visitation-table-cell-bold'>
-                        {visitation.진행자_이름}
-                      </td>
+                      <td className='visitation-table-cell-bold'>{visitation.진행자_이름}</td>
                       <td>
-                        <span
-                          className={`visitation-method-badge ${visitation.심방방법}`}
-                        >
-                          {visitation.심방방법}
-                        </span>
+                        <span className={`visitation-method-badge ${visitation.심방방법}`}>{visitation.심방방법}</span>
                       </td>
                     </tr>
                   ))
@@ -622,44 +580,28 @@ const VisitationManagement: React.FC = () => {
         <div className='visitation-cards-grid'>
           {filteredVisitations.length > 0 ? (
             filteredVisitations
-              .sort(
-                (a, b) =>
-                  new Date(b.심방날짜).getTime() -
-                  new Date(a.심방날짜).getTime()
-              )
+              .sort((a, b) => new Date(b.심방날짜).getTime() - new Date(a.심방날짜).getTime())
               .map(visitation => (
-                <div
-                  key={visitation.id}
-                  className='visitation-card'
-                  onClick={() => handleViewVisitation(visitation)}
-                >
+                <div key={visitation.id} className='visitation-card' onClick={() => handleViewVisitation(visitation)}>
                   <div className='visitation-card-header'>
                     <h3>{visitation.대상자_이름} 심방</h3>
-                    <span
-                      className={`visitation-method-badge ${visitation.심방방법}`}
-                    >
-                      {visitation.심방방법}
-                    </span>
+                    <span className={`visitation-method-badge ${visitation.심방방법}`}>{visitation.심방방법}</span>
                   </div>
                   <div className='visitation-card-content'>
                     <div className='visitation-info-row'>
                       <span className='visitation-info-label'>심방일자:</span>
-                      <span className='visitation-info-value'>
-                        {visitation.심방날짜}
-                      </span>
+                      <span className='visitation-info-value'>{visitation.심방날짜}</span>
                     </div>
                     <div className='visitation-info-row'>
                       <span className='visitation-info-label'>대상자:</span>
                       <span className='visitation-info-value'>
-                        {visitation.대상자_이름} (
-                        {calculateGeneration(visitation.대상자_생일연도)}기)
+                        {visitation.대상자_이름} ({calculateGeneration(visitation.대상자_생일연도)}기)
                       </span>
                     </div>
                     <div className='visitation-info-row'>
                       <span className='visitation-info-label'>소속:</span>
                       <span className='visitation-info-value'>
-                        {visitation.대상자_국} {visitation.대상자_그룹}{' '}
-                        {visitation.대상자_순장}
+                        {visitation.대상자_국} {visitation.대상자_그룹} {visitation.대상자_순장}
                       </span>
                     </div>
                     <div className='visitation-info-row'>
@@ -668,9 +610,7 @@ const VisitationManagement: React.FC = () => {
                         {visitation.진행자_이름} ({visitation.진행자_직분})
                       </span>
                     </div>
-                    <p className='visitation-content-preview'>
-                      {visitation.심방내용}
-                    </p>
+                    <p className='visitation-content-preview'>{visitation.심방내용}</p>
                   </div>
                   <div className='visitation-card-footer'>
                     <span>작성일시: {visitation.작성일시}</span>
@@ -678,25 +618,17 @@ const VisitationManagement: React.FC = () => {
                 </div>
               ))
           ) : (
-            <div className='visitation-empty-cards'>
-              검색 조건에 맞는 심방 기록이 없습니다.
-            </div>
+            <div className='visitation-empty-cards'>검색 조건에 맞는 심방 기록이 없습니다.</div>
           )}
         </div>
       )}
 
       {showModal && (
         <div className='visitation-modal' onClick={() => setShowModal(false)}>
-          <div
-            className='visitation-modal-content'
-            onClick={e => e.stopPropagation()}
-          >
+          <div className='visitation-modal-content' onClick={e => e.stopPropagation()}>
             <div className='visitation-modal-header'>
               <h2>{selectedVisitation ? '심방 기록 수정' : '새 심방 기록'}</h2>
-              <button
-                onClick={() => setShowModal(false)}
-                className='visitation-modal-close'
-              >
+              <button onClick={() => setShowModal(false)} className='visitation-modal-close'>
                 ×
               </button>
             </div>
@@ -902,11 +834,7 @@ const VisitationManagement: React.FC = () => {
               </div>
 
               <div className='visitation-form-buttons'>
-                <button
-                  type='button'
-                  onClick={() => setShowModal(false)}
-                  className='visitation-button'
-                >
+                <button type='button' onClick={() => setShowModal(false)} className='visitation-button'>
                   취소
                 </button>
                 <button type='submit' className='visitation-button primary'>

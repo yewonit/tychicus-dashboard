@@ -90,12 +90,8 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
         }
       });
 
-      filteredLabels = gookIndices.map(
-        index => attendanceData2025.attendanceXAxis[index][0]
-      );
-      filteredCounts = gookIndices.map(
-        index => attendanceData2025.attendanceCounts[index]
-      );
+      filteredLabels = gookIndices.map(index => attendanceData2025.attendanceXAxis[index][0]);
+      filteredCounts = gookIndices.map(index => attendanceData2025.attendanceCounts[index]);
     } else if (chartType === 'group') {
       // 그룹별: "그룹"으로 끝나는 항목만 표시
       const groupIndices: number[] = [];
@@ -105,12 +101,8 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
         }
       });
 
-      filteredLabels = groupIndices.map(
-        index => attendanceData2025.attendanceXAxis[index][0]
-      );
-      filteredCounts = groupIndices.map(
-        index => attendanceData2025.attendanceCounts[index]
-      );
+      filteredLabels = groupIndices.map(index => attendanceData2025.attendanceXAxis[index][0]);
+      filteredCounts = groupIndices.map(index => attendanceData2025.attendanceCounts[index]);
     } else if (chartType === 'sun') {
       // 순별: "순"으로 끝나는 항목만 표시
       const sunIndices: number[] = [];
@@ -120,12 +112,8 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
         }
       });
 
-      filteredLabels = sunIndices.map(
-        index => attendanceData2025.attendanceXAxis[index][0]
-      );
-      filteredCounts = sunIndices.map(
-        index => attendanceData2025.attendanceCounts[index]
-      );
+      filteredLabels = sunIndices.map(index => attendanceData2025.attendanceXAxis[index][0]);
+      filteredCounts = sunIndices.map(index => attendanceData2025.attendanceCounts[index]);
     }
 
     // 필터링된 데이터로 차트 데이터 생성
@@ -253,15 +241,9 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
         <h3 className='chart-title'>{getChartTitle()}</h3>
         <div className='no-data-message'>
           {!attendanceData2025 && '데이터를 불러오는 중...'}
-          {attendanceData2025 &&
-            chartType === 'gook' &&
-            '국별 데이터가 없습니다.'}
-          {attendanceData2025 &&
-            chartType === 'group' &&
-            '그룹별 데이터가 없습니다.'}
-          {attendanceData2025 &&
-            chartType === 'sun' &&
-            `순별 데이터가 없습니다. (선택된 그룹: ${selectedGroup})`}
+          {attendanceData2025 && chartType === 'gook' && '국별 데이터가 없습니다.'}
+          {attendanceData2025 && chartType === 'group' && '그룹별 데이터가 없습니다.'}
+          {attendanceData2025 && chartType === 'sun' && `순별 데이터가 없습니다. (선택된 그룹: ${selectedGroup})`}
         </div>
       </div>
     );
@@ -295,15 +277,11 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
           <div className='worship-stats'>
             <div className='stat-item'>
               <div className='label'>총 출석</div>
-              <div className='value'>
-                {chartData.summary.sundayYoungAdult}명
-              </div>
+              <div className='value'>{chartData.summary.sundayYoungAdult}명</div>
             </div>
             <div className='stat-item'>
               <div className='label'>평균</div>
-              <div className='value'>
-                {chartData.averages.sundayYoungAdult}명
-              </div>
+              <div className='value'>{chartData.averages.sundayYoungAdult}명</div>
             </div>
           </div>
         </div>
@@ -313,15 +291,11 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
           <div className='worship-stats'>
             <div className='stat-item'>
               <div className='label'>총 출석</div>
-              <div className='value'>
-                {chartData.summary.wednesdayYoungAdult}명
-              </div>
+              <div className='value'>{chartData.summary.wednesdayYoungAdult}명</div>
             </div>
             <div className='stat-item'>
               <div className='label'>평균</div>
-              <div className='value'>
-                {chartData.averages.wednesdayYoungAdult}명
-              </div>
+              <div className='value'>{chartData.averages.wednesdayYoungAdult}명</div>
             </div>
           </div>
         </div>
@@ -331,15 +305,11 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
           <div className='worship-stats'>
             <div className='stat-item'>
               <div className='label'>총 출석</div>
-              <div className='value'>
-                {chartData.summary.fridayYoungAdult}명
-              </div>
+              <div className='value'>{chartData.summary.fridayYoungAdult}명</div>
             </div>
             <div className='stat-item'>
               <div className='label'>평균</div>
-              <div className='value'>
-                {chartData.averages.fridayYoungAdult}명
-              </div>
+              <div className='value'>{chartData.averages.fridayYoungAdult}명</div>
             </div>
           </div>
         </div>

@@ -8,11 +8,7 @@ const USER_DATA_KEY = 'userData';
 /**
  * 쿠키에 값을 저장하는 함수
  */
-const setCookie = (
-  name: string,
-  value: string,
-  expiresInSeconds: number
-): void => {
+const setCookie = (name: string, value: string, expiresInSeconds: number): void => {
   const date = new Date();
   date.setTime(date.getTime() + expiresInSeconds * 1000);
   const expires = `expires=${date.toUTCString()}`;
@@ -45,11 +41,7 @@ const deleteCookie = (name: string): void => {
  */
 export const saveTokens = (tokens: TokenData): void => {
   setCookie(ACCESS_TOKEN_KEY, tokens.accessToken, tokens.accessTokenExpiresAt);
-  setCookie(
-    REFRESH_TOKEN_KEY,
-    tokens.refreshToken,
-    tokens.refreshTokenExpiresAt
-  );
+  setCookie(REFRESH_TOKEN_KEY, tokens.refreshToken, tokens.refreshTokenExpiresAt);
 };
 
 /**

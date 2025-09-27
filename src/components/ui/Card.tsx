@@ -10,12 +10,7 @@ interface CardProps extends BoxProps {
  * 공통 카드 컴포넌트
  * 프로젝트 디자인 시스템에 맞는 카드 스타일
  */
-export const Card: React.FC<CardProps> = ({
-  hoverable = false,
-  className = '',
-  children,
-  ...props
-}) => {
+export const Card: React.FC<CardProps> = ({ hoverable = false, className = '', children, ...props }) => {
   const getClassName = () => {
     let classes = 'common-card';
     if (hoverable) classes += ' hoverable';

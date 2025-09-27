@@ -7,12 +7,7 @@ interface AttendancePopupProps {
   onClose: () => void;
 }
 
-const AttendancePopup: React.FC<AttendancePopupProps> = ({
-  isOpen,
-  title,
-  data,
-  onClose,
-}) => {
+const AttendancePopup: React.FC<AttendancePopupProps> = ({ isOpen, title, data, onClose }) => {
   if (!isOpen) return null;
 
   return (
@@ -31,14 +26,10 @@ const AttendancePopup: React.FC<AttendancePopupProps> = ({
                 <div key={index} className='attendance-item'>
                   <div className='member-info'>
                     <span className='member-name'>{member.name}</span>
-                    {member.role && (
-                      <span className='member-role'>{member.role}</span>
-                    )}
+                    {member.role && <span className='member-role'>{member.role}</span>}
                     <span className='team-name'>{member.team}</span>
                   </div>
-                  <span className='consecutive-badge'>
-                    {member.consecutiveWeeks}주 연속
-                  </span>
+                  <span className='consecutive-badge'>{member.consecutiveWeeks}주 연속</span>
                 </div>
               ))
             ) : (

@@ -1,7 +1,4 @@
-import {
-  Button as MuiButton,
-  ButtonProps as MuiButtonProps,
-} from '@mui/material';
+import { Button as MuiButton, ButtonProps as MuiButtonProps } from '@mui/material';
 import React from 'react';
 
 interface ButtonProps extends Omit<MuiButtonProps, 'variant'> {

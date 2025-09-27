@@ -71,12 +71,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         <AppBar position='static' sx={{ backgroundColor: '#4ecdc4' }}>
           <Toolbar>
             {showBackButton && (
-              <IconButton
-                edge='start'
-                color='inherit'
-                onClick={handleBack}
-                sx={{ mr: 1 }}
-              >
+              <IconButton edge='start' color='inherit' onClick={handleBack} sx={{ mr: 1 }}>
                 <ArrowBack />
               </IconButton>
             )}

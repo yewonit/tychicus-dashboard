@@ -293,9 +293,7 @@ const VisitationDetail: React.FC = () => {
   if (loading) {
     return (
       <div className='visitation-detail-container'>
-        <div className='visitation-detail-loading'>
-          심방 정보를 불러오는 중...
-        </div>
+        <div className='visitation-detail-loading'>심방 정보를 불러오는 중...</div>
       </div>
     );
   }
@@ -365,10 +363,7 @@ const VisitationDetail: React.FC = () => {
                   </button>
 
                   {improvedContent && (
-                    <button
-                      onClick={applyImprovedContent}
-                      className='visitation-detail-apply-button'
-                    >
+                    <button onClick={applyImprovedContent} className='visitation-detail-apply-button'>
                       💾 개선된 내용 적용
                     </button>
                   )}
@@ -378,16 +373,12 @@ const VisitationDetail: React.FC = () => {
                 {improvedContent && (
                   <div className='visitation-detail-improved-preview'>
                     <h4>✨ 개선된 내용 미리보기</h4>
-                    <div className='visitation-detail-improved-content'>
-                      {improvedContent}
-                    </div>
+                    <div className='visitation-detail-improved-content'>{improvedContent}</div>
                   </div>
                 )}
               </>
             ) : (
-              <div className='visitation-detail-content-text'>
-                {visitation.심방내용}
-              </div>
+              <div className='visitation-detail-content-text'>{visitation.심방내용}</div>
             )}
           </div>
 
@@ -409,9 +400,7 @@ const VisitationDetail: React.FC = () => {
                     }
                   />
                 ) : (
-                  <span className='visitation-detail-info-value'>
-                    {visitation.심방날짜}
-                  </span>
+                  <span className='visitation-detail-info-value'>{visitation.심방날짜}</span>
                 )}
               </div>
               <div className='visitation-detail-info-item'>
@@ -433,9 +422,7 @@ const VisitationDetail: React.FC = () => {
                   </select>
                 ) : (
                   <span className='visitation-detail-info-value'>
-                    <span
-                      className={`visitation-detail-method-badge ${visitation.심방방법}`}
-                    >
+                    <span className={`visitation-detail-method-badge ${visitation.심방방법}`}>
                       {visitation.심방방법}
                     </span>
                   </span>
@@ -443,19 +430,13 @@ const VisitationDetail: React.FC = () => {
               </div>
               <div className='visitation-detail-info-item'>
                 <span className='visitation-detail-info-label'>작성일시</span>
-                <span className='visitation-detail-info-value'>
-                  {visitation.작성일시}
-                </span>
+                <span className='visitation-detail-info-value'>{visitation.작성일시}</span>
               </div>
               <div className='visitation-detail-info-item'>
-                <span className='visitation-detail-info-label'>
-                  최근 수정일시
-                </span>
+                <span className='visitation-detail-info-label'>최근 수정일시</span>
                 <span className='visitation-detail-info-value'>
                   {lastModified ? (
-                    <span className='visitation-detail-last-modified'>
-                      {lastModified}
-                    </span>
+                    <span className='visitation-detail-last-modified'>{lastModified}</span>
                   ) : (
                     <span className='visitation-detail-no-modification'>-</span>
                   )}
@@ -478,18 +459,14 @@ const VisitationDetail: React.FC = () => {
                   className='visitation-detail-photo-image'
                 />
               ) : (
-                <div className='visitation-detail-no-photo'>
-                  프로필 사진이 없습니다
-                </div>
+                <div className='visitation-detail-no-photo'>프로필 사진이 없습니다</div>
               )}
             </div>
 
             <div className='visitation-detail-info-grid'>
               <div className='visitation-detail-info-item'>
                 <span className='visitation-detail-info-label'>이름</span>
-                <span className='visitation-detail-info-value'>
-                  {visitation.대상자_이름}
-                </span>
+                <span className='visitation-detail-info-value'>{visitation.대상자_이름}</span>
               </div>
               <div className='visitation-detail-info-item'>
                 <span className='visitation-detail-info-label'>기수</span>
@@ -499,27 +476,19 @@ const VisitationDetail: React.FC = () => {
               </div>
               <div className='visitation-detail-info-item'>
                 <span className='visitation-detail-info-label'>소속국</span>
-                <span className='visitation-detail-info-value'>
-                  {visitation.대상자_국}
-                </span>
+                <span className='visitation-detail-info-value'>{visitation.대상자_국}</span>
               </div>
               <div className='visitation-detail-info-item'>
                 <span className='visitation-detail-info-label'>소속그룹</span>
-                <span className='visitation-detail-info-value'>
-                  {visitation.대상자_그룹}
-                </span>
+                <span className='visitation-detail-info-value'>{visitation.대상자_그룹}</span>
               </div>
               <div className='visitation-detail-info-item'>
                 <span className='visitation-detail-info-label'>소속순</span>
-                <span className='visitation-detail-info-value'>
-                  {visitation.대상자_순장}
-                </span>
+                <span className='visitation-detail-info-value'>{visitation.대상자_순장}</span>
               </div>
               <div className='visitation-detail-info-item'>
                 <span className='visitation-detail-info-label'>생일연도</span>
-                <span className='visitation-detail-info-value'>
-                  {visitation.대상자_생일연도}년
-                </span>
+                <span className='visitation-detail-info-value'>{visitation.대상자_생일연도}년</span>
               </div>
             </div>
           </div>
@@ -529,39 +498,27 @@ const VisitationDetail: React.FC = () => {
             <div className='visitation-detail-info-grid'>
               <div className='visitation-detail-info-item'>
                 <span className='visitation-detail-info-label'>이름</span>
-                <span className='visitation-detail-info-value'>
-                  {visitation.진행자_이름}
-                </span>
+                <span className='visitation-detail-info-value'>{visitation.진행자_이름}</span>
               </div>
               <div className='visitation-detail-info-item'>
                 <span className='visitation-detail-info-label'>직분</span>
-                <span className='visitation-detail-info-value'>
-                  {visitation.진행자_직분}
-                </span>
+                <span className='visitation-detail-info-value'>{visitation.진행자_직분}</span>
               </div>
               <div className='visitation-detail-info-item'>
                 <span className='visitation-detail-info-label'>소속국</span>
-                <span className='visitation-detail-info-value'>
-                  {visitation.진행자_국}
-                </span>
+                <span className='visitation-detail-info-value'>{visitation.진행자_국}</span>
               </div>
               <div className='visitation-detail-info-item'>
                 <span className='visitation-detail-info-label'>소속그룹</span>
-                <span className='visitation-detail-info-value'>
-                  {visitation.진행자_그룹}
-                </span>
+                <span className='visitation-detail-info-value'>{visitation.진행자_그룹}</span>
               </div>
               <div className='visitation-detail-info-item'>
                 <span className='visitation-detail-info-label'>소속순</span>
-                <span className='visitation-detail-info-value'>
-                  {visitation.진행자_순}
-                </span>
+                <span className='visitation-detail-info-value'>{visitation.진행자_순}</span>
               </div>
               <div className='visitation-detail-info-item'>
                 <span className='visitation-detail-info-label'>생일연도</span>
-                <span className='visitation-detail-info-value'>
-                  {visitation.진행자_생일연도}년
-                </span>
+                <span className='visitation-detail-info-value'>{visitation.진행자_생일연도}년</span>
               </div>
             </div>
           </div>
@@ -569,31 +526,19 @@ const VisitationDetail: React.FC = () => {
           <div className='visitation-detail-action-buttons'>
             {isEditing ? (
               <>
-                <button
-                  onClick={handleSave}
-                  className='visitation-detail-button primary'
-                >
+                <button onClick={handleSave} className='visitation-detail-button primary'>
                   💾 저장하기
                 </button>
-                <button
-                  onClick={handleCancel}
-                  className='visitation-detail-button'
-                >
+                <button onClick={handleCancel} className='visitation-detail-button'>
                   ❌ 취소하기
                 </button>
               </>
             ) : (
               <>
-                <button
-                  onClick={handleEdit}
-                  className='visitation-detail-button primary'
-                >
+                <button onClick={handleEdit} className='visitation-detail-button primary'>
                   ✏️ 수정하기
                 </button>
-                <button
-                  onClick={handleDelete}
-                  className='visitation-detail-button danger'
-                >
+                <button onClick={handleDelete} className='visitation-detail-button danger'>
                   🗑️ 삭제하기
                 </button>
               </>

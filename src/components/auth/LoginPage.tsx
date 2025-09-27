@@ -1,11 +1,4 @@
-import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { Alert, Box, Button, CircularProgress, TextField, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, useForm } from '../../hooks';
@@ -127,11 +120,7 @@ const LoginPage: React.FC = () => {
             >
               {isSubmitting ? (
                 <>
-                  <CircularProgress
-                    size={20}
-                    className='mr-1'
-                    style={{ color: 'white' }}
-                  />
+                  <CircularProgress size={20} className='mr-1' style={{ color: 'white' }} />
                   로그인 중...
                 </>
               ) : (

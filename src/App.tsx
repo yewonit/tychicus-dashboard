@@ -1,11 +1,6 @@
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import {
-  Navigate,
-  Route,
-  BrowserRouter as Router,
-  Routes,
-} from 'react-router-dom';
+import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { AuthGuard, LoginPage } from './components/auth';
 import MainLayout from './components/layouts/MainLayout';
 import Dashboard from './components/main/Dashboard';
@@ -180,22 +175,12 @@ function App() {
             {/* 소그룹 관리 */}
             <Route
               path='groups'
-              element={
-                <TempPage
-                  title='소그룹 관리'
-                  description='지역별, 연령별 소그룹을 관리하세요'
-                />
-              }
+              element={<TempPage title='소그룹 관리' description='지역별, 연령별 소그룹을 관리하세요' />}
             />
             {/* 활동 관리 섹션 */}
             <Route
               path='attendance'
-              element={
-                <TempPage
-                  title='출결 관리'
-                  description='청년회 출결 현황을 관리하세요'
-                />
-              }
+              element={<TempPage title='출결 관리' description='청년회 출결 현황을 관리하세요' />}
             />
             {/* 출결 관리 */}
             <Route path='forum' element={<ForumManagement />} />
@@ -206,85 +191,42 @@ function App() {
             {/* 심방 상세 */}
             <Route
               path='meeting-records'
-              element={
-                <TempPage
-                  title='지역모임 관리'
-                  description='지역모임 기록을 관리하세요'
-                />
-              }
+              element={<TempPage title='지역모임 관리' description='지역모임 기록을 관리하세요' />}
             />
             {/* 지역모임 관리 */}
             <Route
               path='events'
-              element={
-                <TempPage
-                  title='행사 관리'
-                  description='청년회 행사와 활동을 관리하세요'
-                />
-              }
+              element={<TempPage title='행사 관리' description='청년회 행사와 활동을 관리하세요' />}
             />
             {/* 행사 관리 */}
             {/* 커뮤니케이션 섹션 */}
             <Route
               path='notifications'
-              element={
-                <TempPage
-                  title='공지사항'
-                  description='청년회 공지사항을 관리하세요'
-                />
-              }
+              element={<TempPage title='공지사항' description='청년회 공지사항을 관리하세요' />}
             />
             {/* 공지사항 */}
             <Route
               path='messages'
-              element={
-                <TempPage
-                  title='메시지 관리'
-                  description='구성원 간 메시지를 관리하세요'
-                />
-              }
+              element={<TempPage title='메시지 관리' description='구성원 간 메시지를 관리하세요' />}
             />
             {/* 메시지 관리 */}
             <Route
               path='announcements'
-              element={
-                <TempPage
-                  title='알림 관리'
-                  description='청년회 알림 시스템을 관리하세요'
-                />
-              }
+              element={<TempPage title='알림 관리' description='청년회 알림 시스템을 관리하세요' />}
             />
             {/* 알림 관리 */}
             {/* 데이터 관리 섹션 */}
             <Route
               path='data-export'
-              element={
-                <TempPage
-                  title='데이터 내보내기'
-                  description='청년회 데이터를 다양한 형식으로 내보내세요'
-                />
-              }
+              element={<TempPage title='데이터 내보내기' description='청년회 데이터를 다양한 형식으로 내보내세요' />}
             />
             {/* 데이터 내보내기 */}
             <Route
               path='backup'
-              element={
-                <TempPage
-                  title='데이터 백업'
-                  description='청년회 데이터를 백업하고 복원하세요'
-                />
-              }
+              element={<TempPage title='데이터 백업' description='청년회 데이터를 백업하고 복원하세요' />}
             />
             {/* 데이터 백업 */}
-            <Route
-              path='settings'
-              element={
-                <TempPage
-                  title='시스템 설정'
-                  description='시스템 설정을 관리하세요'
-                />
-              }
-            />
+            <Route path='settings' element={<TempPage title='시스템 설정' description='시스템 설정을 관리하세요' />} />
             {/* 시스템 설정 */}
           </Route>
         </Routes>

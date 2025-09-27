@@ -35,9 +35,7 @@ const WelcomePage: React.FC = () => {
             // 이미지 로드 실패시 기본 텍스트 표시
             const target = e.target as HTMLImageElement;
             target.style.display = 'none';
-            const fallbackText = document.getElementById(
-              'welcome-text-fallback'
-            );
+            const fallbackText = document.getElementById('welcome-text-fallback');
             const subText = document.getElementById('welcome-subtext-fallback');
             if (fallbackText) {
               fallbackText.style.display = 'block';

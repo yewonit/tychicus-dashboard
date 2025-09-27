@@ -18,30 +18,17 @@ interface EmptyStateProps {
  * 빈 상태 컴포넌트
  * 데이터가 없거나 로딩 중일 때 표시
  */
-export const EmptyState: React.FC<EmptyStateProps> = ({
-  icon,
-  title,
-  description,
-  action,
-  fullScreen = false,
-}) => {
+export const EmptyState: React.FC<EmptyStateProps> = ({ icon, title, description, action, fullScreen = false }) => {
   const content = (
     <div className='empty-state-container'>
       {icon && <div className='empty-state-icon'>{icon}</div>}
 
-      <Typography
-        variant='h6'
-        color='text.primary'
-        className='mb-1 font-medium'
-      >
+      <Typography variant='h6' color='text.primary' className='mb-1 font-medium'>
         {title}
       </Typography>
 
       {description && (
-        <Typography
-          variant='body2'
-          className='text-secondary-color mb-3 max-width-300'
-        >
+        <Typography variant='body2' className='text-secondary-color mb-3 max-width-300'>
           {description}
         </Typography>
       )}

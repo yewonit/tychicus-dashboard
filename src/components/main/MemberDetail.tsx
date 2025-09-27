@@ -14,8 +14,7 @@ const mockVisitations = [
     심방날짜: '2024-01-20',
     심방방법: '만남',
     진행자_이름: '이지은',
-    심방내용:
-      '최근 직장에서 스트레스가 많다고 하셨습니다. 기도생활이 소홀해진 것 같아 함께 기도하고 격려했습니다.',
+    심방내용: '최근 직장에서 스트레스가 많다고 하셨습니다. 기도생활이 소홀해진 것 같아 함께 기도하고 격려했습니다.',
   },
   {
     id: 2,
@@ -27,8 +26,7 @@ const mockVisitations = [
     심방날짜: '2024-01-15',
     심방방법: '통화',
     진행자_이름: '박서연',
-    심방내용:
-      '가족 문제로 고민이 많다고 하셨습니다. 함께 기도하고 성경 말씀을 나누었습니다.',
+    심방내용: '가족 문제로 고민이 많다고 하셨습니다. 함께 기도하고 성경 말씀을 나누었습니다.',
   },
   {
     id: 3,
@@ -40,8 +38,7 @@ const mockVisitations = [
     심방날짜: '2024-01-10',
     심방방법: '카카오톡',
     진행자_이름: '최준호',
-    심방내용:
-      '최근 시험 준비로 바쁘다고 하셨습니다. 기도생활을 잊지 말고 하나님께 의지하시라고 격려했습니다.',
+    심방내용: '최근 시험 준비로 바쁘다고 하셨습니다. 기도생활을 잊지 말고 하나님께 의지하시라고 격려했습니다.',
   },
 ];
 
@@ -194,10 +191,7 @@ const MemberDetail: React.FC = () => {
   return (
     <div className='member-detail-container'>
       <div className='member-detail-header'>
-        <button
-          className='member-detail-back-button'
-          onClick={() => navigate('/main/member-management')}
-        >
+        <button className='member-detail-back-button' onClick={() => navigate('/main/member-management')}>
           ← 목록으로
         </button>
         <h1 className='member-detail-title'>{member.이름}님 상세정보</h1>
@@ -211,40 +205,25 @@ const MemberDetail: React.FC = () => {
           <div className='member-detail-photo-area'>
             <div className='member-detail-photo-container'>
               <div
-                className={`member-detail-photo-display ${
-                  photo ? 'has-photo clickable' : 'non-clickable'
-                }`}
+                className={`member-detail-photo-display ${photo ? 'has-photo clickable' : 'non-clickable'}`}
                 onClick={handlePhotoClick}
               >
                 {photo ? (
-                  <img
-                    src={photo}
-                    alt={`${member.이름}님의 프로필 사진`}
-                    className='member-detail-photo-image'
-                  />
+                  <img src={photo} alt={`${member.이름}님의 프로필 사진`} className='member-detail-photo-image' />
                 ) : (
                   <div className='member-detail-photo-placeholder'>👤</div>
                 )}
               </div>
               <div className='member-detail-photo-controls'>
-                <button
-                  className='member-detail-photo-button primary'
-                  onClick={handlePhotoEdit}
-                >
+                <button className='member-detail-photo-button primary' onClick={handlePhotoEdit}>
                   {photo ? '사진 변경' : '사진 등록'}
                 </button>
                 {photo && (
                   <>
-                    <button
-                      className='member-detail-photo-button secondary'
-                      onClick={handlePhotoClick}
-                    >
+                    <button className='member-detail-photo-button secondary' onClick={handlePhotoClick}>
                       사진 보기
                     </button>
-                    <button
-                      className='member-detail-photo-button danger'
-                      onClick={handlePhotoRemove}
-                    >
+                    <button className='member-detail-photo-button danger' onClick={handlePhotoRemove}>
                       사진 삭제
                     </button>
                   </>
@@ -298,31 +277,19 @@ const MemberDetail: React.FC = () => {
               <div className='member-detail-info-item'>
                 <span className='member-detail-info-label'>출석 구분</span>
                 <span className='member-detail-info-value'>
-                  <span className='member-detail-status-badge regular'>
-                    정기출석자
-                  </span>
+                  <span className='member-detail-status-badge regular'>정기출석자</span>
                 </span>
               </div>
               <div className='member-detail-info-item'>
-                <span className='member-detail-info-label'>
-                  최근 주일청년예배 출석일자
-                </span>
-                <span className='member-detail-info-value'>
-                  {member.주일청년예배출석일자}
-                </span>
+                <span className='member-detail-info-label'>최근 주일청년예배 출석일자</span>
+                <span className='member-detail-info-value'>{member.주일청년예배출석일자}</span>
               </div>
               <div className='member-detail-info-item'>
-                <span className='member-detail-info-label'>
-                  최근 수요제자기도회 출석일자
-                </span>
-                <span className='member-detail-info-value'>
-                  {member.수요예배출석일자}
-                </span>
+                <span className='member-detail-info-label'>최근 수요제자기도회 출석일자</span>
+                <span className='member-detail-info-value'>{member.수요예배출석일자}</span>
               </div>
               <div className='member-detail-info-item'>
-                <span className='member-detail-info-label'>
-                  최근 두란노사역자모임 출석일자
-                </span>
+                <span className='member-detail-info-label'>최근 두란노사역자모임 출석일자</span>
                 <span className='member-detail-info-value'>2024-01-19</span>
               </div>
             </div>
@@ -337,17 +304,13 @@ const MemberDetail: React.FC = () => {
         {/* 메인 탭 네비게이션 */}
         <div className='member-detail-tab-navigation'>
           <button
-            className={`member-detail-tab-button ${
-              activeMainTab === 'basic' ? 'active' : ''
-            }`}
+            className={`member-detail-tab-button ${activeMainTab === 'basic' ? 'active' : ''}`}
             onClick={() => setActiveMainTab('basic')}
           >
             기본이력
           </button>
           <button
-            className={`member-detail-tab-button ${
-              activeMainTab === 'spiritual' ? 'active' : ''
-            }`}
+            className={`member-detail-tab-button ${activeMainTab === 'spiritual' ? 'active' : ''}`}
             onClick={() => setActiveMainTab('spiritual')}
           >
             영적 흐름
@@ -360,33 +323,25 @@ const MemberDetail: React.FC = () => {
             {/* 서브 탭 네비게이션 */}
             <div className='member-detail-sub-tab-navigation'>
               <button
-                className={`member-detail-tab-button ${
-                  activeTab === 'department' ? 'active' : ''
-                }`}
+                className={`member-detail-tab-button ${activeTab === 'department' ? 'active' : ''}`}
                 onClick={() => setActiveTab('department')}
               >
                 국/그룹/순 내역
               </button>
               <button
-                className={`member-detail-tab-button ${
-                  activeTab === 'absence' ? 'active' : ''
-                }`}
+                className={`member-detail-tab-button ${activeTab === 'absence' ? 'active' : ''}`}
                 onClick={() => setActiveTab('absence')}
               >
                 결석 이력
               </button>
               <button
-                className={`member-detail-tab-button ${
-                  activeTab === 'position' ? 'active' : ''
-                }`}
+                className={`member-detail-tab-button ${activeTab === 'position' ? 'active' : ''}`}
                 onClick={() => setActiveTab('position')}
               >
                 직분 이력
               </button>
               <button
-                className={`member-detail-tab-button ${
-                  activeTab === 'newfamily' ? 'active' : ''
-                }`}
+                className={`member-detail-tab-button ${activeTab === 'newfamily' ? 'active' : ''}`}
                 onClick={() => setActiveTab('newfamily')}
               >
                 새가족 수료 이력
@@ -399,18 +354,14 @@ const MemberDetail: React.FC = () => {
                 {historyData.departmentHistory.length > 0 ? (
                   historyData.departmentHistory.map((item, index) => (
                     <div key={index} className='member-detail-history-item'>
-                      <span className='member-detail-history-date'>
-                        {item.year}년
-                      </span>
+                      <span className='member-detail-history-date'>{item.year}년</span>
                       <div className='member-detail-history-content'>
                         {item.department} - {item.group} - {item.order}
                       </div>
                     </div>
                   ))
                 ) : (
-                  <div className='member-detail-empty-history'>
-                    변경 내역이 없습니다.
-                  </div>
+                  <div className='member-detail-empty-history'>변경 내역이 없습니다.</div>
                 )}
               </div>
             )}
@@ -423,15 +374,11 @@ const MemberDetail: React.FC = () => {
                       <span className='member-detail-history-date'>
                         {item.date} ({item.type})
                       </span>
-                      <div className='member-detail-history-content'>
-                        사유: {item.reason}
-                      </div>
+                      <div className='member-detail-history-content'>사유: {item.reason}</div>
                     </div>
                   ))
                 ) : (
-                  <div className='member-detail-empty-history'>
-                    결석 이력이 없습니다.
-                  </div>
+                  <div className='member-detail-empty-history'>결석 이력이 없습니다.</div>
                 )}
               </div>
             )}
@@ -441,18 +388,12 @@ const MemberDetail: React.FC = () => {
                 {historyData.positionHistory.length > 0 ? (
                   historyData.positionHistory.map((item, index) => (
                     <div key={index} className='member-detail-history-item'>
-                      <span className='member-detail-history-date'>
-                        {item.year}년
-                      </span>
-                      <div className='member-detail-history-content'>
-                        {item.position}
-                      </div>
+                      <span className='member-detail-history-date'>{item.year}년</span>
+                      <div className='member-detail-history-content'>{item.position}</div>
                     </div>
                   ))
                 ) : (
-                  <div className='member-detail-empty-history'>
-                    직분 이력이 없습니다.
-                  </div>
+                  <div className='member-detail-empty-history'>직분 이력이 없습니다.</div>
                 )}
               </div>
             )}
@@ -462,18 +403,14 @@ const MemberDetail: React.FC = () => {
                 {historyData.newFamilyHistory.length > 0 ? (
                   historyData.newFamilyHistory.map((item, index) => (
                     <div key={index} className='member-detail-history-item'>
-                      <span className='member-detail-history-date'>
-                        {item.date}
-                      </span>
+                      <span className='member-detail-history-date'>{item.date}</span>
                       <div className='member-detail-history-content'>
                         {item.course} - {item.status}
                       </div>
                     </div>
                   ))
                 ) : (
-                  <div className='member-detail-empty-history'>
-                    새가족 수료 이력이 없습니다.
-                  </div>
+                  <div className='member-detail-empty-history'>새가족 수료 이력이 없습니다.</div>
                 )}
               </div>
             )}
@@ -491,8 +428,7 @@ const MemberDetail: React.FC = () => {
                     type: 'visitation',
                     date: visitation.심방날짜,
                     content: `심방방법: ${visitation.심방방법}\n진행자: ${visitation.진행자_이름}\n${visitation.심방내용}`,
-                    onClick: () =>
-                      navigate(`/main/visitation/${visitation.id}`),
+                    onClick: () => navigate(`/main/visitation/${visitation.id}`),
                     className: 'visitation-item',
                   })),
                   // 포럼 내역
@@ -515,16 +451,11 @@ const MemberDetail: React.FC = () => {
 
                 // 날짜순으로 정렬 (최신순)
                 const sortedActivities = allActivities.sort(
-                  (a, b) =>
-                    new Date(b.date).getTime() - new Date(a.date).getTime()
+                  (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
                 );
 
                 if (sortedActivities.length === 0) {
-                  return (
-                    <div className='member-detail-empty-history'>
-                      아직 영적 활동 내역이 없습니다.
-                    </div>
-                  );
+                  return <div className='member-detail-empty-history'>아직 영적 활동 내역이 없습니다.</div>;
                 }
 
                 return sortedActivities.map((activity, index) => (
@@ -533,17 +464,9 @@ const MemberDetail: React.FC = () => {
                     className={`member-detail-timeline-item ${activity.className}`}
                     onClick={activity.onClick}
                   >
-                    <div className='member-detail-timeline-date'>
-                      {activity.date}
-                    </div>
-                    <span
-                      className={`member-detail-timeline-type ${activity.type}`}
-                    >
-                      {activity.type === 'visitation'
-                        ? '심방'
-                        : activity.type === 'forum'
-                          ? '포럼'
-                          : '기도문'}
+                    <div className='member-detail-timeline-date'>{activity.date}</div>
+                    <span className={`member-detail-timeline-type ${activity.type}`}>
+                      {activity.type === 'visitation' ? '심방' : activity.type === 'forum' ? '포럼' : '기도문'}
                     </span>
                     <div className='member-detail-timeline-content'>
                       {activity.content.split('\n').map((line, i) => (
@@ -560,19 +483,9 @@ const MemberDetail: React.FC = () => {
 
       {/* 사진 미리보기 모달 */}
       {showPreview && photo && (
-        <div
-          className='member-detail-photo-preview'
-          onClick={() => setShowPreview(false)}
-        >
-          <img
-            src={photo}
-            alt='프로필 사진 미리보기'
-            className='member-detail-photo-preview-image'
-          />
-          <button
-            className='member-detail-photo-preview-close'
-            onClick={() => setShowPreview(false)}
-          >
+        <div className='member-detail-photo-preview' onClick={() => setShowPreview(false)}>
+          <img src={photo} alt='프로필 사진 미리보기' className='member-detail-photo-preview-image' />
+          <button className='member-detail-photo-preview-close' onClick={() => setShowPreview(false)}>
             ×
           </button>
         </div>

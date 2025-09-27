@@ -7,11 +7,7 @@ interface ConsecutiveAbsenceProps {
   error: string | null;
 }
 
-const ConsecutiveAbsence: React.FC<ConsecutiveAbsenceProps> = ({
-  continuousAttendanceStats,
-  loading,
-  error,
-}) => {
+const ConsecutiveAbsence: React.FC<ConsecutiveAbsenceProps> = ({ continuousAttendanceStats, loading, error }) => {
   // 연속 주차 계산 헬퍼 함수 (absenteeList용)
   const getConsecutiveWeeks = (member: any, absenteeList: any) => {
     if (!absenteeList) return 0;
@@ -92,81 +88,57 @@ const ConsecutiveAbsence: React.FC<ConsecutiveAbsenceProps> = ({
         <div className='absence-card high-severity'>
           <h4 className='absence-title'>🚨 4주 연속 결석자</h4>
           <div className='absence-stats'>
-            <div className='absence-stat-value high-severity'>
-              {absenceStats.consecutive4Weeks}명
-            </div>
+            <div className='absence-stat-value high-severity'>{absenceStats.consecutive4Weeks}명</div>
           </div>
           <div className='absence-list'>
-            {(absenceStats.members.consecutive4Weeks || [])
-              .slice(0, 5)
-              .map((member, index) => (
-                <div key={index} className='absence-item'>
-                  <div className='absence-member-info'>
-                    <span className='absence-member-name'>{member.name}</span>
-                    {member.role && (
-                      <span className='absence-member-role'>{member.role}</span>
-                    )}
-                    <span className='absence-team-name'>{member.team}</span>
-                  </div>
-                  <span className='absence-badge high-severity'>
-                    {member.consecutiveWeeks}주 연속
-                  </span>
+            {(absenceStats.members.consecutive4Weeks || []).slice(0, 5).map((member, index) => (
+              <div key={index} className='absence-item'>
+                <div className='absence-member-info'>
+                  <span className='absence-member-name'>{member.name}</span>
+                  {member.role && <span className='absence-member-role'>{member.role}</span>}
+                  <span className='absence-team-name'>{member.team}</span>
                 </div>
-              ))}
+                <span className='absence-badge high-severity'>{member.consecutiveWeeks}주 연속</span>
+              </div>
+            ))}
           </div>
         </div>
 
         <div className='absence-card medium-severity'>
           <h4 className='absence-title'>⚠️ 3주 연속 결석자</h4>
           <div className='absence-stats'>
-            <div className='absence-stat-value medium-severity'>
-              {absenceStats.consecutive3Weeks}명
-            </div>
+            <div className='absence-stat-value medium-severity'>{absenceStats.consecutive3Weeks}명</div>
           </div>
           <div className='absence-list'>
-            {(absenceStats.members.consecutive3Weeks || [])
-              .slice(0, 5)
-              .map((member, index) => (
-                <div key={index} className='absence-item'>
-                  <div className='absence-member-info'>
-                    <span className='absence-member-name'>{member.name}</span>
-                    {member.role && (
-                      <span className='absence-member-role'>{member.role}</span>
-                    )}
-                    <span className='absence-team-name'>{member.team}</span>
-                  </div>
-                  <span className='absence-badge medium-severity'>
-                    {member.consecutiveWeeks}주 연속
-                  </span>
+            {(absenceStats.members.consecutive3Weeks || []).slice(0, 5).map((member, index) => (
+              <div key={index} className='absence-item'>
+                <div className='absence-member-info'>
+                  <span className='absence-member-name'>{member.name}</span>
+                  {member.role && <span className='absence-member-role'>{member.role}</span>}
+                  <span className='absence-team-name'>{member.team}</span>
                 </div>
-              ))}
+                <span className='absence-badge medium-severity'>{member.consecutiveWeeks}주 연속</span>
+              </div>
+            ))}
           </div>
         </div>
 
         <div className='absence-card low-severity'>
           <h4 className='absence-title'>🔄 2주 연속 결석자</h4>
           <div className='absence-stats'>
-            <div className='absence-stat-value low-severity'>
-              {absenceStats.consecutive2Weeks}명
-            </div>
+            <div className='absence-stat-value low-severity'>{absenceStats.consecutive2Weeks}명</div>
           </div>
           <div className='absence-list'>
-            {(absenceStats.members.consecutive2Weeks || [])
-              .slice(0, 5)
-              .map((member, index) => (
-                <div key={index} className='absence-item'>
-                  <div className='absence-member-info'>
-                    <span className='absence-member-name'>{member.name}</span>
-                    {member.role && (
-                      <span className='absence-member-role'>{member.role}</span>
-                    )}
-                    <span className='absence-team-name'>{member.team}</span>
-                  </div>
-                  <span className='absence-badge low-severity'>
-                    {member.consecutiveWeeks}주 연속
-                  </span>
+            {(absenceStats.members.consecutive2Weeks || []).slice(0, 5).map((member, index) => (
+              <div key={index} className='absence-item'>
+                <div className='absence-member-info'>
+                  <span className='absence-member-name'>{member.name}</span>
+                  {member.role && <span className='absence-member-role'>{member.role}</span>}
+                  <span className='absence-team-name'>{member.team}</span>
                 </div>
-              ))}
+                <span className='absence-badge low-severity'>{member.consecutiveWeeks}주 연속</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>

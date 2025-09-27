@@ -66,10 +66,7 @@ const MembersManagement: React.FC = () => {
           <tbody>
             {currentMembers.map(member => (
               <tr key={member.id}>
-                <td
-                  className='clickable-name'
-                  onClick={() => handleMemberClick(member)}
-                >
+                <td className='clickable-name' onClick={() => handleMemberClick(member)}>
                   {member.이름}
                 </td>
                 <td>{member.생일연도 ? member.생일연도.slice(-2) : ''}</td>
@@ -83,11 +80,7 @@ const MembersManagement: React.FC = () => {
       </div>
 
       <div className='pagination'>
-        <button
-          className='page-button'
-          onClick={() => setCurrentPage(currentPage - 1)}
-          disabled={currentPage === 1}
-        >
+        <button className='page-button' onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>
           이전
         </button>
 

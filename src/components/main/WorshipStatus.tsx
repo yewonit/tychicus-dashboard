@@ -156,12 +156,7 @@ const WorshipStatus: React.FC = () => {
   ];
 
   // 예배 타입
-  const worshipTypes = [
-    '주일청년예배',
-    '대예배',
-    '수요제자기도회',
-    '두란노사역자모임',
-  ];
+  const worshipTypes = ['주일청년예배', '대예배', '수요제자기도회', '두란노사역자모임'];
 
   useEffect(() => {
     // 초기 데이터 로드
@@ -254,15 +249,8 @@ const WorshipStatus: React.FC = () => {
     return [];
   };
 
-  const getAttendanceData = (
-    weekData: any,
-    orgName: string,
-    worshipType: string
-  ) => {
-    if (
-      !weekData.attendance[orgName] ||
-      !weekData.attendance[orgName][worshipType]
-    ) {
+  const getAttendanceData = (weekData: any, orgName: string, worshipType: string) => {
+    if (!weekData.attendance[orgName] || !weekData.attendance[orgName][worshipType]) {
       return { present: 0, total: 0 };
     }
     return weekData.attendance[orgName][worshipType];
@@ -282,8 +270,7 @@ const WorshipStatus: React.FC = () => {
       return [{ value: 'all', label: '전체' }];
     }
 
-    const groupsInCountry =
-      attendanceData2025.gukGroupMapping[filters.country] || [];
+    const groupsInCountry = attendanceData2025.gukGroupMapping[filters.country] || [];
     return [
       { value: 'all', label: '전체' },
       ...groupsInCountry.map((groupName: string) => ({
@@ -313,11 +300,7 @@ const WorshipStatus: React.FC = () => {
     const orgColWidth = 80; // 각 조직의 출석/전체 열 너비
     const totalColWidth = 100; // 총합계 열
 
-    const totalWidth =
-      dateWidth +
-      worshipWidth +
-      orgNames.length * orgColWidth * 2 +
-      totalColWidth;
+    const totalWidth = dateWidth + worshipWidth + orgNames.length * orgColWidth * 2 + totalColWidth;
 
     // 최소 너비 보장 (스크롤이 발생하도록)
     return Math.max(totalWidth, 1500);
@@ -337,10 +320,7 @@ const WorshipStatus: React.FC = () => {
             <div className='filter-grid'>
               <div className='filter-group'>
                 <label>국</label>
-                <select
-                  value={filters.country}
-                  onChange={e => handleFilterChange('country', e.target.value)}
-                >
+                <select value={filters.country} onChange={e => handleFilterChange('country', e.target.value)}>
                   {countryOptions.map(option => (
                     <option key={option.value} value={option.value}>
                       {option.label}
@@ -352,10 +332,7 @@ const WorshipStatus: React.FC = () => {
               {filters.country !== 'all' && (
                 <div className='filter-group'>
                   <label>그룹</label>
-                  <select
-                    value={filters.group}
-                    onChange={e => handleFilterChange('group', e.target.value)}
-                  >
+                  <select value={filters.group} onChange={e => handleFilterChange('group', e.target.value)}>
                     {getGroupOptions().map(option => (
                       <option key={option.value} value={option.value}>
                         {option.label}
@@ -370,9 +347,7 @@ const WorshipStatus: React.FC = () => {
                 <input
                   type='date'
                   value={filters.startDate}
-                  onChange={e =>
-                    handleFilterChange('startDate', e.target.value)
-                  }
+                  onChange={e => handleFilterChange('startDate', e.target.value)}
                 />
               </div>
 
@@ -394,10 +369,7 @@ const WorshipStatus: React.FC = () => {
           <div className='worship-table-section'>
             <h2 className='section-title'>조회 결과 - {getDataLevelTitle()}</h2>
             <div className='table-wrapper'>
-              <table
-                className='worship-table'
-                style={{ width: calculateTableWidth() + 'px' }}
-              >
+              <table className='worship-table' style={{ width: calculateTableWidth() + 'px' }}>
                 <thead>
                   <tr>
                     <th rowSpan={2} className='date-cell'>
@@ -429,10 +401,7 @@ const WorshipStatus: React.FC = () => {
                     worshipTypes.map((worshipType, worshipIndex) => (
                       <tr key={`${weekIndex}-${worshipType}`}>
                         {worshipIndex === 0 ? (
-                          <td
-                            rowSpan={worshipTypes.length}
-                            className='merged-date'
-                          >
+                          <td rowSpan={worshipTypes.length} className='merged-date'>
                             {weekData.date}
                             <br />
                             <small>
@@ -442,11 +411,7 @@ const WorshipStatus: React.FC = () => {
                         ) : null}
                         <td className='worship-type'>{worshipType}</td>
                         {getOrganizationNames().map((orgName: string) => {
-                          const data = getAttendanceData(
-                            weekData,
-                            orgName,
-                            worshipType
-                          );
+                          const data = getAttendanceData(weekData, orgName, worshipType);
                           return (
                             <React.Fragment key={orgName}>
                               <td>{data.present}</td>
@@ -454,9 +419,7 @@ const WorshipStatus: React.FC = () => {
                             </React.Fragment>
                           );
                         })}
-                        <td className='total-cell'>
-                          {calculateTotal(weekData, worshipType)}
-                        </td>
+                        <td className='total-cell'>{calculateTotal(weekData, worshipType)}</td>
                       </tr>
                     ))
                   )}

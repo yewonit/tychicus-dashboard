@@ -50,8 +50,7 @@ const DashboardFilter: React.FC<DashboardFilterProps> = ({
           className='filter-select'
           value={selectedGukId}
           onChange={e => {
-            const value =
-              e.target.value === '전체' ? '전체' : Number(e.target.value);
+            const value = e.target.value === '전체' ? '전체' : Number(e.target.value);
             onGukChange(value);
           }}
           disabled={loading.gooks}
@@ -76,8 +75,7 @@ const DashboardFilter: React.FC<DashboardFilterProps> = ({
           value={selectedGroupId}
           title={selectedGroupName}
           onChange={e => {
-            const value =
-              e.target.value === '전체' ? '전체' : Number(e.target.value);
+            const value = e.target.value === '전체' ? '전체' : Number(e.target.value);
             onGroupChange(value);
           }}
           disabled={loading.groups || selectedGukId === '전체'}

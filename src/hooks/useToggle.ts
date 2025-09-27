@@ -5,9 +5,7 @@ import { useCallback, useState } from 'react';
  * @param initialValue 초기값 (기본: false)
  * @returns [현재 상태, 토글 함수, 직접 설정 함수]
  */
-export function useToggle(
-  initialValue: boolean = false
-): [boolean, () => void, (value: boolean) => void] {
+export function useToggle(initialValue: boolean = false): [boolean, () => void, (value: boolean) => void] {
   const [value, setValue] = useState(initialValue);
 
   const toggle = useCallback(() => {
