@@ -12,20 +12,43 @@ const ConsecutiveAbsence: React.FC<ConsecutiveAbsenceProps> = ({
   loading,
   error,
 }) => {
+  // 연속 주차 계산 헬퍼 함수 (absenteeList용)
+  const getConsecutiveWeeks = (member: any, absenteeList: any) => {
+    if (!absenteeList) return 0;
+
+    // 각 주차별 배열에서 해당 멤버 찾기
+    const weekKeys = ['4weeks', '3weeks', '2weeks'];
+    for (const weekKey of weekKeys) {
+      if (absenteeList[weekKey]?.some((m: any) => m.name === member.name)) {
+        // "4weeks" -> "4", "3weeks" -> "3", "2weeks" -> "2"
+        return parseInt(weekKey.split('weeks')[0]);
+      }
+    }
+    return 0;
+  };
+
   // absenteeList 데이터에서 연속 결석 통계 추출
   const getAbsenceStats = () => {
     const absenteeList = continuousAttendanceStats?.absenteeList;
 
     // absenteeList 데이터가 있으면 사용, 없으면 기존 구조 사용
     if (absenteeList) {
+      // 각 주차별 멤버에 연속 주차 정보 추가
+      const processMembers = (members: any[]) => {
+        return members.map(member => ({
+          ...member,
+          consecutiveWeeks: getConsecutiveWeeks(member, absenteeList),
+        }));
+      };
+
       return {
         consecutive4Weeks: absenteeList['4weeks']?.length || 0,
         consecutive3Weeks: absenteeList['3weeks']?.length || 0,
         consecutive2Weeks: absenteeList['2weeks']?.length || 0,
         members: {
-          consecutive4Weeks: absenteeList['4weeks'] || [],
-          consecutive3Weeks: absenteeList['3weeks'] || [],
-          consecutive2Weeks: absenteeList['2weeks'] || [],
+          consecutive4Weeks: processMembers(absenteeList['4weeks'] || []),
+          consecutive3Weeks: processMembers(absenteeList['3weeks'] || []),
+          consecutive2Weeks: processMembers(absenteeList['2weeks'] || []),
         },
       };
     }
@@ -149,7 +172,9 @@ const ConsecutiveAbsence: React.FC<ConsecutiveAbsenceProps> = ({
                     )}
                     <span className='absence-team-name'>{member.team}</span>
                   </div>
-                  <span className='absence-badge low-severity'>2주 연속</span>
+                  <span className='absence-badge low-severity'>
+                    {member.consecutiveWeeks}주 연속
+                  </span>
                 </div>
               ))}
           </div>
