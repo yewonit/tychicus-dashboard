@@ -6810,6 +6810,147 @@ html {
 }
 
 /* ========================
+   DUGIGO 모달 시스템
+   ======================== */
+.dugigo-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: var(--spacing-lg);
+}
+
+.dugigo-modal-content {
+  background: var(--bg-card-dugigo);
+  border-radius: 16px;
+  box-shadow: var(--shadow-heavy-dugigo);
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.dugigo-modal-small {
+  width: 100%;
+  max-width: 400px;
+}
+
+.dugigo-modal-medium {
+  width: 100%;
+  max-width: 600px;
+}
+
+.dugigo-modal-large {
+  width: 100%;
+  max-width: 800px;
+}
+
+.dugigo-modal-header {
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface-muted);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dugigo-modal-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--brand-text);
+  margin: 0;
+}
+
+.dugigo-modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: var(--text-secondary-dugigo);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: var(--transition-fast);
+}
+
+.dugigo-modal-close:hover {
+  background: var(--bg-hover-dugigo);
+  color: var(--brand-text);
+}
+
+.dugigo-modal-body {
+  padding: var(--spacing-lg);
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* ========================
+   DUGIGO 차트 시스템
+   ======================== */
+.dugigo-chart-container {
+  background: var(--bg-card-dugigo);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-light-dugigo);
+}
+
+.dugigo-chart-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--brand-text);
+  margin: 0 0 var(--spacing-md) 0;
+  text-align: center;
+}
+
+.dugigo-chart-summary {
+  display: flex;
+  justify-content: space-around;
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--surface-muted);
+  border-radius: 8px;
+}
+
+.dugigo-chart-summary-item {
+  text-align: center;
+}
+
+.dugigo-chart-summary-label {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary-dugigo);
+  margin-bottom: 4px;
+}
+
+.dugigo-chart-summary-value {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--brand-text);
+}
+
+/* 반응형 차트 */
+@media (max-width: 1024px) {
+  .dugigo-chart-container {
+    padding: var(--spacing-md);
+  }
+  
+  .dugigo-chart-title {
+    font-size: var(--font-size-base);
+  }
+  
+  .dugigo-chart-summary {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+}
+
+/* ========================
    DUGIGO 사이드바 시스템
    ======================== */
 .dugigo-sidebar-container {

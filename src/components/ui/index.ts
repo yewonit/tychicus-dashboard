@@ -6,4 +6,5 @@ export { EmptyState } from './EmptyState';
 export { FormField } from './FormField';
 export { LoadingSpinner } from './LoadingSpinner';
 export { MobileRestrictionOverlay } from './MobileRestrictionOverlay';
+export { Modal } from './Modal';
 export { Table } from './Table';

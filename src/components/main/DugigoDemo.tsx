@@ -1,11 +1,15 @@
-import React from 'react';
-import { Badge, Button, Card, FormField, Table } from '../ui';
+import React, { useState } from 'react';
+import { Badge, Button, Card, FormField, Modal, Table } from '../ui';
+import DugigoDashboard from './DugigoDashboard';
 
 /**
  * DUGIGO 디자인 시스템 데모 페이지
  * 새로운 컴포넌트들의 동작을 확인하기 위한 임시 페이지
  */
 const DugigoDemo: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<'components' | 'dashboard'>('dashboard');
+  const [showModal, setShowModal] = useState(false);
+  
   // 테이블 데모 데이터
   const tableColumns = [
     { key: 'name', title: '이름', align: 'left' as const },
@@ -20,8 +24,57 @@ const DugigoDemo: React.FC = () => {
   ];
 
   return (
-    <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-      <h1 style={{ color: 'var(--brand-text)', marginBottom: '32px' }}>DUGIGO 디자인 시스템 데모</h1>
+    <div style={{ padding: '0' }}>
+      <div style={{ marginBottom: '32px' }}>
+        <h1 style={{ color: 'var(--brand-text)', fontSize: 'var(--font-size-3xl)', fontWeight: 'var(--font-weight-bold)', marginBottom: '8px' }}>
+          DUGIGO 디자인 시스템
+        </h1>
+        <p style={{ color: 'var(--text-secondary-dugigo)', fontSize: 'var(--font-size-base)', margin: 0 }}>
+          차분한 데이터 중심의 어드민 UI 시스템
+        </p>
+      </div>
+
+      {/* 탭 네비게이션 */}
+      <div style={{ marginBottom: '32px' }}>
+        <div style={{ display: 'flex', gap: '8px', borderBottom: '2px solid var(--border-subtle)' }}>
+          <button
+            style={{
+              padding: '12px 24px',
+              background: 'none',
+              border: 'none',
+              borderBottom: activeTab === 'dashboard' ? '3px solid var(--brand-primary)' : '3px solid transparent',
+              color: activeTab === 'dashboard' ? 'var(--brand-primary)' : 'var(--text-secondary-dugigo)',
+              fontWeight: activeTab === 'dashboard' ? '600' : '400',
+              cursor: 'pointer',
+              transition: 'var(--transition-fast)',
+            }}
+            onClick={() => setActiveTab('dashboard')}
+          >
+            대시보드 데모
+          </button>
+          <button
+            style={{
+              padding: '12px 24px',
+              background: 'none',
+              border: 'none',
+              borderBottom: activeTab === 'components' ? '3px solid var(--brand-primary)' : '3px solid transparent',
+              color: activeTab === 'components' ? 'var(--brand-primary)' : 'var(--text-secondary-dugigo)',
+              fontWeight: activeTab === 'components' ? '600' : '400',
+              cursor: 'pointer',
+              transition: 'var(--transition-fast)',
+            }}
+            onClick={() => setActiveTab('components')}
+          >
+            컴포넌트 가이드
+          </button>
+        </div>
+      </div>
+
+      {/* 탭 컨텐츠 */}
+      {activeTab === 'dashboard' ? (
+        <DugigoDashboard />
+      ) : (
+        <div>
       
       {/* 버튼 섹션 */}
       <Card dugigo hoverable style={{ marginBottom: '24px' }}>
@@ -84,6 +137,16 @@ const DugigoDemo: React.FC = () => {
         <Table columns={tableColumns} data={tableData} onRowClick={(record) => alert(`클릭: ${record.name}`)} />
       </Card>
 
+      {/* 모달 섹션 */}
+      <Card dugigo hoverable style={{ marginBottom: '24px' }}>
+        <h3 style={{ color: 'var(--brand-text)', marginBottom: '16px' }}>모달 컴포넌트</h3>
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          <Button variant='primary' onClick={() => setShowModal(true)}>
+            모달 열기
+          </Button>
+        </div>
+      </Card>
+
       {/* 폼 필드 섹션 */}
       <Card dugigo style={{ marginTop: '24px' }}>
         <h3 style={{ color: 'var(--brand-text)', marginBottom: '16px' }}>폼 필드 컴포넌트</h3>
@@ -93,6 +156,30 @@ const DugigoDemo: React.FC = () => {
           <FormField dugigo label='에러 예시' error='필수 입력 항목입니다' touched />
         </div>
       </Card>
+      
+      {/* 모달 */}
+      <Modal
+        isOpen={showModal}
+        title='DUGIGO 모달 예시'
+        onClose={() => setShowModal(false)}
+        size='medium'
+      >
+        <div style={{ padding: '16px 0' }}>
+          <p style={{ color: 'var(--text-primary-dugigo)', marginBottom: '16px' }}>
+            이것은 DUGIGO 스타일의 모달입니다. 반투명 오버레이와 블러 효과가 적용되어 있습니다.
+          </p>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+            <Button variant='outline' onClick={() => setShowModal(false)}>
+              취소
+            </Button>
+            <Button variant='primary' onClick={() => setShowModal(false)}>
+              확인
+            </Button>
+          </div>
+        </div>
+      </Modal>
+        </div>
+      )}
     </div>
   );
 };

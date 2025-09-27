@@ -49,22 +49,22 @@ const AttendanceTrendChart: React.FC<AttendanceTrendChartProps> = ({
           data={Array.isArray(attendanceTrendData) ? attendanceTrendData : []}
           margin={{ top: 20, right: 30, left: 20, bottom: 80 }}
         >
-          <CartesianGrid strokeDasharray='3 3' stroke='#E5E7EB' />
+          <CartesianGrid strokeDasharray='3 3' stroke='var(--chart-grid)' />
           <XAxis
             dataKey='weekLabel'
-            stroke='#6B7280'
+            stroke='var(--chart-axis)'
             interval={0}
             tick={{ fontSize: 11, textAnchor: 'end' }}
             height={70}
             angle={-45}
           />
-          <YAxis stroke='#6B7280' />
+          <YAxis stroke='var(--chart-axis)' />
           <Tooltip
             contentStyle={{
-              backgroundColor: 'white',
-              border: '1px solid #E5E7EB',
+              backgroundColor: 'var(--bg-card-dugigo)',
+              border: '1px solid var(--border-subtle)',
               borderRadius: '8px',
-              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+              boxShadow: 'var(--shadow-light-dugigo)',
             }}
             labelFormatter={value => `주차: ${value}`}
             formatter={(value, _name) => [`${value}명`, '출석 인원']}
@@ -72,10 +72,10 @@ const AttendanceTrendChart: React.FC<AttendanceTrendChartProps> = ({
           <Line
             type='monotone'
             dataKey='출석'
-            stroke='#26428B'
+            stroke='var(--chart-primary)'
             strokeWidth={3}
-            dot={{ fill: '#26428B', strokeWidth: 2, r: 6 }}
-            activeDot={{ r: 8, stroke: '#26428B', strokeWidth: 2 }}
+            dot={{ fill: 'var(--chart-primary)', strokeWidth: 2, r: 6 }}
+            activeDot={{ r: 8, stroke: 'var(--chart-primary)', strokeWidth: 2 }}
           />
         </LineChart>
       </ResponsiveContainer>

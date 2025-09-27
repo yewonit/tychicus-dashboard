@@ -234,7 +234,7 @@ function App() {
             {/* 시스템 설정 */}
           </Route>
 
-          {/* DUGIGO 디자인 시스템 데모 - 별도 레이아웃 */}
+          {/* DUGIGO 디자인 시스템 - 별도 레이아웃 */}
           <Route
             path='/dugigo'
             element={
@@ -245,6 +245,8 @@ function App() {
           >
             <Route index element={<Navigate to='demo' replace />} />
             <Route path='demo' element={<DugigoDemo />} />
+            {/* 향후 DUGIGO 스타일 페이지들 추가 가능 */}
+            <Route path='dashboard' element={<DugigoDashboard />} />
           </Route>
         </Routes>
       </Router>
