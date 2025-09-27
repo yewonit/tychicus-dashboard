@@ -4,7 +4,6 @@ import {
   ContinuousAttendanceStats,
   Gook,
   Group,
-  WeeklyStats,
 } from '../../types';
 import { getAccessibleOrganizations } from '../../utils/authService';
 import axiosClient from '../../utils/axiosClient';
@@ -51,7 +50,43 @@ const Dashboard: React.FC = () => {
   });
 
   // 출석 관련 데이터 상태
-  const [weeklyStats, setWeeklyStats] = useState<WeeklyStats | null>(null);
+  const [weeklyStats, setWeeklyStats] = useState<{
+    data?: {
+      allMemberCount: number;
+      weeklyAttendanceMemberCount: number;
+      weeklyNewMemberCount: number;
+      attendanceRate: number;
+      lastWeek?: {
+        allMemberCount: number;
+        weeklyAttendanceMemberCount: number;
+        weeklyNewMemberCount: number;
+        attendanceRate: number;
+      };
+    };
+    error?: any;
+  } | null>(null);
+  const [weeklyGraphData, setWeeklyGraphData] = useState<{
+    attendanceXAxis: string[][];
+    attendanceYAxisMax: number | null;
+    attendanceCounts: {
+      sunday: number;
+      sundayYoungAdult: number;
+      wednesdayYoungAdult: number;
+      fridayYoungAdult: number;
+    }[];
+    attendanceAggregationSum: {
+      sunday: number;
+      sundayYoungAdult: number;
+      wednesdayYoungAdult: number;
+      fridayYoungAdult: number;
+    };
+    attendanceAggregationAverage: {
+      sunday: number;
+      sundayYoungAdult: number;
+      wednesdayYoungAdult: number;
+      fridayYoungAdult: number;
+    };
+  } | null>(null);
   const [continuousAttendanceStats, setContinuousAttendanceStats] =
     useState<ContinuousAttendanceStats | null>(null);
   const [attendanceTrendData, setAttendanceTrendData] = useState<
@@ -139,7 +174,13 @@ const Dashboard: React.FC = () => {
 
       const response = await axiosClient.get('/attendances/weekly', { params });
 
-      setWeeklyStats(response.data);
+      // API 응답 구조에 따라 안전하게 처리 (data 필드 안에 실제 데이터가 있음)
+      const responseData = response.data;
+      if (responseData && responseData.data) {
+        setWeeklyStats(responseData);
+      } else {
+        setWeeklyStats(null);
+      }
     } catch (err: any) {
       setError(prev => ({
         ...prev,
@@ -152,56 +193,62 @@ const Dashboard: React.FC = () => {
   };
 
   // 주간 그래프 데이터 가져오기
-  const fetchWeeklyGraph = async (
-    gookId?: number | '전체',
-    groupId?: number | '전체'
-  ) => {
-    try {
-      setLoading(prev => ({ ...prev, weeklyGraph: true }));
-      setError(prev => ({ ...prev, weeklyGraph: null }));
+  const fetchWeeklyGraph = useCallback(
+    async (gookId?: number | '전체', groupId?: number | '전체') => {
+      try {
+        setLoading(prev => ({ ...prev, weeklyGraph: true }));
+        setError(prev => ({ ...prev, weeklyGraph: null }));
 
-      const params: any = {};
+        const params: any = {};
 
-      // 국 이름 설정 (접미사 "국" 제거)
-      if (gookId && gookId !== '전체') {
-        const selectedGook = gooks.find(gook => gook.id === gookId);
-        if (selectedGook) {
-          params.gook = selectedGook.name.replace('국', ''); // "1국" → "1"
+        // 국 이름 설정 (접미사 "국" 제거)
+        if (gookId && gookId !== '전체') {
+          const selectedGook = gooks.find(gook => gook.id === gookId);
+          if (selectedGook) {
+            params.gook = selectedGook.name.replace('국', ''); // "1국" → "1"
+          }
         }
-      }
 
-      // 그룹 이름 설정 (접미사 "그룹" 제거)
-      if (groupId && groupId !== '전체') {
-        const selectedGroup = groups.find(group => group.id === groupId);
-        if (selectedGroup) {
-          params.group = selectedGroup.name.replace('그룹', ''); // "김종성그룹" → "김종성"
+        // 그룹 이름 설정 (접미사 "그룹" 제거)
+        if (groupId && groupId !== '전체') {
+          const selectedGroup = groups.find(group => group.id === groupId);
+          if (selectedGroup) {
+            params.group = selectedGroup.name.replace('그룹', ''); // "김종성그룹" → "김종성"
+          }
         }
-      }
 
-      const response = await axiosClient.get('/attendances/graph', { params });
+        const response = await axiosClient.get('/attendances/graph', {
+          params,
+        });
 
-      // API 응답 구조에 따라 안전하게 처리
-      const responseData = response.data;
-      if (Array.isArray(responseData)) {
-        // 데이터 처리 로직 제거됨
-      } else if (responseData && Array.isArray(responseData.data)) {
-        // 데이터 처리 로직 제거됨
-      } else if (responseData && Array.isArray(responseData.graph)) {
-        // 데이터 처리 로직 제거됨
-      } else {
-        // 예상하지 못한 응답 구조
+        // API 응답 구조에 따라 안전하게 처리
+        const responseData = response.data;
+
+        // 새로운 API 응답 구조 처리 (data 필드 안에 실제 데이터가 있음)
+        if (
+          responseData &&
+          responseData.data &&
+          responseData.data.attendanceXAxis &&
+          responseData.data.attendanceCounts
+        ) {
+          setWeeklyGraphData(responseData.data);
+        } else {
+          // 예상하지 못한 응답 구조
+          setWeeklyGraphData(null);
+        }
+      } catch (err: any) {
+        setError(prev => ({
+          ...prev,
+          weeklyGraph:
+            err.response?.data?.message ||
+            '주간 그래프 데이터를 가져오는데 실패했습니다.',
+        }));
+      } finally {
+        setLoading(prev => ({ ...prev, weeklyGraph: false }));
       }
-    } catch (err: any) {
-      setError(prev => ({
-        ...prev,
-        weeklyGraph:
-          err.response?.data?.message ||
-          '주간 그래프 데이터를 가져오는데 실패했습니다.',
-      }));
-    } finally {
-      setLoading(prev => ({ ...prev, weeklyGraph: false }));
-    }
-  };
+    },
+    [gooks, groups]
+  );
 
   // 연속 결석/출석자 데이터 가져오기
   const fetchContinuousAttendance = async (
@@ -327,7 +374,7 @@ const Dashboard: React.FC = () => {
     fetchWeeklyStats(selectedGukId, selectedGroupId);
     fetchWeeklyGraph(selectedGukId, selectedGroupId);
     fetchContinuousAttendance(selectedGukId, selectedGroupId);
-  }, [selectedGukId, selectedGroupId]);
+  }, [selectedGukId, selectedGroupId, fetchWeeklyGraph]);
 
   // 선택된 국이 변경될 때는 이미 모든 그룹 데이터가 있으므로 별도 처리 불필요
   // (fetchAccessibleOrganizations에서 모든 국과 그룹 데이터를 한번에 가져옴)
@@ -474,23 +521,7 @@ const Dashboard: React.FC = () => {
         <QuickStats weeklyStats={weeklyStats} loading={loading.weeklyStats} />
 
         <AttendanceChart
-          attendanceData2025={{
-            attendanceXAxis: [],
-            attendanceYAxisMax: 10,
-            attendanceCounts: [],
-            attendanceAggregationSum: {
-              sunday: 0,
-              sundayYoungAdult: 0,
-              wednesdayYoungAdult: 0,
-              fridayYoungAdult: 0,
-            },
-            attendanceAggregationAverage: {
-              sunday: 0,
-              sundayYoungAdult: 0,
-              wednesdayYoungAdult: 0,
-              fridayYoungAdult: 0,
-            },
-          }}
+          attendanceData2025={weeklyGraphData}
           selectedGuk={
             selectedGukId === '전체'
               ? '전체'

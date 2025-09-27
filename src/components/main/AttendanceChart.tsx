@@ -1,15 +1,20 @@
 import Chart from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 
 // datalabels 플러그인 등록
 Chart.register(ChartDataLabels);
 
 interface AttendanceChartProps {
   attendanceData2025: {
-    attendanceXAxis: string[];
-    attendanceYAxisMax: number;
-    attendanceCounts: number[];
+    attendanceXAxis: string[][];
+    attendanceYAxisMax: number | null;
+    attendanceCounts: {
+      sunday: number;
+      sundayYoungAdult: number;
+      wednesdayYoungAdult: number;
+      fridayYoungAdult: number;
+    }[];
     attendanceAggregationSum: {
       sunday: number;
       sundayYoungAdult: number;
@@ -22,7 +27,7 @@ interface AttendanceChartProps {
       wednesdayYoungAdult: number;
       fridayYoungAdult: number;
     };
-  };
+  } | null;
   selectedGuk?: string;
   selectedGroup?: string;
   chartType?: 'gook' | 'group' | 'sun';
@@ -52,7 +57,7 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
   };
 
   // API 응답 구조에 맞는 데이터 처리
-  const getChartData = () => {
+  const chartData = useMemo(() => {
     if (!attendanceData2025) {
       return {
         labels: [],
@@ -72,14 +77,89 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
       };
     }
 
+    // 차트 타입에 따라 데이터 필터링
+    let filteredLabels: string[] = [];
+    let filteredCounts: any[] = [];
+
+    if (chartType === 'gook') {
+      // 국별: "국"으로 끝나는 항목만 표시
+      const gookIndices: number[] = [];
+      attendanceData2025.attendanceXAxis?.forEach((item, index) => {
+        if (item[0] && item[0].endsWith('국')) {
+          gookIndices.push(index);
+        }
+      });
+
+      filteredLabels = gookIndices.map(
+        index => attendanceData2025.attendanceXAxis[index][0]
+      );
+      filteredCounts = gookIndices.map(
+        index => attendanceData2025.attendanceCounts[index]
+      );
+    } else if (chartType === 'group') {
+      // 그룹별: "그룹"으로 끝나는 항목만 표시
+      const groupIndices: number[] = [];
+      attendanceData2025.attendanceXAxis?.forEach((item, index) => {
+        if (item[0] && item[0].includes('그룹') && !item[0].includes('순')) {
+          groupIndices.push(index);
+        }
+      });
+
+      filteredLabels = groupIndices.map(
+        index => attendanceData2025.attendanceXAxis[index][0]
+      );
+      filteredCounts = groupIndices.map(
+        index => attendanceData2025.attendanceCounts[index]
+      );
+    } else if (chartType === 'sun') {
+      // 순별: "순"으로 끝나는 항목만 표시
+      const sunIndices: number[] = [];
+      attendanceData2025.attendanceXAxis?.forEach((item, index) => {
+        if (item[0] && item[0].endsWith('순')) {
+          sunIndices.push(index);
+        }
+      });
+
+      filteredLabels = sunIndices.map(
+        index => attendanceData2025.attendanceXAxis[index][0]
+      );
+      filteredCounts = sunIndices.map(
+        index => attendanceData2025.attendanceCounts[index]
+      );
+    }
+
+    // 필터링된 데이터로 차트 데이터 생성
+    const sundayData = filteredCounts.map(item => item.sunday);
+
     return {
-      labels: attendanceData2025.attendanceXAxis || [],
+      labels: filteredLabels,
       datasets: [
         {
           label: '대예배',
-          data: attendanceData2025.attendanceCounts || [],
+          data: sundayData,
           backgroundColor: 'rgba(153, 102, 255, 0.8)',
           borderColor: 'rgba(153, 102, 255, 1)',
+          borderWidth: 1,
+        },
+        {
+          label: '주일청년예배',
+          data: filteredCounts.map(item => item.sundayYoungAdult),
+          backgroundColor: 'rgba(54, 162, 235, 0.8)',
+          borderColor: 'rgba(54, 162, 235, 1)',
+          borderWidth: 1,
+        },
+        {
+          label: '수요제자기도회',
+          data: filteredCounts.map(item => item.wednesdayYoungAdult),
+          backgroundColor: 'rgba(255, 206, 86, 0.8)',
+          borderColor: 'rgba(255, 206, 86, 1)',
+          borderWidth: 1,
+        },
+        {
+          label: '두란노사역자모임',
+          data: filteredCounts.map(item => item.fridayYoungAdult),
+          backgroundColor: 'rgba(75, 192, 192, 0.8)',
+          borderColor: 'rgba(75, 192, 192, 1)',
           borderWidth: 1,
         },
       ],
@@ -96,13 +176,12 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
         fridayYoungAdult: 0,
       },
     };
-  };
+  }, [attendanceData2025, chartType]);
 
   // 차트 생성
   useEffect(() => {
     if (!chartRef.current) return;
 
-    const chartData = getChartData();
     if (!chartData.labels || chartData.labels.length === 0) return;
 
     // 기존 차트 인스턴스 제거
@@ -166,18 +245,22 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
         chartInstance.current.destroy();
       }
     };
-  }, [attendanceData2025, selectedGuk, selectedGroup, chartType]);
-
-  const chartData = getChartData();
+  }, [chartData, selectedGuk, selectedGroup, chartType]);
 
   if (!chartData.labels || chartData.labels.length === 0) {
     return (
       <div className='chart-container'>
         <h3 className='chart-title'>{getChartTitle()}</h3>
         <div className='no-data-message'>
-          {chartType === 'gook' && '국별 데이터가 없습니다.'}
-          {chartType === 'group' && '그룹별 데이터가 없습니다.'}
-          {chartType === 'sun' &&
+          {!attendanceData2025 && '데이터를 불러오는 중...'}
+          {attendanceData2025 &&
+            chartType === 'gook' &&
+            '국별 데이터가 없습니다.'}
+          {attendanceData2025 &&
+            chartType === 'group' &&
+            '그룹별 데이터가 없습니다.'}
+          {attendanceData2025 &&
+            chartType === 'sun' &&
             `순별 데이터가 없습니다. (선택된 그룹: ${selectedGroup})`}
         </div>
       </div>
