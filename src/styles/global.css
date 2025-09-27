@@ -6993,7 +6993,11 @@ html {
 .dugigo-sidebar-title {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
-  color: white;
+  background: var(--gradient-logo);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: white; /* fallback */
   margin: 0 0 4px 0;
   text-align: center;
 }
@@ -7046,19 +7050,30 @@ html {
   display: flex;
   align-items: center;
   gap: 12px;
-  color: var(--text-primary-dugigo);
+  color: rgba(255, 255, 255, 0.8);
   font-size: var(--font-size-base);
+  position: relative;
 }
 
 .dugigo-sidebar-menu-button:hover {
   background: var(--bg-hover-dugigo);
-  color: var(--brand-primary);
+  color: white;
 }
 
 .dugigo-sidebar-menu-button.active {
   background: var(--gradient-primary-dugigo);
   color: white;
   font-weight: var(--font-weight-bold);
+}
+
+.dugigo-sidebar-menu-button.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--accent-secondary-dugigo);
 }
 
 .dugigo-sidebar-menu-icon {
