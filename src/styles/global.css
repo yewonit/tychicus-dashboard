@@ -186,6 +186,22 @@
   --chart-success: var(--state-success);
   --chart-warning: var(--state-warning);
   --chart-danger: var(--state-danger);
+  
+  /* 부록 G 추가 토큰 */
+  /* 심방 관리 메서드 배지 색상 */
+  --method-meeting-bg: #e3f2fd;
+  --method-meeting-text: #1976d2;
+  --method-call-bg: #f3e5f5;
+  --method-call-text: #7b1fa2;
+  --method-kakao-bg: #fff3e0;
+  --method-kakao-text: #f57c00;
+  
+  /* 아이콘 상태 색상 */
+  --icon-inactive: #CCCCCC;
+  --icon-favorite: #FFD700;
+  
+  /* 로고 텍스트 그라데이션 */
+  --gradient-logo: linear-gradient(135deg, var(--alabaster-white) 0%, var(--pastel-gray) 100%);
 }
 
 /* 전역 리셋 */
