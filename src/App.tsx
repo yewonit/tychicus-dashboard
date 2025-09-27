@@ -5,6 +5,7 @@ import { AuthGuard, LoginPage } from './components/auth';
 import MainLayout from './components/layouts/MainLayout';
 import { MobileRestrictionOverlay } from './components/ui';
 import Dashboard from './components/main/Dashboard';
+import DugigoDemo from './components/main/DugigoDemo';
 import ForumManagement from './components/main/ForumManagement';
 import MemberDetail from './components/main/MemberDetail';
 import MembersManagement from './components/main/MembersManagement';
@@ -167,6 +168,8 @@ function App() {
             {/* 대시보드 섹션 */}
             {/* 전체 현황 */}
             <Route path='dashboard' element={<Dashboard />} />
+            {/* DUGIGO 데모 페이지 */}
+            <Route path='dugigo-demo' element={<DugigoDemo />} />
             {/* 예배 현황 */}
             <Route path='worship' element={<WorshipStatus />} />
             {/* 조직 관리 섹션 */}

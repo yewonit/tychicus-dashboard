@@ -6486,6 +6486,329 @@ html {
   box-shadow: none !important;
 }
 
+/* ========================
+   DUGIGO 버튼 시스템
+   ======================== */
+/* 버튼 베이스 스타일 */
+.dugigo-button {
+  border-radius: 6px !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  transition: all 0.2s ease !important;
+  border: none !important;
+  cursor: pointer !important;
+  padding: 10px 20px !important;
+  font-size: var(--font-size-base) !important;
+  min-height: 40px !important;
+}
+
+/* Primary 버튼 */
+.dugigo-button-primary {
+  background: var(--brand-primary) !important;
+  color: white !important;
+}
+
+.dugigo-button-primary:hover {
+  filter: brightness(0.95) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Secondary 버튼 */
+.dugigo-button-secondary {
+  background: var(--brand-secondary) !important;
+  color: white !important;
+}
+
+.dugigo-button-secondary:hover {
+  filter: brightness(0.95) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Success 버튼 */
+.dugigo-button-success {
+  background: var(--state-success) !important;
+  color: white !important;
+}
+
+.dugigo-button-success:hover {
+  filter: brightness(0.95) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Danger 버튼 */
+.dugigo-button-danger {
+  background: var(--state-danger) !important;
+  color: white !important;
+}
+
+.dugigo-button-danger:hover {
+  filter: brightness(0.95) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Outline 버튼 */
+.dugigo-button-outline {
+  background: transparent !important;
+  color: var(--brand-primary) !important;
+  border: 1px solid var(--brand-primary) !important;
+}
+
+.dugigo-button-outline:hover {
+  background: var(--brand-primary) !important;
+  color: white !important;
+}
+
+/* Text 버튼 */
+.dugigo-button-text {
+  background: transparent !important;
+  color: var(--brand-primary) !important;
+  box-shadow: none !important;
+}
+
+.dugigo-button-text:hover {
+  background: rgba(38, 58, 153, 0.1) !important;
+}
+
+/* Small 크기 */
+.dugigo-button-small {
+  padding: 8px 16px !important;
+  font-size: var(--font-size-sm) !important;
+  min-height: 32px !important;
+}
+
+/* Disabled 상태 */
+.dugigo-button:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+/* ========================
+   DUGIGO 카드 시스템
+   ======================== */
+.dugigo-card {
+  background: var(--bg-card-dugigo);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-light-dugigo);
+  transition: var(--transition-normal);
+}
+
+.dugigo-card-hoverable:hover {
+  box-shadow: var(--shadow-medium-dugigo);
+  transform: translateY(-1px);
+}
+
+/* 강조 보더 카드 */
+.dugigo-card-accent-primary {
+  border-left: 4px solid var(--brand-primary);
+}
+
+.dugigo-card-accent-secondary {
+  border-left: 4px solid var(--brand-secondary);
+}
+
+.dugigo-card-accent-success {
+  border-left: 4px solid var(--state-success);
+}
+
+.dugigo-card-accent-warning {
+  border-left: 4px solid var(--state-warning);
+}
+
+.dugigo-card-accent-danger {
+  border-left: 4px solid var(--state-danger);
+}
+
+/* ========================
+   DUGIGO 배지 시스템
+   ======================== */
+.dugigo-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* 배지 변형 */
+.dugigo-badge-primary {
+  background: var(--brand-primary);
+  color: white;
+}
+
+.dugigo-badge-secondary {
+  background: var(--brand-secondary);
+  color: white;
+}
+
+.dugigo-badge-success {
+  background: var(--state-success);
+  color: white;
+}
+
+.dugigo-badge-warning {
+  background: var(--state-warning);
+  color: white;
+}
+
+.dugigo-badge-danger {
+  background: var(--state-danger);
+  color: white;
+}
+
+.dugigo-badge-info {
+  background: var(--info);
+  color: white;
+}
+
+/* 배지 크기 */
+.dugigo-badge-small {
+  padding: 2px 8px;
+  font-size: var(--font-size-xs);
+  border-radius: 8px;
+}
+
+.dugigo-badge-large {
+  padding: 6px 16px;
+  font-size: var(--font-size-base);
+  border-radius: 16px;
+}
+
+/* ========================
+   DUGIGO 테이블 시스템
+   ======================== */
+.dugigo-table-container {
+  background: var(--bg-card-dugigo);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-light-dugigo);
+}
+
+.dugigo-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-base);
+}
+
+.dugigo-table-header {
+  background: var(--surface-muted);
+}
+
+.dugigo-table-header-cell {
+  padding: 16px;
+  font-weight: 600;
+  color: var(--brand-text);
+  border-bottom: 1px solid var(--border-subtle);
+  text-align: left;
+}
+
+.dugigo-table-body .dugigo-table-row {
+  transition: var(--transition-fast);
+}
+
+.dugigo-table-row-clickable {
+  cursor: pointer;
+}
+
+.dugigo-table-row-clickable:hover {
+  background: var(--bg-hover-dugigo);
+  transform: translateY(-1px);
+}
+
+.dugigo-table-cell {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-neutral);
+  color: var(--text-primary-dugigo);
+}
+
+/* 정렬 */
+.dugigo-table-align-left {
+  text-align: left;
+}
+
+.dugigo-table-align-center {
+  text-align: center;
+}
+
+.dugigo-table-align-right {
+  text-align: right;
+}
+
+/* 로딩/빈 상태 */
+.dugigo-table-loading,
+.dugigo-table-empty {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-secondary-dugigo);
+  font-size: var(--font-size-base);
+}
+
+/* 반응형 테이블 */
+@media (max-width: 1024px) {
+  .dugigo-table-container {
+    overflow-x: auto;
+  }
+  
+  .dugigo-table {
+    min-width: 600px;
+  }
+  
+  .dugigo-table-header-cell,
+  .dugigo-table-cell {
+    padding: 12px 8px;
+    font-size: var(--font-size-sm);
+  }
+}
+
+/* ========================
+   DUGIGO 폼 필드 시스템
+   ======================== */
+.dugigo-textfield {
+  margin-bottom: var(--spacing-md);
+}
+
+.dugigo-textfield .MuiOutlinedInput-root {
+  border-radius: 6px;
+  background: var(--bg-card-dugigo);
+  transition: var(--transition-normal);
+}
+
+.dugigo-textfield .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline {
+  border-color: var(--border-subtle);
+  border-width: 2px;
+}
+
+.dugigo-textfield .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: var(--brand-primary);
+}
+
+.dugigo-textfield .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px rgba(38, 58, 153, 0.1);
+}
+
+.dugigo-textfield .MuiInputLabel-root {
+  color: var(--text-secondary-dugigo);
+  font-weight: 500;
+}
+
+.dugigo-textfield .MuiInputLabel-root.Mui-focused {
+  color: var(--brand-primary);
+}
+
+.dugigo-textfield .MuiFormHelperText-root {
+  color: var(--text-muted-dugigo);
+  font-size: var(--font-size-sm);
+}
+
 /* 로딩 컨테이너 */
 .auth-loading-container {
   display: flex;
