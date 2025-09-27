@@ -212,10 +212,9 @@ const MemberDetail: React.FC = () => {
             <div className='member-detail-photo-container'>
               <div
                 className={`member-detail-photo-display ${
-                  photo ? 'has-photo' : ''
+                  photo ? 'has-photo clickable' : 'non-clickable'
                 }`}
                 onClick={handlePhotoClick}
-                style={{ cursor: photo ? 'pointer' : 'default' }}
               >
                 {photo ? (
                   <img

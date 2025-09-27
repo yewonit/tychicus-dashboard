@@ -26,21 +26,13 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   fullScreen = false,
 }) => {
   const content = (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        textAlign: 'center',
-        p: 3,
-      }}
-    >
-      {icon && <Box sx={{ mb: 2, color: 'text.secondary' }}>{icon}</Box>}
+    <div className='empty-state-container'>
+      {icon && <div className='empty-state-icon'>{icon}</div>}
 
       <Typography
         variant='h6'
         color='text.primary'
-        sx={{ mb: 1, fontWeight: 'medium' }}
+        className='mb-1 font-medium'
       >
         {title}
       </Typography>
@@ -48,30 +40,21 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       {description && (
         <Typography
           variant='body2'
-          color='text.secondary'
-          sx={{ mb: 3, maxWidth: 300 }}
+          className='text-secondary-color mb-3 max-width-300'
         >
           {description}
         </Typography>
       )}
 
-      {action && <Box sx={{ mt: 2 }}>{action}</Box>}
-    </Box>
+      {action && <div className='empty-state-action'>{action}</div>}
+    </div>
   );
 
   if (fullScreen) {
     return (
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '50vh',
-        }}
-      >
+      <div className='loading-container'>
         {content}
-      </Box>
+      </div>
     );
   }
 

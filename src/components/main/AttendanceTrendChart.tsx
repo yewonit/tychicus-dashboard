@@ -25,7 +25,7 @@ const AttendanceTrendChart: React.FC<AttendanceTrendChartProps> = ({
     return (
       <div className='chart-card'>
         <h3 className='chart-title'>주차별 청년예배 출석 트렌드</h3>
-        <div style={{ textAlign: 'center', padding: '40px' }}>
+        <div className='center-loading'>
           출석 트렌드 데이터를 불러오는 중...
         </div>
       </div>
@@ -36,15 +36,7 @@ const AttendanceTrendChart: React.FC<AttendanceTrendChartProps> = ({
     return (
       <div className='chart-card'>
         <h3 className='chart-title'>주차별 청년예배 출석 트렌드</h3>
-        <div
-          style={{
-            textAlign: 'center',
-            padding: '40px',
-            color: 'var(--error)',
-          }}
-        >
-          ⚠️ {error}
-        </div>
+        <div className='center-loading error-text'>⚠️ {error}</div>
       </div>
     );
   }

@@ -20,9 +20,9 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
 }) => {
   const content = (
     <>
-      <CircularProgress size={size} sx={{ color: 'var(--primary)' }} />
+      <CircularProgress size={size} className='primary-color' />
       {message && (
-        <Typography variant='body2' color='text.secondary' sx={{ mt: 2 }}>
+        <Typography variant='body2' className='text-secondary-color mt-2'>
           {message}
         </Typography>
       )}
@@ -31,30 +31,15 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
 
   if (fullScreen) {
     return (
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '50vh',
-        }}
-      >
+      <div className='loading-container'>
         {content}
-      </Box>
+      </div>
     );
   }
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        p: 2,
-      }}
-    >
+    <div className='loading-inline'>
       {content}
-    </Box>
+    </div>
   );
 };

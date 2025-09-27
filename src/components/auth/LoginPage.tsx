@@ -52,10 +52,10 @@ const LoginPage: React.FC = () => {
   if (loading) {
     return (
       <div className='auth-loading-container'>
-        <CircularProgress size={60} sx={{ color: 'var(--primary)' }} />
+        <CircularProgress size={60} className='primary-color' />
         <Typography
           variant='body1'
-          sx={{ mt: 2, color: 'var(--text-secondary)' }}
+          className='mt-2 text-secondary-color'
         >
           인증 상태를 확인하고 있습니다...
         </Typography>
@@ -78,7 +78,7 @@ const LoginPage: React.FC = () => {
 
         {/* 에러 메시지 */}
         {error && (
-          <Alert severity='error' sx={{ mb: 3 }} onClose={clearError}>
+          <Alert severity='error' className='mb-3' onClose={clearError}>
             {error}
           </Alert>
         )}
@@ -125,13 +125,12 @@ const LoginPage: React.FC = () => {
               type='submit'
               fullWidth
               variant='contained'
-              className='common-button'
+              className='common-button height-56'
               disabled={isSubmitting || !form.isValid}
-              sx={{ height: 56 }}
             >
               {isSubmitting ? (
                 <>
-                  <CircularProgress size={20} sx={{ mr: 1, color: 'white' }} />
+                  <CircularProgress size={20} className='mr-1' style={{ color: 'white' }} />
                   로그인 중...
                 </>
               ) : (
@@ -142,20 +141,17 @@ const LoginPage: React.FC = () => {
         </Box>
 
         {/* 추가 정보 */}
-        <Box sx={{ mt: 4, textAlign: 'center' }}>
-          <Typography variant='body2' sx={{ color: 'var(--text-tertiary)' }}>
+        <div className='mt-4 text-center'>
+          <Typography variant='body2' className='text-tertiary-color'>
             문제가 있으신가요?{' '}
             <a
               href='mailto:admin@icoramdeo.com'
-              style={{
-                color: 'var(--primary)',
-                textDecoration: 'none',
-              }}
+              className='primary-link'
             >
               관리자에게 문의하세요
             </a>
           </Typography>
-        </Box>
+        </div>
       </div>
     </div>
   );

@@ -42,13 +42,7 @@ const AttendancePopup: React.FC<AttendancePopupProps> = ({
                 </div>
               ))
             ) : (
-              <div
-                style={{
-                  textAlign: 'center',
-                  padding: '20px',
-                  color: 'var(--text-secondary)',
-                }}
-              >
+              <div className='empty-message'>
                 연속 출석한 인원이 없습니다.
               </div>
             )}

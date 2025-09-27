@@ -42,5 +42,6 @@
   
   // React 설정
   "typescript.preferences.jsxAttributeCompletionStyle": "auto",
-  "typescript.preferences.includePackageJsonAutoImports": "on"
+  "typescript.preferences.includePackageJsonAutoImports": "on",
+  "devon-aide.resourcePath": "/Users/yonggullee/.cursor/extensions/lgcns-devon-aide.devon-aide-0.0.1/resource"
 }

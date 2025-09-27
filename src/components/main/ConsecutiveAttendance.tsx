@@ -41,7 +41,7 @@ const ConsecutiveAttendance: React.FC<ConsecutiveAttendanceProps> = ({
     return (
       <div className='consecutive-attendance-section'>
         <h3 className='chart-title'>최근 4주 연속 출석 현황</h3>
-        <div style={{ textAlign: 'center', padding: '40px' }}>
+        <div className='center-loading'>
           연속 출석 데이터를 불러오는 중...
         </div>
       </div>
@@ -52,13 +52,7 @@ const ConsecutiveAttendance: React.FC<ConsecutiveAttendanceProps> = ({
     return (
       <div className='consecutive-attendance-section'>
         <h3 className='chart-title'>최근 4주 연속 출석 현황</h3>
-        <div
-          style={{
-            textAlign: 'center',
-            padding: '40px',
-            color: 'var(--error)',
-          }}
-        >
+        <div className='center-loading error-text'>
           ⚠️ {error}
         </div>
       </div>
