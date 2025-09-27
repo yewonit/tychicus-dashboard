@@ -2,6 +2,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { AuthGuard, LoginPage } from './components/auth';
+import DugigoLayout from './components/layouts/DugigoLayout';
 import MainLayout from './components/layouts/MainLayout';
 import { MobileRestrictionOverlay } from './components/ui';
 import Dashboard from './components/main/Dashboard';
@@ -168,8 +169,6 @@ function App() {
             {/* 대시보드 섹션 */}
             {/* 전체 현황 */}
             <Route path='dashboard' element={<Dashboard />} />
-            {/* DUGIGO 데모 페이지 */}
-            <Route path='dugigo-demo' element={<DugigoDemo />} />
             {/* 예배 현황 */}
             <Route path='worship' element={<WorshipStatus />} />
             {/* 조직 관리 섹션 */}
@@ -233,6 +232,19 @@ function App() {
             {/* 데이터 백업 */}
             <Route path='settings' element={<TempPage title='시스템 설정' description='시스템 설정을 관리하세요' />} />
             {/* 시스템 설정 */}
+          </Route>
+
+          {/* DUGIGO 디자인 시스템 데모 - 별도 레이아웃 */}
+          <Route
+            path='/dugigo'
+            element={
+              <AuthGuard>
+                <DugigoLayout />
+              </AuthGuard>
+            }
+          >
+            <Route index element={<Navigate to='demo' replace />} />
+            <Route path='demo' element={<DugigoDemo />} />
           </Route>
         </Routes>
       </Router>

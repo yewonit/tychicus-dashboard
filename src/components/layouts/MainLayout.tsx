@@ -12,6 +12,8 @@ interface MainLayoutProps {
   onBack?: () => void;
   onHome?: () => void;
   onCancel?: () => void;
+  /** DUGIGO 레이아웃 사용 여부 */
+  dugigo?: boolean;
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({
@@ -19,6 +21,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   showBackButton = false,
   showHomeButton = false,
   showCancelButton = false,
+  dugigo = false,
   onBack,
   onHome,
   onCancel,
@@ -48,6 +51,19 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       navigate('/main/service-selection');
     }
   };
+
+  if (dugigo) {
+    return (
+      <div className='dugigo-main-layout'>
+        <Sidebar dugigo />
+        <div className='dugigo-main-content'>
+          <div className='dugigo-main-content-inner'>
+            <Outlet />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', overflow: 'hidden' }}>

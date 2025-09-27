@@ -13,7 +13,12 @@ interface MenuSection {
   items: MenuItem[];
 }
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  /** DUGIGO 스타일 사용 여부 */
+  dugigo?: boolean;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ dugigo = false }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
@@ -24,6 +29,7 @@ const Sidebar: React.FC = () => {
       items: [
         { path: '/main/dashboard', icon: '📊', text: '전체 현황' },
         { path: '/main/worship', icon: '⛪', text: '예배 현황' },
+        { path: '/dugigo/demo', icon: '🎨', text: 'DUGIGO 데모' },
       ],
     },
     {
@@ -69,29 +75,102 @@ const Sidebar: React.FC = () => {
     return location.pathname === path;
   };
 
+  const getContainerClassName = () => {
+    return dugigo ? 'dugigo-sidebar-container' : 'sidebar-container';
+  };
+
+  const getHeaderClassName = () => {
+    return dugigo ? 'dugigo-sidebar-header' : 'sidebar-header';
+  };
+
+  const getTitleClassName = () => {
+    return dugigo ? 'dugigo-sidebar-title' : 'sidebar-title';
+  };
+
+  const getSubtitleClassName = () => {
+    return dugigo ? 'dugigo-sidebar-subtitle' : 'sidebar-subtitle';
+  };
+
+  const getContentClassName = () => {
+    return dugigo ? 'dugigo-sidebar-content' : 'sidebar-content';
+  };
+
+  const getCategoryClassName = () => {
+    return dugigo ? 'dugigo-sidebar-category' : 'sidebar-category';
+  };
+
+  const getCategoryTitleClassName = () => {
+    return dugigo ? 'dugigo-sidebar-category-title' : 'sidebar-category-title';
+  };
+
+  const getMenuListClassName = () => {
+    return dugigo ? 'dugigo-sidebar-menu-list' : 'sidebar-menu-list';
+  };
+
+  const getMenuItemClassName = () => {
+    return dugigo ? 'dugigo-sidebar-menu-item' : 'sidebar-menu-item';
+  };
+
+  const getMenuButtonClassName = (path: string) => {
+    const baseClass = dugigo ? 'dugigo-sidebar-menu-button' : 'sidebar-menu-button';
+    return `${baseClass} ${isActive(path) ? 'active' : ''}`;
+  };
+
+  const getMenuIconClassName = () => {
+    return dugigo ? 'dugigo-sidebar-menu-icon' : 'sidebar-menu-icon';
+  };
+
+  const getMenuTextClassName = () => {
+    return dugigo ? 'dugigo-sidebar-menu-text' : 'sidebar-menu-text';
+  };
+
+  const getFooterClassName = () => {
+    return dugigo ? 'dugigo-sidebar-footer' : 'sidebar-footer';
+  };
+
+  const getUserInfoClassName = () => {
+    return dugigo ? 'dugigo-sidebar-user-info' : 'sidebar-user-info';
+  };
+
+  const getUserAvatarClassName = () => {
+    return dugigo ? 'dugigo-sidebar-user-avatar' : 'sidebar-user-avatar';
+  };
+
+  const getUserDetailsClassName = () => {
+    return dugigo ? 'dugigo-sidebar-user-details' : 'sidebar-user-details';
+  };
+
+  const getUserNameClassName = () => {
+    return dugigo ? 'dugigo-sidebar-user-name' : 'sidebar-user-name';
+  };
+
+  const getUserRoleClassName = () => {
+    return dugigo ? 'dugigo-sidebar-user-role' : 'sidebar-user-role';
+  };
+
   return (
-    <div className='sidebar-container'>
-      <div className='sidebar-header'>
+    <div className={getContainerClassName()}>
+      <div className={getHeaderClassName()}>
         <div className='sidebar-logo'>
-          <h2 className='sidebar-title'>코람데오</h2>
-          <p className='sidebar-subtitle'>청년회 관리</p>
+          <h2 className={getTitleClassName()}>코람데오</h2>
+          <p className={getSubtitleClassName()}>청년회 관리</p>
         </div>
       </div>
 
-      <div className='sidebar-content'>
+      <div className={getContentClassName()}>
         <nav className='sidebar-nav'>
           {menuSections.map((section, sectionIndex) => (
-            <div key={sectionIndex} className='sidebar-category'>
-              <div className='sidebar-category-title'>{section.title}</div>
-              <ul className='sidebar-menu-list'>
+            <div key={sectionIndex} className={getCategoryClassName()}>
+              <div className={getCategoryTitleClassName()}>{section.title}</div>
+              <ul className={getMenuListClassName()}>
                 {section.items.map((item, itemIndex) => (
-                  <li key={itemIndex} className='sidebar-menu-item'>
+                  <li key={itemIndex} className={getMenuItemClassName()}>
                     <button
-                      className={`sidebar-menu-button ${isActive(item.path) ? 'active' : ''}`}
+                      className={getMenuButtonClassName(item.path)}
                       onClick={() => handleMenuClick(item.path)}
                     >
-                      <span className='sidebar-menu-icon'>{item.icon}</span>
-                      <span className='sidebar-menu-text'>{item.text}</span>
+                      <span className={getMenuIconClassName()}>{item.icon}</span>
+                      <span className={getMenuTextClassName()}>{item.text}</span>
                     </button>
                   </li>
                 ))}
@@ -101,12 +180,12 @@ const Sidebar: React.FC = () => {
         </nav>
       </div>
 
-      <div className='sidebar-footer'>
-        <div className='sidebar-user-info'>
-          <div className='sidebar-user-avatar'>👤</div>
-          <div className='sidebar-user-details'>
-            <div className='sidebar-user-name'>{user?.name || '사용자'}</div>
-            <div className='sidebar-user-role'>{user?.roles?.[0]?.roleName || ''}</div>
+      <div className={getFooterClassName()}>
+        <div className={getUserInfoClassName()}>
+          <div className={getUserAvatarClassName()}>👤</div>
+          <div className={getUserDetailsClassName()}>
+            <div className={getUserNameClassName()}>{user?.name || '사용자'}</div>
+            <div className={getUserRoleClassName()}>{user?.roles?.[0]?.roleName || ''}</div>
           </div>
         </div>
       </div>
