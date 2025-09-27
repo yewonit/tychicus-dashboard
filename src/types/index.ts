@@ -1,18 +1,81 @@
-// 사용자 관련 타입
-export interface User {
-  id: string;
-  name: string;
+// 인증 관련 타입
+export interface LoginRequest {
   email: string;
-  phone: string;
-  roles: Role[];
-  accessToken?: string;
+  password: string;
 }
 
-export interface Role {
-  id: string;
-  permissionName: string;
-  description?: string;
+export interface TokenData {
+  accessToken: string;
+  accessTokenExpiresAt: number;
+  refreshToken: string;
+  refreshTokenExpiresAt: number;
 }
+
+export interface UserRole {
+  roleName: string;
+  organizationId: number;
+  organizationName: string;
+}
+
+export interface UserData {
+  id: number;
+  name: string;
+  email: string;
+  phoneNumber: string;
+  roles: UserRole[];
+}
+
+export interface LoginResponse {
+  tokens: TokenData;
+  userData: UserData;
+}
+
+// 토큰 검증 API 응답 (Bearer Token으로 /login 호출 시)
+export interface TokenValidationResponse {
+  tokens: TokenData;
+  user: UserData; // 토큰 검증 시에는 'user' 필드 사용
+}
+
+export interface AuthState {
+  isAuthenticated: boolean;
+  user: UserData | null;
+  loading: boolean;
+  error: string | null;
+}
+
+// 접근 가능한 조직 구조 타입 (users/accessible API 응답) - depth 기반
+export interface AccessibleGookItem {
+  id: number;
+  name: string;
+}
+
+export interface AccessibleGroupItem {
+  id: number;
+  name: string;
+}
+
+export interface AccessibleOrganizationRoot {
+  depth: 0;
+  id: 0;
+  name: string; // "코람데오 청년선교회"
+}
+
+export interface AccessibleOrganizationGooks {
+  depth: 1;
+  gooks: AccessibleGookItem[];
+}
+
+export interface AccessibleOrganizationGroups {
+  depth: 2;
+  id: number;
+  name: string; // 국 이름
+  groups: AccessibleGroupItem[];
+}
+
+export type AccessibleOrganization =
+  | AccessibleOrganizationRoot
+  | AccessibleOrganizationGooks
+  | AccessibleOrganizationGroups;
 
 // 조직 관련 타입
 export interface Organization {
@@ -105,14 +168,6 @@ export interface RouteMeta {
   permissions?: {
     roles: string[];
   };
-}
-
-// API 응답 타입
-export interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  message?: string;
-  error?: string;
 }
 
 // 차트 데이터 타입
@@ -217,21 +272,7 @@ export interface AttendanceTrendData {
 // 조직 구조 API 타입들
 export interface Gook {
   id: number;
-  season_id: number;
-  organization_code: string;
-  organization_name: string;
-  organization_description: string;
-  upper_organization_id: number;
-  start_date: string;
-  end_date: string;
-  is_deleted: string;
-  created_at: string;
-  updated_at: string;
-  creator_id: number;
-  updater_id: number;
-  creator_ip: string;
-  updater_ip: string;
-  access_service_id: string;
+  name: string;
 }
 
 export interface Group {

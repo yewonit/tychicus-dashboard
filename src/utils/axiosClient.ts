@@ -65,9 +65,10 @@ const authClient: AxiosInstance = axios.create({
 // 공통 요청 인터셉터 함수
 const addRequestInterceptor = (instance: AxiosInstance) => {
   instance.interceptors.request.use(
-    (config: InternalAxiosRequestConfig) => {
-      // 토큰이 있으면 헤더에 추가
-      const token = localStorage.getItem('accessToken');
+    async (config: InternalAxiosRequestConfig) => {
+      // authUtils에서 토큰 가져오기
+      const { getAccessToken } = await import('./authUtils');
+      const token = getAccessToken();
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -85,12 +86,11 @@ const addResponseInterceptor = (instance: AxiosInstance) => {
     (response: AxiosResponse) => {
       return response;
     },
-    error => {
-      // 401 에러 시 로그인 페이지로 리다이렉트
+    async error => {
+      // 401 에러 시 토큰 새로고침 시도
       if (error.response?.status === 401) {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('userInfo');
+        const { clearAuthData } = await import('./authUtils');
+        clearAuthData();
         window.location.href = '/login';
       }
       return Promise.reject(error);

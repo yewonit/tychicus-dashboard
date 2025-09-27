@@ -1,5 +1,4 @@
 import { useCallback, useState } from 'react';
-import logger from '../utils/logger';
 
 /**
  * 범용 폼 상태 관리 훅
@@ -126,7 +125,7 @@ export function useForm<T extends Record<string, any>>({
       try {
         await onSubmit(values);
       } catch (error) {
-        logger.error('Form submission error:', 'useForm', error);
+        // 에러 처리
       } finally {
         setIsSubmitting(false);
       }

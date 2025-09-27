@@ -6107,3 +6107,194 @@ html {
     font-size: var(--font-size-xs);
   }
 }
+
+/* ========================
+   인증 페이지 스타일
+   ======================== */
+
+/* 인증 컨테이너 */
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gradient-primary);
+  padding: var(--spacing-lg);
+}
+
+/* 인증 페이지 메인 카드 */
+.auth-paper {
+  background: var(--bg-elevated);
+  border-radius: 24px;
+  padding: var(--spacing-2xl);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  border: 1px solid var(--border-light);
+}
+
+/* 헤더 영역 */
+.header-box {
+  text-align: center;
+  margin-bottom: var(--spacing-2xl);
+}
+
+.auth-title {
+  color: var(--text-primary);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--spacing-sm);
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.auth-subtitle {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+}
+
+/* 입력 필드 그룹 */
+.input-group {
+  margin-bottom: var(--spacing-lg);
+}
+
+.input-group:last-of-type {
+  margin-bottom: var(--spacing-xl);
+}
+
+/* 버튼 그룹 */
+.button-group {
+  margin-bottom: var(--spacing-lg);
+}
+
+/* 공통 텍스트 필드 */
+.common-textfield .MuiOutlinedInput-root {
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.common-textfield .MuiOutlinedInput-root:hover {
+  background: var(--bg-elevated);
+}
+
+.common-textfield .MuiOutlinedInput-root.Mui-focused {
+  background: var(--bg-elevated);
+  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.1);
+}
+
+.common-textfield .MuiInputLabel-root {
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.common-textfield .MuiInputLabel-root.Mui-focused {
+  color: var(--primary);
+}
+
+/* 공통 버튼 */
+.common-button {
+  background: var(--gradient-primary) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 28px !important;
+  font-weight: var(--font-weight-medium) !important;
+  font-size: var(--font-size-base) !important;
+  padding: var(--spacing-md) var(--spacing-xl) !important;
+  box-shadow: 0 8px 24px rgba(78, 205, 196, 0.3) !important;
+  transition: all 0.3s ease !important;
+  text-transform: none !important;
+}
+
+.common-button:hover {
+  background: var(--gradient-primary-hover) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 12px 32px rgba(78, 205, 196, 0.4) !important;
+}
+
+.common-button:disabled {
+  background: var(--text-disabled) !important;
+  color: white !important;
+  opacity: 0.6 !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* 로딩 컨테이너 */
+.auth-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--bg-primary);
+  padding: var(--spacing-xl);
+}
+
+/* 사용자 정보 박스 */
+.user-info-box {
+  background: var(--bg-card);
+  border-radius: 16px;
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  border: 1px solid var(--border-light);
+}
+
+/* 링크 스타일 */
+.auth-link {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  transition: color 0.3s ease;
+}
+
+.auth-link:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
+}
+
+/* 반응형 디자인 - 인증 페이지 */
+@media (max-width: 768px) {
+  .auth-container {
+    padding: var(--spacing-md);
+  }
+
+  .auth-paper {
+    padding: var(--spacing-xl);
+    margin: var(--spacing-md);
+  }
+
+  .auth-title {
+    font-size: var(--font-size-md);
+  }
+
+  .auth-subtitle {
+    font-size: var(--font-size-xs);
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-container {
+    padding: var(--spacing-sm);
+  }
+
+  .auth-paper {
+    padding: var(--spacing-lg);
+    margin: 0;
+  }
+
+  .header-box {
+    margin-bottom: var(--spacing-xl);
+  }
+
+  .input-group {
+    margin-bottom: var(--spacing-md);
+  }
+
+  .button-group {
+    margin-bottom: var(--spacing-md);
+  }
+}

@@ -9,7 +9,6 @@ import {
   YAxis,
 } from 'recharts';
 import { AttendanceTrendData } from '../../types';
-import logger from '../../utils/logger';
 
 interface AttendanceTrendChartProps {
   attendanceTrendData: AttendanceTrendData[];
@@ -22,14 +21,6 @@ const AttendanceTrendChart: React.FC<AttendanceTrendChartProps> = ({
   loading,
   error,
 }) => {
-  // 디버깅을 위한 로그
-  logger.info('AttendanceTrendChart 렌더링', 'AttendanceTrendChart', {
-    loading,
-    error,
-    hasData:
-      Array.isArray(attendanceTrendData) && attendanceTrendData.length > 0,
-    dataLength: attendanceTrendData?.length,
-  });
   if (loading) {
     return (
       <div className='chart-card'>

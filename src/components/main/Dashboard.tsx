@@ -1,15 +1,14 @@
-import axios from 'axios';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  AccessibleOrganization,
   AttendanceTrendData,
   ContinuousAttendanceStats,
   Gook,
   Group,
-  WeeklyGraphData,
   WeeklyStats,
 } from '../../types';
+import { getAccessibleOrganizations } from '../../utils/authService';
 import axiosClient from '../../utils/axiosClient';
-import logger from '../../utils/logger';
 import AttendanceChart from './AttendanceChart';
 import AttendancePopup from './AttendancePopup';
 import AttendanceTrendChart from './AttendanceTrendChart';
@@ -54,106 +53,79 @@ const Dashboard: React.FC = () => {
 
   // 출석 관련 데이터 상태
   const [weeklyStats, setWeeklyStats] = useState<WeeklyStats | null>(null);
-  const [weeklyGraphData, setWeeklyGraphData] = useState<WeeklyGraphData[]>([]);
   const [continuousAttendanceStats, setContinuousAttendanceStats] =
     useState<ContinuousAttendanceStats | null>(null);
   const [attendanceTrendData, setAttendanceTrendData] = useState<
     AttendanceTrendData[]
   >([]);
 
-  // 국 데이터 가져오기
-  const fetchGooks = async (year?: number) => {
-    try {
-      setLoading(prev => ({ ...prev, gooks: true }));
-      setError(prev => ({ ...prev, gooks: null }));
+  // 접근 가능한 조직 데이터 변환 함수 (depth 기반)
+  const transformAccessibleDataToGooksAndGroups = (
+    accessibleData: AccessibleOrganization[]
+  ) => {
+    const transformedGooks: Gook[] = [];
+    const transformedGroups: Group[] = [];
 
-      const params = year ? { year } : {};
-      // 국/그룹 데이터는 운영 서버에서 가져오기
-      const response = await axios.get(
-        'https://attendance.icoramdeo.com/api/organizations/gooks',
-        {
-          params,
-          headers: {
-            'Content-Type': 'application/json',
-          },
+    // depth 1에서 국 목록 추출
+    const gooksData = accessibleData.find(item => item.depth === 1);
+    if (gooksData && 'gooks' in gooksData) {
+      gooksData.gooks.forEach(gookItem => {
+        const gook: Gook = {
+          id: gookItem.id,
+          name: gookItem.name,
+        };
+        transformedGooks.push(gook);
+      });
+    }
+
+    // depth 2에서 각 국의 그룹 목록 추출 (현재는 1국만 있음)
+    accessibleData
+      .filter(item => item.depth === 2)
+      .forEach(gookData => {
+        if ('groups' in gookData && 'id' in gookData) {
+          gookData.groups.forEach(groupItem => {
+            const group: Group = {
+              id: groupItem.id,
+              name: groupItem.name,
+              gookId: gookData.id,
+              gookName: gookData.name,
+              organization_name: groupItem.name,
+            };
+            transformedGroups.push(group);
+          });
         }
-      );
+      });
 
-      // API 응답 데이터 구조 확인 및 안전하게 처리
-      const responseData = response.data;
-      if (Array.isArray(responseData)) {
-        setGooks(responseData);
-      } else if (responseData && Array.isArray(responseData.data)) {
-        setGooks(responseData.data);
-      } else if (responseData && Array.isArray(responseData.gooks)) {
-        setGooks(responseData.gooks);
-      } else {
-        logger.warn('예상하지 못한 API 응답 구조:', responseData);
-        setGooks([]);
-      }
+    return { gooks: transformedGooks, groups: transformedGroups };
+  };
+
+  // 접근 가능한 조직 구조 데이터 가져오기
+  const fetchAccessibleOrganizations = useCallback(async () => {
+    try {
+      setLoading(prev => ({ ...prev, gooks: true, groups: true }));
+      setError(prev => ({ ...prev, gooks: null, groups: null }));
+
+      const accessibleData = await getAccessibleOrganizations();
+
+      const { gooks, groups } =
+        transformAccessibleDataToGooksAndGroups(accessibleData);
+
+      setGooks(gooks);
+      setGroups(groups);
     } catch (err: any) {
-      logger.error('국 데이터를 가져오는데 실패했습니다:', err);
       setError(prev => ({
         ...prev,
         gooks:
-          err.response?.data?.message || '국 데이터를 가져오는데 실패했습니다.',
-      }));
-    } finally {
-      setLoading(prev => ({ ...prev, gooks: false }));
-    }
-  };
-
-  // 그룹 데이터 가져오기
-  const fetchGroups = async (gookId: number) => {
-    try {
-      setLoading(prev => ({ ...prev, groups: true }));
-      setError(prev => ({ ...prev, groups: null }));
-
-      // 그룹 데이터도 운영 서버에서 가져오기
-      const response = await axios.get(
-        'https://attendance.icoramdeo.com/api/organizations/groups',
-        {
-          params: { gookId },
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      // API 응답 데이터 구조 확인 및 안전하게 처리
-      const responseData = response.data;
-      logger.info('그룹 API 응답', 'Dashboard', { gookId, responseData });
-
-      let groupsData: Group[] = [];
-      if (Array.isArray(responseData)) {
-        groupsData = responseData;
-      } else if (responseData && Array.isArray(responseData.data)) {
-        groupsData = responseData.data;
-      } else if (responseData && Array.isArray(responseData.groups)) {
-        groupsData = responseData.groups;
-      } else {
-        logger.warn('예상하지 못한 그룹 API 응답 구조:', responseData);
-        groupsData = [];
-      }
-
-      // 그룹 데이터 구조 확인
-      if (groupsData.length > 0) {
-        logger.info('첫 번째 그룹 데이터 구조', 'Dashboard', groupsData[0]);
-      }
-
-      setGroups(groupsData);
-    } catch (err: any) {
-      logger.error('그룹 데이터를 가져오는데 실패했습니다:', err);
-      setError(prev => ({
-        ...prev,
+          err.response?.data?.message ||
+          '조직 데이터를 가져오는데 실패했습니다.',
         groups:
           err.response?.data?.message ||
-          '그룹 데이터를 가져오는데 실패했습니다.',
+          '조직 데이터를 가져오는데 실패했습니다.',
       }));
     } finally {
-      setLoading(prev => ({ ...prev, groups: false }));
+      setLoading(prev => ({ ...prev, gooks: false, groups: false }));
     }
-  };
+  }, []);
 
   // 주간 통계 가져오기
   const fetchWeeklyStats = async (
@@ -178,16 +150,8 @@ const Dashboard: React.FC = () => {
 
       const response = await axiosClient.get('/attendances/weekly', { params });
 
-      // API 응답 구조 확인을 위한 로깅
-      logger.info('주간 통계 API 응답', 'Dashboard', {
-        params,
-        responseData: response.data,
-        hasLastWeek: !!response.data?.lastWeek,
-      });
-
       setWeeklyStats(response.data);
     } catch (err: any) {
-      logger.error('주간 통계를 가져오는데 실패했습니다:', err);
       setError(prev => ({
         ...prev,
         weeklyStats:
@@ -224,32 +188,21 @@ const Dashboard: React.FC = () => {
       // API 응답 구조에 따라 안전하게 처리
       const responseData = response.data;
       if (Array.isArray(responseData)) {
-        setWeeklyGraphData(responseData);
+        // 데이터 처리 로직 제거됨
       } else if (responseData && Array.isArray(responseData.data)) {
-        setWeeklyGraphData(responseData.data);
+        // 데이터 처리 로직 제거됨
       } else if (responseData && Array.isArray(responseData.graph)) {
-        setWeeklyGraphData(responseData.graph);
+        // 데이터 처리 로직 제거됨
       } else {
-        logger.warn(
-          '예상하지 못한 주간 그래프 API 응답 구조:',
-          'Dashboard',
-          responseData
-        );
-        setWeeklyGraphData([]);
+        // 예상하지 못한 응답 구조
       }
     } catch (err: any) {
-      logger.error(
-        '주간 그래프 데이터를 가져오는데 실패했습니다:',
-        'Dashboard',
-        err
-      );
       setError(prev => ({
         ...prev,
         weeklyGraph:
           err.response?.data?.message ||
           '주간 그래프 데이터를 가져오는데 실패했습니다.',
       }));
-      setWeeklyGraphData([]); // 오류 시 빈 배열로 설정
     } finally {
       setLoading(prev => ({ ...prev, weeklyGraph: false }));
     }
@@ -281,7 +234,6 @@ const Dashboard: React.FC = () => {
       });
       setContinuousAttendanceStats(response.data);
     } catch (err: any) {
-      logger.error('연속 출석 데이터를 가져오는데 실패했습니다:', err);
       setError(prev => ({
         ...prev,
         continuousAttendance:
@@ -303,7 +255,6 @@ const Dashboard: React.FC = () => {
 
       // API 응답 구조에 따라 안전하게 처리
       const responseData = response.data;
-      logger.info('출석 트렌드 API 응답', 'Dashboard', responseData);
 
       let trendData: AttendanceTrendData[] = [];
 
@@ -328,27 +279,11 @@ const Dashboard: React.FC = () => {
       } else if (responseData && Array.isArray(responseData.trend)) {
         trendData = responseData.trend;
       } else {
-        logger.warn(
-          '예상하지 못한 출석 트렌드 API 응답 구조:',
-          'Dashboard',
-          responseData
-        );
         trendData = [];
       }
 
-      logger.info('처리된 트렌드 데이터', 'Dashboard', {
-        dataLength: trendData.length,
-        firstItem: trendData[0],
-        lastItem: trendData[trendData.length - 1],
-      });
-
       setAttendanceTrendData(trendData);
     } catch (err: any) {
-      logger.error(
-        '출석 트렌드 데이터를 가져오는데 실패했습니다:',
-        'Dashboard',
-        err
-      );
       setError(prev => ({
         ...prev,
         attendanceTrend:
@@ -361,11 +296,11 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // 컴포넌트 마운트 시 국 데이터 가져오기
+  // 컴포넌트 마운트 시 접근 가능한 조직 데이터 가져오기
   useEffect(() => {
-    fetchGooks();
+    fetchAccessibleOrganizations();
     fetchAttendanceTrend(); // 트렌드 데이터는 국/그룹 선택과 무관
-  }, []);
+  }, [fetchAccessibleOrganizations]);
 
   // 국/그룹 선택이 변경될 때마다 출석 데이터 가져오기
   useEffect(() => {
@@ -374,37 +309,27 @@ const Dashboard: React.FC = () => {
     fetchContinuousAttendance(selectedGukId, selectedGroupId);
   }, [selectedGukId, selectedGroupId]);
 
-  // 선택된 국이 변경될 때 그룹 데이터 가져오기
-  useEffect(() => {
-    if (selectedGukId !== '전체') {
-      fetchGroups(selectedGukId);
-    } else {
-      setGroups([]);
-    }
-  }, [selectedGukId]);
+  // 선택된 국이 변경될 때는 이미 모든 그룹 데이터가 있으므로 별도 처리 불필요
+  // (fetchAccessibleOrganizations에서 모든 국과 그룹 데이터를 한번에 가져옴)
 
   // 선택된 국에 따른 그룹 목록 (API 데이터 기반)
   const availableGroups = useMemo((): {
     value: number | '전체';
     label: string;
   }[] => {
-    logger.info('availableGroups 계산', 'Dashboard', {
-      selectedGukId,
-      groupsLength: groups.length,
-    });
-
     if (selectedGukId === '전체') {
       return [{ value: '전체', label: '전체' }];
     }
 
-    const groupOptions = Array.isArray(groups)
-      ? groups.map(group => ({
-          value: group.id,
-          label: group.organization_name || group.name || `그룹 ${group.id}`,
-        }))
+    // 선택된 국에 해당하는 그룹만 필터링
+    const filteredGroups = Array.isArray(groups)
+      ? groups.filter(group => group.gookId === selectedGukId)
       : [];
 
-    logger.info('그룹 옵션들', 'Dashboard', groupOptions);
+    const groupOptions = filteredGroups.map(group => ({
+      value: group.id,
+      label: group.organization_name || group.name || `그룹 ${group.id}`,
+    }));
 
     return [{ value: '전체', label: '전체' }, ...groupOptions];
   }, [selectedGukId, groups]);
@@ -489,15 +414,12 @@ const Dashboard: React.FC = () => {
           selectedGuk={
             selectedGukId === '전체'
               ? '전체'
-              : gooks.find(g => g.id === selectedGukId)?.organization_name ||
-                '전체'
+              : gooks.find(g => g.id === selectedGukId)?.name || '전체'
           }
           selectedGroup={
             selectedGroupId === '전체'
               ? '전체'
-              : groups.find(g => g.id === selectedGroupId)?.organization_name ||
-                groups.find(g => g.id === selectedGroupId)?.name ||
-                '전체'
+              : groups.find(g => g.id === selectedGroupId)?.name || '전체'
           }
           chartType={
             selectedGukId === '전체'

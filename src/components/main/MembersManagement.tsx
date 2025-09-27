@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { membersData } from '../../data/mockData';
-import { logUserAction } from '../../utils/logger';
 
 const MembersManagement: React.FC = () => {
   const navigate = useNavigate();
@@ -24,14 +23,10 @@ const MembersManagement: React.FC = () => {
 
   const handleMemberClick = (member: any) => {
     // 구성원 상세 정보 화면으로 이동
-    logUserAction('구성원 상세보기', 'MembersManagement', {
-      memberId: member.id,
-    });
     navigate(`/main/member-management/${member.id}`);
   };
 
   const handleAddMember = () => {
-    logUserAction('새 구성원 추가 버튼 클릭', 'MembersManagement');
     // 새 구성원 추가 로직
   };
 

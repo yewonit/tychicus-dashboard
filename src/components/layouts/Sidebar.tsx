@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../hooks';
 
 interface MenuItem {
   path: string;
@@ -15,6 +16,7 @@ interface MenuSection {
 const Sidebar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
 
   const menuSections: MenuSection[] = [
     {
@@ -103,8 +105,10 @@ const Sidebar: React.FC = () => {
         <div className='sidebar-user-info'>
           <div className='sidebar-user-avatar'>👤</div>
           <div className='sidebar-user-details'>
-            <div className='sidebar-user-name'>관리자</div>
-            <div className='sidebar-user-role'>시스템 관리자</div>
+            <div className='sidebar-user-name'>{user?.name || '사용자'}</div>
+            <div className='sidebar-user-role'>
+              {user?.roles?.[0]?.roleName || ''}
+            </div>
           </div>
         </div>
       </div>

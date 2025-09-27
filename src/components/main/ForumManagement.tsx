@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { logUserAction } from '../../utils/logger';
 
 // 더미 구성원 데이터
 const membersData = [
@@ -118,10 +117,7 @@ const ForumManagement: React.FC = () => {
   }, [query]);
 
   const handleSearch = () => {
-    logUserAction('포럼 검색', 'ForumManagement', {
-      searchTerm,
-      selectedPeriod,
-    });
+    // 검색 로직
   };
 
   const handleViewDetails = (id: number, type = 'forum') => {
@@ -145,19 +141,15 @@ const ForumManagement: React.FC = () => {
 
   const handleEdit = () => {
     if (modalType === 'prayer') {
-      logUserAction('기도문 수정 시도', 'ForumManagement', {
-        itemId: selectedForum?.id,
-      });
+      // 기도문 수정 로직
     } else {
-      logUserAction('포럼 수정 시도', 'ForumManagement', {
-        itemId: selectedForum?.id,
-      });
+      // 포럼 수정 로직
     }
     // 수정 로직 구현
   };
 
-  const handleDelete = (id: number) => {
-    logUserAction('항목 삭제 시도', 'ForumManagement', { itemId: id });
+  const handleDelete = (_id: number) => {
+    // 삭제 로직 구현
     // 삭제 로직 구현
   };
 

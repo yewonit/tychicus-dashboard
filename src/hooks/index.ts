@@ -1,4 +1,5 @@
 // 커스텀 훅 Export
+export { useAuth } from './useAuth';
 export { useDebounce } from './useDebounce';
 export { useForm } from './useForm';
 export { useLocalStorage, useLocalStorageValue } from './useLocalStorage';

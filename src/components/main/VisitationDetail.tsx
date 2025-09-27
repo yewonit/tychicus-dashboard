@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { logUserAction, logger } from '../../utils/logger';
 
 // 타입 정의
 interface Visitation {
@@ -174,11 +173,6 @@ const VisitationDetail: React.FC = () => {
         setError('심방 기록을 찾을 수 없습니다.');
       }
     } catch (error) {
-      logger.error(
-        '심방 상세 정보를 불러오는데 실패했습니다:',
-        'VisitationDetail',
-        error
-      );
       setError('심방 상세 정보를 불러오는데 실패했습니다.');
     } finally {
       setLoading(false);
@@ -201,9 +195,6 @@ const VisitationDetail: React.FC = () => {
 
   const handleEdit = () => {
     setIsEditing(true);
-    logUserAction('심방 상세 수정 시작', 'VisitationDetail', {
-      visitationId: id,
-    });
   };
 
   const handleSave = async () => {
@@ -229,15 +220,9 @@ const VisitationDetail: React.FC = () => {
       setLastModified(currentTime);
       setIsEditing(false);
 
-      logUserAction('심방 상세 수정 완료', 'VisitationDetail', {
-        visitationId: id,
-        modifiedFields: Object.keys(editForm),
-      });
-
       // 성공 메시지
       alert('심방 기록이 성공적으로 수정되었습니다.');
     } catch (error) {
-      logger.error('심방 기록 수정에 실패했습니다:', 'VisitationDetail', error);
       alert('심방 기록 수정에 실패했습니다.');
     }
   };
@@ -251,19 +236,12 @@ const VisitationDetail: React.FC = () => {
       심방방법: visitation.심방방법,
     });
     setIsEditing(false);
-    logUserAction('심방 상세 수정 취소', 'VisitationDetail', {
-      visitationId: id,
-    });
   };
 
   const handleDelete = () => {
     if (!visitation) return;
 
     if (window.confirm('이 심방 기록을 삭제하시겠습니까?')) {
-      logUserAction('심방 기록 삭제', 'VisitationDetail', {
-        visitationId: id,
-        targetName: visitation.대상자_이름,
-      });
       // 삭제 로직 구현
       navigate('/main/visitation');
     }
@@ -293,14 +271,10 @@ const VisitationDetail: React.FC = () => {
 
       setImprovedContent(mockResponse.improved_content);
 
-      logUserAction('심방 내용 개선', 'VisitationDetail', {
-        visitationId: id,
-        contentLength: editForm.심방내용.length,
-      });
+      // 내용 개선 로직
 
       alert('내용이 성공적으로 개선되었습니다!');
     } catch (error) {
-      logger.error('내용 개선에 실패했습니다:', 'VisitationDetail', error);
       alert('내용 개선에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setIsImproving(false);
@@ -311,10 +285,6 @@ const VisitationDetail: React.FC = () => {
     if (improvedContent) {
       setEditForm(prev => ({ ...prev, 심방내용: improvedContent }));
       setImprovedContent('');
-
-      logUserAction('개선된 내용 적용', 'VisitationDetail', {
-        visitationId: id,
-      });
 
       alert('개선된 내용이 적용되었습니다.');
     }

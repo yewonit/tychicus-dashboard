@@ -37,7 +37,7 @@ const DashboardFilter: React.FC<DashboardFilterProps> = ({
     ...(Array.isArray(gooks)
       ? gooks.map(gook => ({
           value: gook.id as number,
-          label: gook.organization_name,
+          label: gook.name,
         }))
       : []),
   ];

@@ -17,34 +17,20 @@ interface LogEntry {
   level: LogLevel;
   message: string;
   context?: string;
-  metadata?: Record<string, any>;
+  metadata?: any;
 }
 
 class Logger {
   private static instance: Logger;
-  private logLevel: LogLevel = LogLevel.INFO;
-  private isDevelopment: boolean = process.env.NODE_ENV === 'development';
-  private sensitiveKeys: string[] = [
-    'password',
-    'token',
-    'secret',
-    'key',
-    'auth',
-    'credential',
-    'session',
-    'cookie',
-    'email',
-    'phone',
-    'address',
-    'personalInfo',
-    'birthDate',
-    'ssn',
-    'id',
-  ];
+  private logLevel: LogLevel;
+  private isDevelopment: boolean;
 
-  private constructor() {}
+  private constructor() {
+    this.logLevel = LogLevel.INFO;
+    this.isDevelopment = process.env.NODE_ENV === 'development';
+  }
 
-  static getInstance(): Logger {
+  public static getInstance(): Logger {
     if (!Logger.instance) {
       Logger.instance = new Logger();
     }
@@ -54,38 +40,8 @@ class Logger {
   /**
    * 로그 레벨 설정
    */
-  setLogLevel(level: LogLevel): void {
+  public setLogLevel(level: LogLevel): void {
     this.logLevel = level;
-  }
-
-  /**
-   * 민감한 데이터를 마스킹하는 함수
-   */
-  private sanitizeData(data: any): any {
-    if (typeof data !== 'object' || data === null) {
-      return data;
-    }
-
-    if (Array.isArray(data)) {
-      return data.map(item => this.sanitizeData(item));
-    }
-
-    const sanitized: any = {};
-    for (const [key, value] of Object.entries(data)) {
-      const lowerKey = key.toLowerCase();
-      const isSensitive = this.sensitiveKeys.some(sensitiveKey =>
-        lowerKey.includes(sensitiveKey)
-      );
-
-      if (isSensitive) {
-        sanitized[key] = '***MASKED***';
-      } else if (typeof value === 'object' && value !== null) {
-        sanitized[key] = this.sanitizeData(value);
-      } else {
-        sanitized[key] = value;
-      }
-    }
-    return sanitized;
   }
 
   /**
@@ -102,7 +58,7 @@ class Logger {
       level,
       message,
       context,
-      metadata: metadata ? this.sanitizeData(metadata) : undefined,
+      metadata,
     };
   }
 
@@ -156,58 +112,93 @@ class Logger {
   private sendToServer(entry: LogEntry): void {
     // 실제 구현에서는 API 엔드포인트로 전송
     try {
-      localStorage.setItem(`log_${entry.timestamp}`, JSON.stringify(entry));
+      // localStorage에 저장 (임시)
+      const logs = JSON.parse(localStorage.getItem('app_logs') || '[]');
+      logs.push(entry);
+      if (logs.length > 100) {
+        logs.shift(); // 오래된 로그 제거
+      }
+      localStorage.setItem('app_logs', JSON.stringify(logs));
     } catch (error) {
-      // 로컬 스토리지 실패 시 무시
+      // 로그 저장 실패 시 무시
     }
   }
 
   /**
    * 디버그 로그
    */
-  debug(message: string, context?: string, metadata?: any): void {
-    this.log(this.createLogEntry(LogLevel.DEBUG, message, context, metadata));
+  public debug(message: string, context?: string, metadata?: any): void {
+    const entry = this.createLogEntry(
+      LogLevel.DEBUG,
+      message,
+      context,
+      metadata
+    );
+    this.log(entry);
   }
 
   /**
    * 정보 로그
    */
-  info(message: string, context?: string, metadata?: any): void {
-    this.log(this.createLogEntry(LogLevel.INFO, message, context, metadata));
+  public info(message: string, context?: string, metadata?: any): void {
+    const entry = this.createLogEntry(
+      LogLevel.INFO,
+      message,
+      context,
+      metadata
+    );
+    this.log(entry);
   }
 
   /**
    * 경고 로그
    */
-  warn(message: string, context?: string, metadata?: any): void {
-    this.log(this.createLogEntry(LogLevel.WARN, message, context, metadata));
+  public warn(message: string, context?: string, metadata?: any): void {
+    const entry = this.createLogEntry(
+      LogLevel.WARN,
+      message,
+      context,
+      metadata
+    );
+    this.log(entry);
   }
 
   /**
    * 에러 로그
    */
-  error(message: string, context?: string, metadata?: any): void {
-    this.log(this.createLogEntry(LogLevel.ERROR, message, context, metadata));
+  public error(message: string, context?: string, metadata?: any): void {
+    const entry = this.createLogEntry(
+      LogLevel.ERROR,
+      message,
+      context,
+      metadata
+    );
+    this.log(entry);
   }
 
   /**
-   * 사용자 액션 로그 (보안 중요)
+   * 사용자 액션 로그
    */
-  userAction(action: string, context?: string, metadata?: any): void {
+  public userAction(action: string, context?: string, metadata?: any): void {
     this.info(`User Action: ${action}`, context, metadata);
   }
 
   /**
    * API 호출 로그
    */
-  apiCall(method: string, url: string, context?: string, metadata?: any): void {
+  public apiCall(
+    method: string,
+    url: string,
+    context?: string,
+    metadata?: any
+  ): void {
     this.info(`API Call: ${method} ${url}`, context, metadata);
   }
 
   /**
    * 에러 발생 로그
    */
-  exception(error: Error, context?: string, metadata?: any): void {
+  public exception(error: Error, context?: string, metadata?: any): void {
     this.error(`Exception: ${error.message}`, context, {
       ...metadata,
       stack: error.stack,

@@ -6,6 +6,7 @@ import {
   BrowserRouter as Router,
   Routes,
 } from 'react-router-dom';
+import { AuthGuard, LoginPage } from './components/auth';
 import MainLayout from './components/layouts/MainLayout';
 import Dashboard from './components/main/Dashboard';
 import ForumManagement from './components/main/ForumManagement';
@@ -127,10 +128,43 @@ function App() {
       <CssBaseline />
       <Router>
         <Routes>
-          {/* 환영 페이지 */}
-          <Route path='/' element={<WelcomePage />} />
-          {/* 메인 애플리케이션 - 사이드바 포함 */}
-          <Route path='/main' element={<MainLayout />}>
+          {/* 로그인 페이지 - 인증 불필요 */}
+          <Route path='/login' element={<LoginPage />} />
+
+          {/* 루트 경로 - 대시보드로 리다이렉트 */}
+          <Route path='/' element={<Navigate to='/dashboard' replace />} />
+
+          {/* 환영 페이지 - 인증 필요 */}
+          <Route
+            path='/welcome'
+            element={
+              <AuthGuard>
+                <WelcomePage />
+              </AuthGuard>
+            }
+          />
+
+          {/* 대시보드 직접 접근 - 인증 필요 */}
+          <Route
+            path='/dashboard'
+            element={
+              <AuthGuard>
+                <MainLayout />
+              </AuthGuard>
+            }
+          >
+            <Route index element={<Dashboard />} />
+          </Route>
+
+          {/* 메인 애플리케이션 - 사이드바 포함, 인증 필요 */}
+          <Route
+            path='/main'
+            element={
+              <AuthGuard>
+                <MainLayout />
+              </AuthGuard>
+            }
+          >
             {/* 기본 리다이렉트 */}
             <Route index element={<Navigate to='dashboard' replace />} />
             {/* 대시보드 섹션 */}

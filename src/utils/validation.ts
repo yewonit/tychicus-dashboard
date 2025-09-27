@@ -32,21 +32,21 @@ export const validationRules = {
   password: (value: string) => {
     if (!value) return '비밀번호를 입력해주세요.';
 
-    if (value.length < 8) {
-      return '비밀번호는 8자 이상이어야 합니다.';
-    }
+    // if (value.length < 8) {
+    //   return '비밀번호는 8자 이상이어야 합니다.';
+    // }
 
-    if (!/[a-z]/.test(value)) {
-      return '영어 소문자를 포함해야 합니다.';
-    }
+    // if (!/[a-z]/.test(value)) {
+    //   return '영어 소문자를 포함해야 합니다.';
+    // }
 
-    if (!/[0-9]/.test(value)) {
-      return '숫자를 포함해야 합니다.';
-    }
+    // if (!/[0-9]/.test(value)) {
+    //   return '숫자를 포함해야 합니다.';
+    // }
 
-    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(value)) {
-      return '특수문자를 포함해야 합니다.';
-    }
+    // if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(value)) {
+    //   return '특수문자를 포함해야 합니다.';
+    // }
 
     return '';
   },
