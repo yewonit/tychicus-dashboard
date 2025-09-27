@@ -1,5 +1,13 @@
 import React from 'react';
-import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 import { AttendanceTrendData } from '../../types';
 
 interface AttendanceTrendChartProps {
@@ -8,12 +16,18 @@ interface AttendanceTrendChartProps {
   error: string | null;
 }
 
-const AttendanceTrendChart: React.FC<AttendanceTrendChartProps> = ({ attendanceTrendData, loading, error }) => {
+const AttendanceTrendChart: React.FC<AttendanceTrendChartProps> = ({
+  attendanceTrendData,
+  loading,
+  error,
+}) => {
   if (loading) {
     return (
       <div className='chart-card'>
         <h3 className='chart-title'>주차별 청년예배 출석 트렌드</h3>
-        <div className='center-loading'>출석 트렌드 데이터를 불러오는 중...</div>
+        <div className='center-loading'>
+          출석 트렌드 데이터를 불러오는 중...
+        </div>
       </div>
     );
   }

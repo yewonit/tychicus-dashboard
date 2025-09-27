@@ -3,6 +3,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { AuthGuard, LoginPage } from './components/auth';
 import MainLayout from './components/layouts/MainLayout';
+import { MobileRestrictionOverlay } from './components/ui';
 import Dashboard from './components/main/Dashboard';
 import ForumManagement from './components/main/ForumManagement';
 import MemberDetail from './components/main/MemberDetail';
@@ -121,6 +122,7 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
+      <MobileRestrictionOverlay />
       <Router>
         <Routes>
           {/* 로그인 페이지 - 인증 불필요 */}

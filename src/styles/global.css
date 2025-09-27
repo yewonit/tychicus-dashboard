@@ -4,6 +4,33 @@
    CSS 변수 정의 - 민트-스카이블루 테마
    ======================== */
 :root {
+  /* ========================
+     DUGIGO 브랜드 컬러 토큰
+     ======================== */
+  /* 브랜드 기본 색상 */
+  --charleston-green: #2A2829;
+  --dark-sky-blue: #97B4DE;
+  --royal-blue: #263A99;
+  --alabaster-white: #F0EBE5;
+  --pastel-gray: #DCD0BE;
+  
+  /* DUGIGO 유틸리티 컬러 */
+  --text-primary-dugigo: var(--charleston-green);
+  --text-secondary-dugigo: #6c757d;
+  --text-muted-dugigo: #636e72;
+  --background-primary-dugigo: var(--alabaster-white);
+  --background-secondary-dugigo: var(--pastel-gray);
+  --accent-primary-dugigo: var(--royal-blue);
+  --accent-secondary-dugigo: var(--dark-sky-blue);
+  
+  /* 미정의 변수 해결 */
+  --blue-oblivion: var(--royal-blue);
+  --sapphire-dust: var(--dark-sky-blue);
+  --caramel-essence: #E3AF64;
+  
+  /* ========================
+     기존 색상 (호환성 유지)
+     ======================== */
   /* 메인 색상 */
   --primary: #4ecdc4;
   --primary-light: #a6e7e2;
@@ -23,6 +50,21 @@
   --error-light: #ef4444;
   --info: #85c1e9;
 
+  /* DUGIGO 상태 컬러 */
+  --state-success: #28a745;
+  --state-warning: #ffc107;
+  --state-danger: #dc3545;
+  --state-success-light: #10B981;
+  --state-warning-light: #F59E0B;
+  --state-danger-light: #EF4444;
+  
+  /* DUGIGO 표면/보더 토큰 */
+  --surface-muted: #f8f9fa;
+  --border-subtle: #e9ecef;
+  --border-neutral: #E5E7EB;
+  --bg-card-dugigo: #ffffff;
+  --bg-hover-dugigo: #f8f9fa;
+  
   /* 중성 색상 (그레이 스케일) */
   --gray-100: #f1f1f1;
   --gray-300: #c1c1c1;
@@ -30,7 +72,13 @@
   --gray-500: #b0b0b0;
   --gray-600: #909090;
 
-  /* 그라데이션 */
+  /* DUGIGO 그라데이션 시스템 */
+  --gradient-primary-dugigo: linear-gradient(135deg, var(--royal-blue) 0%, var(--dark-sky-blue) 100%);
+  --gradient-background-dugigo: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  --gradient-text-dugigo: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-indigo: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  
+  /* 기존 그라데이션 (호환성) */
   --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
   --gradient-secondary: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
   --gradient-primary-hover: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary-dark) 100%);
@@ -99,10 +147,45 @@
   --radius-xl: 24px;
   --radius-full: 50%;
 
+  /* DUGIGO 브레이크포인트 토큰 */
+  --mobile-max-width: 767px;
+  --tablet-min-width: 768px;
+  --tablet-max-width: 1024px;
+  --desktop-min-width: 1025px;
+  
+  /* DUGIGO 레이아웃 토큰 */
+  --sidebar-width-desktop: 240px;
+  --sidebar-width-tablet: 200px;
+  --sidebar-width-mobile: 180px;
+  
+  /* DUGIGO 그림자 시스템 */
+  --shadow-light-dugigo: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --shadow-medium-dugigo: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-heavy-dugigo: 0 8px 25px rgba(0, 0, 0, 0.15);
+  
   /* 트랜지션 */
   --transition-fast: 0.2s ease;
   --transition-normal: 0.3s ease;
   --transition-slow: 0.5s ease;
+  
+  /* ========================
+     DUGIGO 매핑 변수 (점진적 전환용)
+     ======================== */
+  /* 브랜드 매핑 - 나중에 기존 변수를 이것들로 교체 */
+  --brand-primary: var(--royal-blue);
+  --brand-secondary: var(--dark-sky-blue);
+  --brand-text: var(--charleston-green);
+  --brand-background: var(--alabaster-white);
+  --brand-surface: var(--pastel-gray);
+  
+  /* 차트 팔레트 토큰 */
+  --chart-axis: #6B7280;
+  --chart-grid: #E5E7EB;
+  --chart-primary: var(--royal-blue);
+  --chart-secondary: var(--dark-sky-blue);
+  --chart-success: var(--state-success);
+  --chart-warning: var(--state-warning);
+  --chart-danger: var(--state-danger);
 }
 
 /* 전역 리셋 */
@@ -253,6 +336,77 @@ html {
 .primary-link {
   color: var(--primary);
   text-decoration: none;
+}
+
+/* ========================
+   DUGIGO 모바일 접근 제한 오버레이
+   ======================== */
+.mobile-restriction-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: var(--gradient-background-dugigo);
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  padding: var(--spacing-xl);
+  text-align: center;
+}
+
+.mobile-restriction-content {
+  background: var(--bg-card-dugigo);
+  padding: var(--spacing-2xl);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-heavy-dugigo);
+  max-width: 400px;
+  width: 100%;
+}
+
+.mobile-restriction-title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--brand-text);
+  margin-bottom: var(--spacing-md);
+}
+
+.mobile-restriction-message {
+  font-size: var(--font-size-base);
+  color: var(--text-secondary-dugigo);
+  line-height: var(--line-height-relaxed);
+  margin-bottom: var(--spacing-lg);
+}
+
+.mobile-restriction-button {
+  background: var(--gradient-primary-dugigo);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: var(--transition-normal);
+}
+
+.mobile-restriction-button:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-medium-dugigo);
+}
+
+/* 767px 이하에서 오버레이 표시 */
+@media (max-width: 767px) {
+  .mobile-restriction-overlay {
+    display: flex;
+  }
+  
+  /* 사용자가 강제 진입을 선택한 경우 숨김 */
+  .mobile-restriction-overlay.allow-mobile {
+    display: none;
+  }
 }
 
 .flex {
