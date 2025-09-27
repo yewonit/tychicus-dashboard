@@ -29,7 +29,6 @@ const Sidebar: React.FC<SidebarProps> = ({ dugigo = false }) => {
       items: [
         { path: '/main/dashboard', icon: '📊', text: '전체 현황' },
         { path: '/main/worship', icon: '⛪', text: '예배 현황' },
-        { path: '/dugigo/demo', icon: '🎨', text: 'DUGIGO 데모' },
       ],
     },
     {

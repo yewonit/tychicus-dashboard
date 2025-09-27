@@ -7,11 +7,8 @@ import {
   Routes,
 } from 'react-router-dom';
 import { AuthGuard, LoginPage } from './components/auth';
-import DugigoLayout from './components/layouts/DugigoLayout';
 import MainLayout from './components/layouts/MainLayout';
 import Dashboard from './components/main/Dashboard';
-import DugigoDashboard from './components/main/DugigoDashboard';
-import DugigoDemo from './components/main/DugigoDemo';
 import ForumManagement from './components/main/ForumManagement';
 import MemberDetail from './components/main/MemberDetail';
 import MembersManagement from './components/main/MembersManagement';
@@ -154,7 +151,7 @@ function App() {
             path='/dashboard'
             element={
               <AuthGuard>
-                <DugigoLayout />
+                <MainLayout />
               </AuthGuard>
             }
           >
@@ -166,7 +163,7 @@ function App() {
             path='/main'
             element={
               <AuthGuard>
-                <DugigoLayout />
+                <MainLayout />
               </AuthGuard>
             }
           >
@@ -293,20 +290,6 @@ function App() {
             {/* 시스템 설정 */}
           </Route>
 
-          {/* DUGIGO 디자인 시스템 - 별도 레이아웃 */}
-          <Route
-            path='/dugigo'
-            element={
-              <AuthGuard>
-                <DugigoLayout />
-              </AuthGuard>
-            }
-          >
-            <Route index element={<Navigate to='demo' replace />} />
-            <Route path='demo' element={<DugigoDemo />} />
-            {/* 향후 DUGIGO 스타일 페이지들 추가 가능 */}
-            <Route path='dashboard' element={<DugigoDashboard />} />
-          </Route>
         </Routes>
       </Router>
     </ThemeProvider>
