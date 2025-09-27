@@ -33,7 +33,7 @@ export interface LoginResponse {
 // 토큰 검증 API 응답 (Bearer Token으로 /login 호출 시)
 export interface TokenValidationResponse {
   tokens: TokenData;
-  user: UserData; // 토큰 검증 시에는 'user' 필드 사용
+  userData: UserData; // 토큰 검증 시에는 'userData' 필드 사용
 }
 
 export interface AuthState {
@@ -43,7 +43,13 @@ export interface AuthState {
   error: string | null;
 }
 
-// 접근 가능한 조직 구조 타입 (users/accessible API 응답) - depth 기반
+// 접근 가능한 조직 구조 타입 (users/accessible API 응답) - 새로운 구조
+export interface AccessibleOrganizationsResponse {
+  gook: string[];
+  group: string[];
+}
+
+// 기존 depth 기반 타입들 (호환성을 위해 유지)
 export interface AccessibleGookItem {
   id: number;
   name: string;
@@ -221,7 +227,6 @@ export interface ContinuousAttendanceMember {
   name: string;
   team: string;
   role: string | null;
-  consecutiveWeeks: number;
 }
 
 export interface ContinuousAttendanceStats {
@@ -233,32 +238,33 @@ export interface ContinuousAttendanceStats {
     consecutive3Weeks: ContinuousAttendanceMember[];
     consecutive2Weeks: ContinuousAttendanceMember[];
   };
-  // 연속 출석 현황 API 응답 구조 (continuousAttendeeCount)
-  wednesdayYoungAdult?: {
-    '4weeks': number;
-    '3weeks': number;
-    '2weeks': number;
-  };
-  fridayYoungAdult?: {
-    '4weeks': number;
-    '3weeks': number;
-    '2weeks': number;
-  };
-  sunday?: {
-    '4weeks': number;
-    '3weeks': number;
-    '2weeks': number;
-  };
-  sundayYoungAdult?: {
-    '4weeks': number;
-    '3weeks': number;
-    '2weeks': number;
-  };
-  // 연속 결석 현황 API 응답 구조 (absenteeList)
+  // 새로운 API 응답 구조
   absenteeList?: {
     '4weeks': ContinuousAttendanceMember[];
     '3weeks': ContinuousAttendanceMember[];
     '2weeks': ContinuousAttendanceMember[];
+  };
+  continuousAttendeeCount?: {
+    sunday?: {
+      '4weeks': ContinuousAttendanceMember[];
+      '3weeks': ContinuousAttendanceMember[];
+      '2weeks': ContinuousAttendanceMember[];
+    };
+    sundayYoungAdult?: {
+      '4weeks': ContinuousAttendanceMember[];
+      '3weeks': ContinuousAttendanceMember[];
+      '2weeks': ContinuousAttendanceMember[];
+    };
+    wednesdayYoungAdult?: {
+      '4weeks': ContinuousAttendanceMember[];
+      '3weeks': ContinuousAttendanceMember[];
+      '2weeks': ContinuousAttendanceMember[];
+    };
+    fridayYoungAdult?: {
+      '4weeks': ContinuousAttendanceMember[];
+      '3weeks': ContinuousAttendanceMember[];
+      '2weeks': ContinuousAttendanceMember[];
+    };
   };
 }
 
@@ -276,11 +282,7 @@ export interface Gook {
 }
 
 export interface Group {
-  organization_name: any;
   id: number;
   name: string;
   gookId: number;
-  gookName?: string;
-  memberCount?: number;
-  leader?: string;
 }

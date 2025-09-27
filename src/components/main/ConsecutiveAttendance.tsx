@@ -16,7 +16,7 @@ const ConsecutiveAttendance: React.FC<ConsecutiveAttendanceProps> = ({
   error,
   onOpenAttendancePopup,
 }) => {
-  // API 데이터에서 연속 출석 통계 추출
+  // API 데이터에서 연속 출석 통계 추출 (continuousAttendeeCount 사용)
   const getConsecutiveStats = (
     type:
       | 'wednesdayYoungAdult'
@@ -24,11 +24,11 @@ const ConsecutiveAttendance: React.FC<ConsecutiveAttendanceProps> = ({
       | 'sunday'
       | 'sundayYoungAdult'
   ) => {
-    const data = continuousAttendanceStats?.[type];
+    const data = continuousAttendanceStats?.continuousAttendeeCount?.[type];
     return {
-      consecutive4Weeks: data?.['4weeks'] || 0,
-      consecutive3Weeks: data?.['3weeks'] || 0,
-      consecutive2Weeks: data?.['2weeks'] || 0,
+      consecutive4Weeks: data?.['4weeks']?.length || 0,
+      consecutive3Weeks: data?.['3weeks']?.length || 0,
+      consecutive2Weeks: data?.['2weeks']?.length || 0,
     };
   };
 

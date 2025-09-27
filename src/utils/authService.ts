@@ -1,5 +1,4 @@
 import {
-  AccessibleOrganization,
   LoginRequest,
   LoginResponse,
   TokenData,
@@ -13,7 +12,7 @@ import {
   saveTokens,
   saveUserData,
 } from './authUtils';
-import { authClient } from './axiosClient';
+import axiosClient, { authClient } from './axiosClient';
 
 /**
  * 로그인 API 호출
@@ -54,10 +53,10 @@ export const validateToken = async (): Promise<UserData> => {
       },
     });
 
-    // 사용자 데이터 업데이트 (토큰 검증 시에는 'user' 필드 사용)
-    saveUserData(response.data.user);
+    // 사용자 데이터 업데이트 (토큰 검증 시에는 'userData' 필드 사용)
+    saveUserData(response.data.userData);
 
-    return response.data.user;
+    return response.data.userData;
   } catch (error) {
     throw error;
   }
@@ -138,85 +137,18 @@ export const validateOrRefreshToken = async (): Promise<UserData> => {
 };
 
 /**
- * 사용자가 접근 가능한 조직 구조 조회 (임시 정적 데이터 사용)
+ * 사용자가 접근 가능한 조직 구조 조회
  */
-export const getAccessibleOrganizations = async (): Promise<
-  AccessibleOrganization[]
-> => {
+export const getAccessibleOrganizations = async (): Promise<{
+  gook: string[];
+  group: string[][];
+}> => {
   try {
-    // 임시 정적 데이터
-    const mockData: AccessibleOrganization[] = [
-      {
-        depth: 0,
-        id: 0,
-        name: '코람데오 청년선교회',
-      },
-      {
-        depth: 1,
-        gooks: [
-          {
-            id: 3,
-            name: '1국',
-          },
-          {
-            id: 31,
-            name: '2국',
-          },
-          {
-            id: 65,
-            name: '3국',
-          },
-          {
-            id: 94,
-            name: '4국',
-          },
-          {
-            id: 127,
-            name: '237국',
-          },
-        ],
-      },
-      {
-        depth: 2,
-        id: 3,
-        name: '1국',
-        groups: [
-          {
-            id: 4,
-            name: '강병관그룹',
-          },
-          {
-            id: 8,
-            name: '김종성그룹',
-          },
-          {
-            id: 12,
-            name: '김상욱그룹',
-          },
-          {
-            id: 16,
-            name: '윤현군그룹',
-          },
-          {
-            id: 20,
-            name: '김은영그룹',
-          },
-          {
-            id: 24,
-            name: '신한빛그룹',
-          },
-          {
-            id: 28,
-            name: '김성원그룹',
-          },
-        ],
-      },
-    ];
-
-    // 실제 API 호출 대신 임시 데이터 반환
-    await new Promise(resolve => setTimeout(resolve, 500)); // 실제 API 호출처럼 지연 추가
-
-    return mockData;
+    const response = await axiosClient.get<{
+      gook: string[];
+      group: string[][];
+    }>('/users/accessible');
+    return response.data;
   } catch (error) {
     throw error;
   }

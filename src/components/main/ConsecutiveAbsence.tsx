@@ -149,9 +149,7 @@ const ConsecutiveAbsence: React.FC<ConsecutiveAbsenceProps> = ({
                     )}
                     <span className='absence-team-name'>{member.team}</span>
                   </div>
-                  <span className='absence-badge low-severity'>
-                    {member.consecutiveWeeks}주 연속
-                  </span>
+                  <span className='absence-badge low-severity'>2주 연속</span>
                 </div>
               ))}
           </div>

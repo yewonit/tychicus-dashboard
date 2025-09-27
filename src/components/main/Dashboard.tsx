@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  AccessibleOrganization,
   AttendanceTrendData,
   ContinuousAttendanceStats,
   Gook,
@@ -59,42 +58,26 @@ const Dashboard: React.FC = () => {
     AttendanceTrendData[]
   >([]);
 
-  // 접근 가능한 조직 데이터 변환 함수 (depth 기반)
-  const transformAccessibleDataToGooksAndGroups = (
-    accessibleData: AccessibleOrganization[]
-  ) => {
-    const transformedGooks: Gook[] = [];
+  // 새로운 API 응답 구조에 맞게 데이터 변환 (group이 2차원 배열)
+  const transformAccessibleDataToGooksAndGroups = (accessibleData: {
+    gook: string[];
+    group: string[][];
+  }) => {
+    const transformedGooks: Gook[] = accessibleData.gook.map((name, index) => ({
+      id: index + 1, // 임시 ID 생성
+      name: `${name}국`, // "1" → "1국"
+    }));
+
     const transformedGroups: Group[] = [];
-
-    // depth 1에서 국 목록 추출
-    const gooksData = accessibleData.find(item => item.depth === 1);
-    if (gooksData && 'gooks' in gooksData) {
-      gooksData.gooks.forEach(gookItem => {
-        const gook: Gook = {
-          id: gookItem.id,
-          name: gookItem.name,
-        };
-        transformedGooks.push(gook);
+    accessibleData.group.forEach((groupArray, gookIndex) => {
+      groupArray.forEach(groupName => {
+        transformedGroups.push({
+          id: transformedGroups.length + 1, // 고유 ID 생성
+          name: `${groupName}그룹`, // "강병관" → "강병관그룹"
+          gookId: gookIndex + 1, // 해당 국의 ID
+        });
       });
-    }
-
-    // depth 2에서 각 국의 그룹 목록 추출 (현재는 1국만 있음)
-    accessibleData
-      .filter(item => item.depth === 2)
-      .forEach(gookData => {
-        if ('groups' in gookData && 'id' in gookData) {
-          gookData.groups.forEach(groupItem => {
-            const group: Group = {
-              id: groupItem.id,
-              name: groupItem.name,
-              gookId: gookData.id,
-              gookName: gookData.name,
-              organization_name: groupItem.name,
-            };
-            transformedGroups.push(group);
-          });
-        }
-      });
+    });
 
     return { gooks: transformedGooks, groups: transformedGroups };
   };
@@ -138,14 +121,20 @@ const Dashboard: React.FC = () => {
 
       const params: any = {};
 
-      // 국 ID 설정
+      // 국 이름 설정 (접미사 "국" 제거)
       if (gookId && gookId !== '전체') {
-        params.gook = gookId;
+        const selectedGook = gooks.find(gook => gook.id === gookId);
+        if (selectedGook) {
+          params.gook = selectedGook.name.replace('국', ''); // "1국" → "1"
+        }
       }
 
-      // 그룹 ID 설정
+      // 그룹 이름 설정 (접미사 "그룹" 제거)
       if (groupId && groupId !== '전체') {
-        params.group = groupId;
+        const selectedGroup = groups.find(group => group.id === groupId);
+        if (selectedGroup) {
+          params.group = selectedGroup.name.replace('그룹', ''); // "김종성그룹" → "김종성"
+        }
       }
 
       const response = await axiosClient.get('/attendances/weekly', { params });
@@ -173,14 +162,20 @@ const Dashboard: React.FC = () => {
 
       const params: any = {};
 
-      // 국 ID 설정
+      // 국 이름 설정 (접미사 "국" 제거)
       if (gookId && gookId !== '전체') {
-        params.gook = gookId;
+        const selectedGook = gooks.find(gook => gook.id === gookId);
+        if (selectedGook) {
+          params.gook = selectedGook.name.replace('국', ''); // "1국" → "1"
+        }
       }
 
-      // 그룹 ID 설정
+      // 그룹 이름 설정 (접미사 "그룹" 제거)
       if (groupId && groupId !== '전체') {
-        params.group = groupId;
+        const selectedGroup = groups.find(group => group.id === groupId);
+        if (selectedGroup) {
+          params.group = selectedGroup.name.replace('그룹', ''); // "김종성그룹" → "김종성"
+        }
       }
 
       const response = await axiosClient.get('/attendances/graph', { params });
@@ -219,20 +214,45 @@ const Dashboard: React.FC = () => {
 
       const params: any = {};
 
-      // 국 ID 설정
+      // 국 이름 설정 (접미사 "국" 제거)
       if (gookId && gookId !== '전체') {
-        params.gook = gookId;
+        const selectedGook = gooks.find(gook => gook.id === gookId);
+        if (selectedGook) {
+          params.gook = selectedGook.name.replace('국', ''); // "1국" → "1"
+        }
       }
 
-      // 그룹 ID 설정
+      // 그룹 이름 설정 (접미사 "그룹" 제거)
       if (groupId && groupId !== '전체') {
-        params.group = groupId;
+        const selectedGroup = groups.find(group => group.id === groupId);
+        if (selectedGroup) {
+          params.group = selectedGroup.name.replace('그룹', ''); // "김종성그룹" → "김종성"
+        }
       }
 
       const response = await axiosClient.get('/attendances/continuous', {
         params,
       });
-      setContinuousAttendanceStats(response.data);
+
+      // 새로운 API 응답 구조에 맞게 데이터 변환
+      const apiData = response.data?.data || response.data;
+
+      const transformedData: ContinuousAttendanceStats = {
+        // 연속 결석자 수 (absenteeList 배열 길이로 계산)
+        consecutive4Weeks: apiData.absenteeList?.['4weeks']?.length || 0,
+        consecutive3Weeks: apiData.absenteeList?.['3weeks']?.length || 0,
+        consecutive2Weeks: apiData.absenteeList?.['2weeks']?.length || 0,
+        members: {
+          consecutive4Weeks: apiData.absenteeList?.['4weeks'] || [],
+          consecutive3Weeks: apiData.absenteeList?.['3weeks'] || [],
+          consecutive2Weeks: apiData.absenteeList?.['2weeks'] || [],
+        },
+        // 원본 데이터 보존 (상세 정보 확인용)
+        absenteeList: apiData.absenteeList,
+        continuousAttendeeCount: apiData.continuousAttendeeCount,
+      };
+
+      setContinuousAttendanceStats(transformedData);
     } catch (err: any) {
       setError(prev => ({
         ...prev,
@@ -328,7 +348,7 @@ const Dashboard: React.FC = () => {
 
     const groupOptions = filteredGroups.map(group => ({
       value: group.id,
-      label: group.organization_name || group.name || `그룹 ${group.id}`,
+      label: group.name || `그룹 ${group.id}`,
     }));
 
     return [{ value: '전체', label: '전체' }, ...groupOptions];
@@ -341,20 +361,80 @@ const Dashboard: React.FC = () => {
     }
     const selectedGroup = groups.find(group => group.id === selectedGroupId);
     return selectedGroup
-      ? selectedGroup.organization_name ||
-          selectedGroup.name ||
-          `그룹 ${selectedGroup.id}`
+      ? selectedGroup.name || `그룹 ${selectedGroup.id}`
       : '전체';
   }, [selectedGroupId, groups]);
 
-  // 연속 출석 인원 데이터 계산
-  const getConsecutiveAttendanceMembers = (_type: string) => {
-    const sampleData = [
-      { name: '김민수', team: '1순', role: '순장', consecutiveWeeks: 4 },
-      { name: '이영희', team: '2순', role: null, consecutiveWeeks: 3 },
-      { name: '박철수', team: '3순', role: '부순장', consecutiveWeeks: 2 },
-    ];
-    return sampleData;
+  // 연속 출석 인원 데이터 계산 (continuousAttendeeCount 사용)
+  const getConsecutiveAttendanceMembers = (type: string) => {
+    if (!continuousAttendanceStats?.continuousAttendeeCount) {
+      return [];
+    }
+
+    const attendeeData = continuousAttendanceStats.continuousAttendeeCount;
+    let members: any[] = [];
+
+    // 타입에 따라 해당하는 데이터 가져오기
+    switch (type) {
+      case 'wednesday':
+        members = [
+          ...(attendeeData.wednesdayYoungAdult?.['4weeks'] || []),
+          ...(attendeeData.wednesdayYoungAdult?.['3weeks'] || []),
+          ...(attendeeData.wednesdayYoungAdult?.['2weeks'] || []),
+        ];
+        break;
+      case 'friday':
+        members = [
+          ...(attendeeData.fridayYoungAdult?.['4weeks'] || []),
+          ...(attendeeData.fridayYoungAdult?.['3weeks'] || []),
+          ...(attendeeData.fridayYoungAdult?.['2weeks'] || []),
+        ];
+        break;
+      case 'sundayYoungAdult':
+        members = [
+          ...(attendeeData.sundayYoungAdult?.['4weeks'] || []),
+          ...(attendeeData.sundayYoungAdult?.['3weeks'] || []),
+          ...(attendeeData.sundayYoungAdult?.['2weeks'] || []),
+        ];
+        break;
+      case 'special': // 대예배
+        members = [
+          ...(attendeeData.sunday?.['4weeks'] || []),
+          ...(attendeeData.sunday?.['3weeks'] || []),
+          ...(attendeeData.sunday?.['2weeks'] || []),
+        ];
+        break;
+      default:
+        return [];
+    }
+
+    // 데이터 변환 (API 응답 형식을 컴포넌트가 기대하는 형식으로)
+    return members.map(member => ({
+      name: member.name,
+      team: member.organization || '',
+      role: member.role,
+      consecutiveWeeks: getConsecutiveWeeks(member, attendeeData, type),
+    }));
+  };
+
+  // 연속 주차 계산 헬퍼 함수 (키에서 숫자 추출)
+  const getConsecutiveWeeks = (
+    member: any,
+    attendeeData: any,
+    type: string
+  ) => {
+    const typeData = attendeeData[type === 'special' ? 'sunday' : type];
+    if (!typeData) return 0;
+
+    // 각 주차별 배열에서 해당 멤버 찾기
+    const weekKeys = ['4weeks', '3weeks', '2weeks'];
+    for (const weekKey of weekKeys) {
+      if (typeData[weekKey]?.some((m: any) => m.name === member.name)) {
+        // "4weeks" -> "4", "3weeks" -> "3", "2weeks" -> "2"
+        return parseInt(weekKey.split('weeks')[0]);
+      }
+    }
+    return 0;
   };
 
   // 팝업창 열기 함수
