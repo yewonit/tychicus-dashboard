@@ -127,14 +127,17 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
     const allValues = [...sundayData, ...sundayYoungAdultData, ...wednesdayYoungAdultData, ...fridayYoungAdultData];
     const maxValue = Math.max(...allValues, 0);
 
-    // 최대값에 따른 적절한 Y축 상한값 계산
+    // 최대값에 따른 적절한 Y축 상한값 계산 (5단위로 끊기)
     let yAxisMax;
     if (maxValue <= 10) {
       yAxisMax = Math.max(maxValue + 2, 10); // 작은 값일 때는 +2 정도의 여유
-    } else if (maxValue <= 50) {
-      yAxisMax = Math.ceil(maxValue * 1.1); // 중간 값일 때는 1.1배
     } else {
-      yAxisMax = Math.ceil(maxValue * 1.2); // 큰 값일 때는 1.2배
+      // 5단위로 끊기기 위해 최대값을 5의 배수로 올림
+      yAxisMax = Math.ceil(maxValue / 5) * 5;
+      // 최소 1단위 여유 공간만 확보 (과도한 여백 방지)
+      if (yAxisMax - maxValue < 1) {
+        yAxisMax += 5;
+      }
     }
 
     return {
@@ -240,7 +243,7 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
             beginAtZero: true,
             max: chartData.maxValue,
             ticks: {
-              stepSize: Math.max(1, Math.ceil(chartData.maxValue / 8)), // 최대 8개 구간으로 나누기
+              stepSize: 5, // 5단위로 고정
             },
           },
         },
