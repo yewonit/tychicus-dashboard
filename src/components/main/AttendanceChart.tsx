@@ -74,6 +74,7 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
           wednesdayYoungAdult: 0,
           fridayYoungAdult: 0,
         },
+        maxValue: 10,
       };
     }
 
@@ -118,6 +119,23 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
 
     // 필터링된 데이터로 차트 데이터 생성
     const sundayData = filteredCounts.map(item => item.sunday);
+    const sundayYoungAdultData = filteredCounts.map(item => item.sundayYoungAdult);
+    const wednesdayYoungAdultData = filteredCounts.map(item => item.wednesdayYoungAdult);
+    const fridayYoungAdultData = filteredCounts.map(item => item.fridayYoungAdult);
+
+    // 모든 데이터셋의 최대값 계산
+    const allValues = [...sundayData, ...sundayYoungAdultData, ...wednesdayYoungAdultData, ...fridayYoungAdultData];
+    const maxValue = Math.max(...allValues, 0);
+
+    // 최대값에 따른 적절한 Y축 상한값 계산
+    let yAxisMax;
+    if (maxValue <= 10) {
+      yAxisMax = Math.max(maxValue + 2, 10); // 작은 값일 때는 +2 정도의 여유
+    } else if (maxValue <= 50) {
+      yAxisMax = Math.ceil(maxValue * 1.1); // 중간 값일 때는 1.1배
+    } else {
+      yAxisMax = Math.ceil(maxValue * 1.2); // 큰 값일 때는 1.2배
+    }
 
     return {
       labels: filteredLabels,
@@ -131,21 +149,21 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
         },
         {
           label: '주일청년예배',
-          data: filteredCounts.map(item => item.sundayYoungAdult),
+          data: sundayYoungAdultData,
           backgroundColor: 'rgba(151, 180, 222, 0.8)',
           borderColor: 'rgba(151, 180, 222, 1)',
           borderWidth: 1,
         },
         {
           label: '수요제자기도회',
-          data: filteredCounts.map(item => item.wednesdayYoungAdult),
+          data: wednesdayYoungAdultData,
           backgroundColor: 'rgba(255, 193, 7, 0.8)',
           borderColor: 'rgba(255, 193, 7, 1)',
           borderWidth: 1,
         },
         {
           label: '두란노사역자모임',
-          data: filteredCounts.map(item => item.fridayYoungAdult),
+          data: fridayYoungAdultData,
           backgroundColor: 'rgba(40, 167, 69, 0.8)',
           borderColor: 'rgba(40, 167, 69, 1)',
           borderWidth: 1,
@@ -163,6 +181,7 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
         wednesdayYoungAdult: 0,
         fridayYoungAdult: 0,
       },
+      maxValue: yAxisMax,
     };
   }, [attendanceData2025, chartType]);
 
@@ -219,9 +238,9 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
         scales: {
           y: {
             beginAtZero: true,
-            max: attendanceData2025?.attendanceYAxisMax || 10,
+            max: chartData.maxValue,
             ticks: {
-              stepSize: 1,
+              stepSize: Math.max(1, Math.ceil(chartData.maxValue / 8)), // 최대 8개 구간으로 나누기
             },
           },
         },

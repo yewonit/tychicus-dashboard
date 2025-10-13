@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AttendanceTrendData, ContinuousAttendanceStats, Gook, Group } from '../../types';
 import { getAccessibleOrganizations } from '../../utils/authService';
 import axiosClient from '../../utils/axiosClient';
@@ -21,6 +21,10 @@ const Dashboard: React.FC = () => {
     title: '',
     data: [],
   });
+
+  // 중복 API 호출 방지를 위한 ref
+  const hasInitialized = useRef(false);
+  const lastFetchParams = useRef<{ gookId: number | '전체'; groupId: number | '전체' } | null>(null);
 
   // API 데이터 상태
   const [gooks, setGooks] = useState<Gook[]>([]);
@@ -329,16 +333,33 @@ const Dashboard: React.FC = () => {
 
   // 컴포넌트 마운트 시 접근 가능한 조직 데이터 가져오기
   useEffect(() => {
+    if (hasInitialized.current) return;
+    hasInitialized.current = true;
+
     fetchAccessibleOrganizations();
     fetchAttendanceTrend(); // 트렌드 데이터는 국/그룹 선택과 무관
-  }, [fetchAccessibleOrganizations]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // 국/그룹 선택이 변경될 때마다 출석 데이터 가져오기
   useEffect(() => {
+    // 동일한 파라미터로 중복 호출 방지
+    const currentParams = { gookId: selectedGukId, groupId: selectedGroupId };
+    if (
+      lastFetchParams.current &&
+      lastFetchParams.current.gookId === currentParams.gookId &&
+      lastFetchParams.current.groupId === currentParams.groupId
+    ) {
+      return;
+    }
+
+    lastFetchParams.current = currentParams;
+
     fetchWeeklyStats(selectedGukId, selectedGroupId);
     fetchWeeklyGraph(selectedGukId, selectedGroupId);
     fetchContinuousAttendance(selectedGukId, selectedGroupId);
-  }, [selectedGukId, selectedGroupId, fetchWeeklyGraph]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedGukId, selectedGroupId]);
 
   // 선택된 국이 변경될 때는 이미 모든 그룹 데이터가 있으므로 별도 처리 불필요
   // (fetchAccessibleOrganizations에서 모든 국과 그룹 데이터를 한번에 가져옴)
