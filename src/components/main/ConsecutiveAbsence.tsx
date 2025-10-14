@@ -12,10 +12,10 @@ const ConsecutiveAbsence: React.FC<ConsecutiveAbsenceProps> = ({ continuousAtten
   const getConsecutiveWeeks = (member: any, absenteeList: any) => {
     if (!absenteeList) return 0;
 
-    // 각 주차별 배열에서 해당 멤버 찾기
+    // 각 주차별 배열에서 해당 멤버 찾기 (이름과 조직 모두 일치해야 함)
     const weekKeys = ['4weeks', '3weeks', '2weeks'];
     for (const weekKey of weekKeys) {
-      if (absenteeList[weekKey]?.some((m: any) => m.name === member.name)) {
+      if (absenteeList[weekKey]?.some((m: any) => m.name === member.name && m.organization === member.organization)) {
         // "4weeks" -> "4", "3weeks" -> "3", "2weeks" -> "2"
         return parseInt(weekKey.split('weeks')[0]);
       }
