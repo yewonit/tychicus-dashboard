@@ -91,7 +91,7 @@ const ConsecutiveAbsence: React.FC<ConsecutiveAbsenceProps> = ({ continuousAtten
             <div className='absence-stat-value high-severity'>{absenceStats.consecutive4Weeks}명</div>
           </div>
           <div className='absence-list'>
-            {(absenceStats.members.consecutive4Weeks || []).slice(0, 5).map((member, index) => (
+            {(absenceStats.members.consecutive4Weeks || []).map((member, index) => (
               <div key={index} className='absence-item'>
                 <div className='absence-member-info'>
                   <span className='absence-member-name'>{member.name}</span>
@@ -110,7 +110,7 @@ const ConsecutiveAbsence: React.FC<ConsecutiveAbsenceProps> = ({ continuousAtten
             <div className='absence-stat-value medium-severity'>{absenceStats.consecutive3Weeks}명</div>
           </div>
           <div className='absence-list'>
-            {(absenceStats.members.consecutive3Weeks || []).slice(0, 5).map((member, index) => (
+            {(absenceStats.members.consecutive3Weeks || []).map((member, index) => (
               <div key={index} className='absence-item'>
                 <div className='absence-member-info'>
                   <span className='absence-member-name'>{member.name}</span>
@@ -129,7 +129,7 @@ const ConsecutiveAbsence: React.FC<ConsecutiveAbsenceProps> = ({ continuousAtten
             <div className='absence-stat-value low-severity'>{absenceStats.consecutive2Weeks}명</div>
           </div>
           <div className='absence-list'>
-            {(absenceStats.members.consecutive2Weeks || []).slice(0, 5).map((member, index) => (
+            {(absenceStats.members.consecutive2Weeks || []).map((member, index) => (
               <div key={index} className='absence-item'>
                 <div className='absence-member-info'>
                   <span className='absence-member-name'>{member.name}</span>
