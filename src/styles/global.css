@@ -8,12 +8,12 @@
      DUGIGO 브랜드 컬러 토큰
      ======================== */
   /* 브랜드 기본 색상 */
-  --charleston-green: #2A2829;
-  --dark-sky-blue: #97B4DE;
-  --royal-blue: #263A99;
-  --alabaster-white: #F0EBE5;
-  --pastel-gray: #DCD0BE;
-  
+  --charleston-green: #2a2829;
+  --dark-sky-blue: #97b4de;
+  --royal-blue: #263a99;
+  --alabaster-white: #f0ebe5;
+  --pastel-gray: #dcd0be;
+
   /* DUGIGO 유틸리티 컬러 */
   --text-primary-dugigo: var(--charleston-green);
   --text-secondary-dugigo: #6c757d;
@@ -22,12 +22,18 @@
   --background-secondary-dugigo: var(--pastel-gray);
   --accent-primary-dugigo: var(--royal-blue);
   --accent-secondary-dugigo: var(--dark-sky-blue);
-  
+
   /* 미정의 변수 해결 */
   --blue-oblivion: var(--royal-blue);
   --sapphire-dust: var(--dark-sky-blue);
-  --caramel-essence: #E3AF64;
-  
+  --caramel-essence: #ff8c42;
+
+  /* 네비게이션 전용 그라데이션 */
+  --nav-gradient-primary: linear-gradient(135deg, #263a99, #97b4de);
+  --nav-gradient-logo: linear-gradient(135deg, #f0ebe5, #dcd0be);
+  --nav-gradient-user: linear-gradient(180deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.3) 100%);
+  --nav-gradient-avatar: linear-gradient(135deg, #ff8c42, #97b4de);
+
   /* ========================
      기존 변수를 DUGIGO 토큰으로 교체 (전체 적용)
      ======================== */
@@ -54,17 +60,17 @@
   --state-success: #28a745;
   --state-warning: #ffc107;
   --state-danger: #dc3545;
-  --state-success-light: #10B981;
-  --state-warning-light: #F59E0B;
-  --state-danger-light: #EF4444;
-  
+  --state-success-light: #10b981;
+  --state-warning-light: #f59e0b;
+  --state-danger-light: #ef4444;
+
   /* DUGIGO 표면/보더 토큰 */
   --surface-muted: #f8f9fa;
   --border-subtle: #e9ecef;
-  --border-neutral: #E5E7EB;
+  --border-neutral: #e5e7eb;
   --bg-card-dugigo: #ffffff;
   --bg-hover-dugigo: #f8f9fa;
-  
+
   /* 중성 색상 (그레이 스케일) */
   --gray-100: #f1f1f1;
   --gray-300: #c1c1c1;
@@ -77,7 +83,7 @@
   --gradient-background-dugigo: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   --gradient-text-dugigo: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   --gradient-indigo: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  
+
   /* 기존 그라데이션 (호환성) */
   --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
   --gradient-secondary: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
@@ -152,22 +158,22 @@
   --tablet-min-width: 768px;
   --tablet-max-width: 1024px;
   --desktop-min-width: 1025px;
-  
+
   /* DUGIGO 레이아웃 토큰 */
   --sidebar-width-desktop: 240px;
   --sidebar-width-tablet: 200px;
   --sidebar-width-mobile: 180px;
-  
+
   /* DUGIGO 그림자 시스템 */
   --shadow-light-dugigo: 0 2px 8px rgba(0, 0, 0, 0.05);
   --shadow-medium-dugigo: 0 4px 12px rgba(0, 0, 0, 0.08);
   --shadow-heavy-dugigo: 0 8px 25px rgba(0, 0, 0, 0.15);
-  
+
   /* 트랜지션 */
   --transition-fast: 0.2s ease;
   --transition-normal: 0.3s ease;
   --transition-slow: 0.5s ease;
-  
+
   /* ========================
      DUGIGO 매핑 변수 (점진적 전환용)
      ======================== */
@@ -177,16 +183,16 @@
   --brand-text: var(--charleston-green);
   --brand-background: var(--alabaster-white);
   --brand-surface: var(--pastel-gray);
-  
+
   /* 차트 팔레트 토큰 */
-  --chart-axis: #6B7280;
-  --chart-grid: #E5E7EB;
+  --chart-axis: #6b7280;
+  --chart-grid: #e5e7eb;
   --chart-primary: var(--royal-blue);
   --chart-secondary: var(--dark-sky-blue);
   --chart-success: var(--state-success);
   --chart-warning: var(--state-warning);
   --chart-danger: var(--state-danger);
-  
+
   /* 부록 G 추가 토큰 */
   /* 심방 관리 메서드 배지 색상 */
   --method-meeting-bg: #e3f2fd;
@@ -195,11 +201,11 @@
   --method-call-text: #7b1fa2;
   --method-kakao-bg: #fff3e0;
   --method-kakao-text: #f57c00;
-  
+
   /* 아이콘 상태 색상 */
-  --icon-inactive: #CCCCCC;
-  --icon-favorite: #FFD700;
-  
+  --icon-inactive: #cccccc;
+  --icon-favorite: #ffd700;
+
   /* 로고 텍스트 그라데이션 */
   --gradient-logo: linear-gradient(135deg, var(--alabaster-white) 0%, var(--pastel-gray) 100%);
 }
@@ -418,7 +424,7 @@ html {
   .mobile-restriction-overlay {
     display: flex;
   }
-  
+
   /* 사용자가 강제 진입을 선택한 경우 숨김 */
   .mobile-restriction-overlay.allow-mobile {
     display: none;
@@ -3685,79 +3691,90 @@ html {
 }
 
 /* ========================
-   Sidebar 스타일
+   네비게이션 스타일 - 가이드 완벽 구현
    ======================== */
+
+/* 메인 사이드바 컨테이너 */
 .sidebar-container {
+  width: 240px;
+  height: 100vh;
+  background: var(--nav-gradient-primary);
+  color: white;
   position: fixed;
   left: 0;
   top: 0;
-  width: 280px;
-  height: 100vh;
-  background: var(--bg-elevated);
-  border-right: 1px solid var(--border-light);
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   z-index: 1000;
-  transition: transform 0.3s ease;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  padding-bottom: 120px;
+  padding-right: 6px;
 }
 
-/* 모바일에서 사이드바 숨김 */
-@media (max-width: 768px) {
-  .sidebar-container {
-    transform: translateX(-100%);
-  }
-
-  .sidebar-container.open {
-    transform: translateX(0);
-  }
+/* 스크롤바 스타일링 */
+.sidebar-container::-webkit-scrollbar {
+  width: 6px;
 }
 
+.sidebar-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.sidebar-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.sidebar-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* 로고 영역 */
 .sidebar-header {
-  padding: var(--spacing-lg);
-  border-bottom: 1px solid var(--border-light);
-  background: var(--gradient-primary);
+  padding: 20px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .sidebar-logo {
-  text-align: center;
+  /* 로고 컨테이너 스타일 제거 */
 }
 
 .sidebar-title {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
-  color: white;
-  margin: 0 0 4px 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0;
+  background: var(--nav-gradient-logo);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .sidebar-subtitle {
-  font-size: var(--font-size-sm);
-  color: rgba(255, 255, 255, 0.9);
-  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 3px 0 0 0;
 }
 
+/* 네비게이션 메뉴 */
 .sidebar-content {
-  flex: 1;
-  overflow-y: auto;
-  padding: var(--spacing-md) 0;
+  padding: 15px 0;
 }
 
 .sidebar-nav {
-  height: 100%;
+  /* 네비게이션 컨테이너 */
 }
 
 .sidebar-category {
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: 15px;
 }
 
 .sidebar-category-title {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
-  color: var(--text-tertiary);
+  padding: 0 20px 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.6);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  padding: 0 var(--spacing-lg);
-  margin-bottom: var(--spacing-sm);
 }
 
 .sidebar-menu-list {
@@ -3770,31 +3787,34 @@ html {
   margin: 0;
 }
 
+/* 메뉴 아이템 */
 .sidebar-menu-button {
   width: 100%;
   display: flex;
   align-items: center;
-  padding: 12px var(--spacing-lg);
+  padding: 10px 20px;
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  position: relative;
   border: none;
   background: transparent;
-  color: var(--text-primary);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
   cursor: pointer;
-  transition: all 0.2s ease;
   text-align: left;
-  gap: 12px;
 }
 
 .sidebar-menu-button:hover {
-  background: var(--bg-card);
-  color: var(--primary);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  transform: translateX(5px);
 }
 
 .sidebar-menu-button.active {
-  background: var(--gradient-primary);
+  background: rgba(255, 255, 255, 0.15);
   color: white;
-  font-weight: var(--font-weight-bold);
+  font-weight: 600;
 }
 
 .sidebar-menu-button.active::before {
@@ -3804,47 +3824,50 @@ html {
   top: 0;
   bottom: 0;
   width: 4px;
-  background: var(--accent);
+  background: rgba(255, 255, 255, 0.8);
 }
 
 .sidebar-menu-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
+  margin-right: 12px;
+  font-size: 1rem;
+  width: 18px;
+  text-align: center;
 }
 
 .sidebar-menu-text {
   flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
+/* 사용자 정보 영역 */
 .sidebar-footer {
-  padding: var(--spacing-md) var(--spacing-lg);
-  border-top: 1px solid var(--border-light);
-  background: var(--bg-card);
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 234px;
+  padding: 20px 25px 20px 25px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--nav-gradient-user);
+  backdrop-filter: blur(10px);
+  z-index: 1001;
 }
 
 .sidebar-user-info {
   display: flex;
   align-items: center;
-  gap: 12px;
+  margin-bottom: 10px;
 }
 
 .sidebar-user-avatar {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: var(--gradient-primary);
+  background: var(--nav-gradient-avatar);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
-  color: white;
+  margin-right: 12px;
+  font-weight: 600;
+  font-size: 1.1rem;
 }
 
 .sidebar-user-details {
@@ -3852,16 +3875,160 @@ html {
 }
 
 .sidebar-user-name {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--text-primary);
-  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0 0 3px 0;
+  color: white;
 }
 
 .sidebar-user-role {
-  font-size: var(--font-size-xs);
-  color: var(--text-tertiary);
-  margin: 2px 0 0 0;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+  font-weight: 500;
+}
+
+/* 로그아웃 버튼 */
+.sidebar-logout-button {
+  width: 100%;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.sidebar-logout-button:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+.sidebar-logout-button:active {
+  transform: translateY(0);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .sidebar-container {
+    width: 200px;
+  }
+
+  .sidebar-header {
+    padding: 15px 15px;
+  }
+
+  .sidebar-title {
+    font-size: 1.2rem;
+  }
+
+  .sidebar-subtitle {
+    font-size: 0.8rem;
+  }
+
+  .sidebar-category-title {
+    padding: 0 15px 6px;
+    font-size: 0.7rem;
+  }
+
+  .sidebar-menu-button {
+    padding: 8px 15px;
+    font-size: 0.85rem;
+  }
+
+  .sidebar-menu-icon {
+    margin-right: 10px;
+    font-size: 0.9rem;
+    width: 16px;
+  }
+
+  .sidebar-footer {
+    width: 194px;
+    padding: 15px 20px 15px 20px;
+  }
+
+  .sidebar-user-avatar {
+    width: 35px;
+    height: 35px;
+    margin-right: 10px;
+    font-size: 1rem;
+  }
+
+  .sidebar-user-name {
+    font-size: 0.9rem;
+  }
+
+  .sidebar-user-role {
+    font-size: 0.75rem;
+  }
+
+  .sidebar-logout-button {
+    padding: 8px 10px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar-container {
+    width: 180px;
+  }
+
+  .sidebar-header {
+    padding: 12px 12px;
+  }
+
+  .sidebar-title {
+    font-size: 1.1rem;
+  }
+
+  .sidebar-subtitle {
+    font-size: 0.75rem;
+  }
+
+  .sidebar-category-title {
+    padding: 0 12px 5px;
+    font-size: 0.65rem;
+  }
+
+  .sidebar-menu-button {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+
+  .sidebar-menu-icon {
+    margin-right: 8px;
+    font-size: 0.85rem;
+    width: 14px;
+  }
+
+  .sidebar-footer {
+    width: 174px;
+    padding: 12px 15px 12px 15px;
+  }
+
+  .sidebar-user-avatar {
+    width: 30px;
+    height: 30px;
+    margin-right: 8px;
+    font-size: 0.9rem;
+  }
+
+  .sidebar-user-name {
+    font-size: 0.85rem;
+  }
+
+  .sidebar-user-role {
+    font-size: 0.7rem;
+  }
+
+  .sidebar-logout-button {
+    padding: 6px 8px;
+    font-size: 0.75rem;
+  }
 }
 
 /* 메인 콘텐츠가 사이드바 옆에 위치하도록 조정 */
@@ -6797,11 +6964,11 @@ html {
   .dugigo-table-container {
     overflow-x: auto;
   }
-  
+
   .dugigo-table {
     min-width: 600px;
   }
-  
+
   .dugigo-table-header-cell,
   .dugigo-table-cell {
     padding: 12px 8px;
@@ -6998,11 +7165,11 @@ html {
   .dugigo-chart-container {
     padding: var(--spacing-md);
   }
-  
+
   .dugigo-chart-title {
     font-size: var(--font-size-base);
   }
-  
+
   .dugigo-chart-summary {
     flex-direction: column;
     gap: var(--spacing-sm);
@@ -7010,66 +7177,82 @@ html {
 }
 
 /* ========================
-   DUGIGO 사이드바 시스템
+   DUGIGO 네비게이션 스타일 - 가이드 완벽 구현
    ======================== */
+
+/* 메인 사이드바 컨테이너 */
 .dugigo-sidebar-container {
+  width: 240px;
+  height: 100vh;
+  background: var(--nav-gradient-primary);
+  color: white;
   position: fixed;
   left: 0;
   top: 0;
-  width: var(--sidebar-width-desktop);
-  height: 100vh;
-  background: var(--bg-card-dugigo);
-  border-right: 1px solid var(--border-subtle);
-  display: flex;
-  flex-direction: column;
-  box-shadow: var(--shadow-medium-dugigo);
   z-index: 1000;
-  transition: var(--transition-normal);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  padding-bottom: 120px;
+  padding-right: 6px;
 }
 
+/* 스크롤바 스타일링 */
+.dugigo-sidebar-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dugigo-sidebar-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.dugigo-sidebar-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.dugigo-sidebar-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* 로고 영역 */
 .dugigo-sidebar-header {
-  padding: var(--spacing-lg);
-  border-bottom: 1px solid var(--border-subtle);
-  background: var(--gradient-primary-dugigo);
+  padding: 20px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .dugigo-sidebar-title {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-  background: var(--gradient-logo);
-  background-clip: text;
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0;
+  background: var(--nav-gradient-logo);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  color: white; /* fallback */
-  margin: 0 0 4px 0;
-  text-align: center;
+  background-clip: text;
 }
 
 .dugigo-sidebar-subtitle {
-  font-size: var(--font-size-sm);
-  color: rgba(255, 255, 255, 0.9);
-  margin: 0;
-  text-align: center;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 3px 0 0 0;
 }
 
+/* 네비게이션 메뉴 */
 .dugigo-sidebar-content {
-  flex: 1;
-  overflow-y: auto;
-  padding: var(--spacing-md) 0;
+  padding: 15px 0;
 }
 
 .dugigo-sidebar-category {
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: 15px;
 }
 
 .dugigo-sidebar-category-title {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
-  color: var(--text-muted-dugigo);
+  padding: 0 20px 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.6);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  padding: 0 var(--spacing-lg);
-  margin-bottom: var(--spacing-sm);
 }
 
 .dugigo-sidebar-menu-list {
@@ -7082,31 +7265,34 @@ html {
   margin: 0;
 }
 
+/* 메뉴 아이템 */
 .dugigo-sidebar-menu-button {
   width: 100%;
-  background: none;
-  border: none;
-  padding: 12px var(--spacing-lg);
-  text-align: left;
-  cursor: pointer;
-  transition: var(--transition-fast);
   display: flex;
   align-items: center;
-  gap: 12px;
+  padding: 10px 20px;
   color: rgba(255, 255, 255, 0.8);
-  font-size: var(--font-size-base);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
   position: relative;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
 }
 
 .dugigo-sidebar-menu-button:hover {
-  background: var(--bg-hover-dugigo);
+  background: rgba(255, 255, 255, 0.1);
   color: white;
+  transform: translateX(5px);
 }
 
 .dugigo-sidebar-menu-button.active {
-  background: var(--gradient-primary-dugigo);
+  background: rgba(255, 255, 255, 0.15);
   color: white;
-  font-weight: var(--font-weight-bold);
+  font-weight: 600;
 }
 
 .dugigo-sidebar-menu-button.active::before {
@@ -7116,47 +7302,50 @@ html {
   top: 0;
   bottom: 0;
   width: 4px;
-  background: var(--accent-secondary-dugigo);
+  background: rgba(255, 255, 255, 0.8);
 }
 
 .dugigo-sidebar-menu-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
+  margin-right: 12px;
+  font-size: 1rem;
+  width: 18px;
+  text-align: center;
 }
 
 .dugigo-sidebar-menu-text {
   flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
+/* 사용자 정보 영역 */
 .dugigo-sidebar-footer {
-  padding: var(--spacing-md) var(--spacing-lg);
-  border-top: 1px solid var(--border-subtle);
-  background: var(--surface-muted);
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 234px;
+  padding: 20px 25px 20px 25px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--nav-gradient-user);
+  backdrop-filter: blur(10px);
+  z-index: 1001;
 }
 
 .dugigo-sidebar-user-info {
   display: flex;
   align-items: center;
-  gap: 12px;
+  margin-bottom: 10px;
 }
 
 .dugigo-sidebar-user-avatar {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: var(--gradient-primary-dugigo);
+  background: var(--nav-gradient-avatar);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
-  color: white;
+  margin-right: 12px;
+  font-weight: 600;
+  font-size: 1.1rem;
 }
 
 .dugigo-sidebar-user-details {
@@ -7164,33 +7353,159 @@ html {
 }
 
 .dugigo-sidebar-user-name {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--brand-text);
-  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0 0 3px 0;
+  color: white;
 }
 
 .dugigo-sidebar-user-role {
-  font-size: var(--font-size-xs);
-  color: var(--text-secondary-dugigo);
-  margin: 2px 0 0 0;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+  font-weight: 500;
+}
+
+/* 로그아웃 버튼 */
+.dugigo-sidebar-logout-button {
+  width: 100%;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.dugigo-sidebar-logout-button:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+.dugigo-sidebar-logout-button:active {
+  transform: translateY(0);
 }
 
 /* DUGIGO 사이드바 반응형 */
 @media (max-width: 1024px) {
   .dugigo-sidebar-container {
-    width: var(--sidebar-width-tablet);
+    width: 200px;
+  }
+
+  .dugigo-sidebar-header {
+    padding: 15px 15px;
+  }
+
+  .dugigo-sidebar-title {
+    font-size: 1.2rem;
+  }
+
+  .dugigo-sidebar-subtitle {
+    font-size: 0.8rem;
+  }
+
+  .dugigo-sidebar-category-title {
+    padding: 0 15px 6px;
+    font-size: 0.7rem;
+  }
+
+  .dugigo-sidebar-menu-button {
+    padding: 8px 15px;
+    font-size: 0.85rem;
+  }
+
+  .dugigo-sidebar-menu-icon {
+    margin-right: 10px;
+    font-size: 0.9rem;
+    width: 16px;
+  }
+
+  .dugigo-sidebar-footer {
+    width: 194px;
+    padding: 15px 20px 15px 20px;
+  }
+
+  .dugigo-sidebar-user-avatar {
+    width: 35px;
+    height: 35px;
+    margin-right: 10px;
+    font-size: 1rem;
+  }
+
+  .dugigo-sidebar-user-name {
+    font-size: 0.9rem;
+  }
+
+  .dugigo-sidebar-user-role {
+    font-size: 0.75rem;
+  }
+
+  .dugigo-sidebar-logout-button {
+    padding: 8px 10px;
+    font-size: 0.8rem;
   }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 768px) {
   .dugigo-sidebar-container {
-    width: var(--sidebar-width-mobile);
-    transform: translateX(-100%);
+    width: 180px;
   }
-  
-  .dugigo-sidebar-container.open {
-    transform: translateX(0);
+
+  .dugigo-sidebar-header {
+    padding: 12px 12px;
+  }
+
+  .dugigo-sidebar-title {
+    font-size: 1.1rem;
+  }
+
+  .dugigo-sidebar-subtitle {
+    font-size: 0.75rem;
+  }
+
+  .dugigo-sidebar-category-title {
+    padding: 0 12px 5px;
+    font-size: 0.65rem;
+  }
+
+  .dugigo-sidebar-menu-button {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+
+  .dugigo-sidebar-menu-icon {
+    margin-right: 8px;
+    font-size: 0.85rem;
+    width: 14px;
+  }
+
+  .dugigo-sidebar-footer {
+    width: 174px;
+    padding: 12px 15px 12px 15px;
+  }
+
+  .dugigo-sidebar-user-avatar {
+    width: 30px;
+    height: 30px;
+    margin-right: 8px;
+    font-size: 0.9rem;
+  }
+
+  .dugigo-sidebar-user-name {
+    font-size: 0.85rem;
+  }
+
+  .dugigo-sidebar-user-role {
+    font-size: 0.7rem;
+  }
+
+  .dugigo-sidebar-logout-button {
+    padding: 6px 8px;
+    font-size: 0.75rem;
   }
 }
 
@@ -7237,7 +7552,7 @@ html {
   .dugigo-main-content {
     margin-left: var(--sidebar-width-tablet);
   }
-  
+
   .dugigo-main-content-inner {
     padding: var(--spacing-md);
   }
@@ -7248,7 +7563,7 @@ html {
     margin-left: 0;
     width: 100%;
   }
-  
+
   .dugigo-main-content-inner {
     padding: var(--spacing-sm);
   }

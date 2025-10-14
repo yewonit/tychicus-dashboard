@@ -21,7 +21,7 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ dugigo = false }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const menuSections: MenuSection[] = [
     {
@@ -68,6 +68,15 @@ const Sidebar: React.FC<SidebarProps> = ({ dugigo = false }) => {
 
   const handleMenuClick = (path: string) => {
     navigate(path);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('로그아웃 실패:', error);
+    }
   };
 
   const isActive = (path: string) => {
@@ -149,13 +158,15 @@ const Sidebar: React.FC<SidebarProps> = ({ dugigo = false }) => {
 
   return (
     <div className={getContainerClassName()}>
+      {/* 로고 영역 */}
       <div className={getHeaderClassName()}>
         <div className='sidebar-logo'>
-          <h2 className={getTitleClassName()}>코람데오</h2>
-          <p className={getSubtitleClassName()}>청년회 관리</p>
+          <h1 className={getTitleClassName()}>청년회 어드민</h1>
+          <p className={getSubtitleClassName()}>코람데오 교회</p>
         </div>
       </div>
 
+      {/* 네비게이션 메뉴 */}
       <div className={getContentClassName()}>
         <nav className='sidebar-nav'>
           {menuSections.map((section, sectionIndex) => (
@@ -164,10 +175,7 @@ const Sidebar: React.FC<SidebarProps> = ({ dugigo = false }) => {
               <ul className={getMenuListClassName()}>
                 {section.items.map((item, itemIndex) => (
                   <li key={itemIndex} className={getMenuItemClassName()}>
-                    <button
-                      className={getMenuButtonClassName(item.path)}
-                      onClick={() => handleMenuClick(item.path)}
-                    >
+                    <button className={getMenuButtonClassName(item.path)} onClick={() => handleMenuClick(item.path)}>
                       <span className={getMenuIconClassName()}>{item.icon}</span>
                       <span className={getMenuTextClassName()}>{item.text}</span>
                     </button>
@@ -179,14 +187,18 @@ const Sidebar: React.FC<SidebarProps> = ({ dugigo = false }) => {
         </nav>
       </div>
 
+      {/* 사용자 정보 영역 */}
       <div className={getFooterClassName()}>
         <div className={getUserInfoClassName()}>
-          <div className={getUserAvatarClassName()}>👤</div>
+          <div className={getUserAvatarClassName()}>관</div>
           <div className={getUserDetailsClassName()}>
-            <div className={getUserNameClassName()}>{user?.name || '사용자'}</div>
-            <div className={getUserRoleClassName()}>{user?.roles?.[0]?.roleName || ''}</div>
+            <div className={getUserNameClassName()}>{user?.name || '관리자'}</div>
+            <div className={getUserRoleClassName()}>{user?.roles?.[0]?.roleName || '시스템 관리자'}</div>
           </div>
         </div>
+        <button className={dugigo ? 'dugigo-sidebar-logout-button' : 'sidebar-logout-button'} onClick={handleLogout}>
+          로그아웃
+        </button>
       </div>
     </div>
   );
