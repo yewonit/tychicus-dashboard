@@ -406,30 +406,57 @@ const Dashboard: React.FC = () => {
     switch (type) {
       case 'wednesday':
         members = [
-          ...(attendeeData.wednesdayYoungAdult?.['4weeks'] || []),
-          ...(attendeeData.wednesdayYoungAdult?.['3weeks'] || []),
-          ...(attendeeData.wednesdayYoungAdult?.['2weeks'] || []),
+          ...(attendeeData.wednesdayYoungAdult?.['4weeks'] || []).map((member: any) => ({
+            ...member,
+            consecutiveWeeks: 4,
+          })),
+          ...(attendeeData.wednesdayYoungAdult?.['3weeks'] || []).map((member: any) => ({
+            ...member,
+            consecutiveWeeks: 3,
+          })),
+          ...(attendeeData.wednesdayYoungAdult?.['2weeks'] || []).map((member: any) => ({
+            ...member,
+            consecutiveWeeks: 2,
+          })),
         ];
         break;
       case 'friday':
         members = [
-          ...(attendeeData.fridayYoungAdult?.['4weeks'] || []),
-          ...(attendeeData.fridayYoungAdult?.['3weeks'] || []),
-          ...(attendeeData.fridayYoungAdult?.['2weeks'] || []),
+          ...(attendeeData.fridayYoungAdult?.['4weeks'] || []).map((member: any) => ({
+            ...member,
+            consecutiveWeeks: 4,
+          })),
+          ...(attendeeData.fridayYoungAdult?.['3weeks'] || []).map((member: any) => ({
+            ...member,
+            consecutiveWeeks: 3,
+          })),
+          ...(attendeeData.fridayYoungAdult?.['2weeks'] || []).map((member: any) => ({
+            ...member,
+            consecutiveWeeks: 2,
+          })),
         ];
         break;
       case 'sundayYoungAdult':
         members = [
-          ...(attendeeData.sundayYoungAdult?.['4weeks'] || []),
-          ...(attendeeData.sundayYoungAdult?.['3weeks'] || []),
-          ...(attendeeData.sundayYoungAdult?.['2weeks'] || []),
+          ...(attendeeData.sundayYoungAdult?.['4weeks'] || []).map((member: any) => ({
+            ...member,
+            consecutiveWeeks: 4,
+          })),
+          ...(attendeeData.sundayYoungAdult?.['3weeks'] || []).map((member: any) => ({
+            ...member,
+            consecutiveWeeks: 3,
+          })),
+          ...(attendeeData.sundayYoungAdult?.['2weeks'] || []).map((member: any) => ({
+            ...member,
+            consecutiveWeeks: 2,
+          })),
         ];
         break;
       case 'special': // 대예배
         members = [
-          ...(attendeeData.sunday?.['4weeks'] || []),
-          ...(attendeeData.sunday?.['3weeks'] || []),
-          ...(attendeeData.sunday?.['2weeks'] || []),
+          ...(attendeeData.sunday?.['4weeks'] || []).map((member: any) => ({ ...member, consecutiveWeeks: 4 })),
+          ...(attendeeData.sunday?.['3weeks'] || []).map((member: any) => ({ ...member, consecutiveWeeks: 3 })),
+          ...(attendeeData.sunday?.['2weeks'] || []).map((member: any) => ({ ...member, consecutiveWeeks: 2 })),
         ];
         break;
       default:
@@ -441,24 +468,8 @@ const Dashboard: React.FC = () => {
       name: member.name,
       team: member.organization || '',
       role: member.role,
-      consecutiveWeeks: getConsecutiveWeeks(member, attendeeData, type),
+      consecutiveWeeks: member.consecutiveWeeks,
     }));
-  };
-
-  // 연속 주차 계산 헬퍼 함수 (키에서 숫자 추출)
-  const getConsecutiveWeeks = (member: any, attendeeData: any, type: string) => {
-    const typeData = attendeeData[type === 'special' ? 'sunday' : type];
-    if (!typeData) return 0;
-
-    // 각 주차별 배열에서 해당 멤버 찾기
-    const weekKeys = ['4weeks', '3weeks', '2weeks'];
-    for (const weekKey of weekKeys) {
-      if (typeData[weekKey]?.some((m: any) => m.name === member.name)) {
-        // "4weeks" -> "4", "3weeks" -> "3", "2weeks" -> "2"
-        return parseInt(weekKey.split('weeks')[0]);
-      }
-    }
-    return 0;
   };
 
   // 팝업창 열기 함수

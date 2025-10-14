@@ -70,10 +70,7 @@ const ConsecutiveAttendance: React.FC<ConsecutiveAttendanceProps> = ({
             </div>
           </div>
           {selectedGukId !== '전체' && (
-            <button
-              className='view-button'
-              onClick={() => onOpenAttendancePopup('wednesday', '수요제자기도회 4주간 연속 출석 인원')}
-            >
+            <button className='view-button' onClick={() => onOpenAttendancePopup('wednesday', '수요제자기도회')}>
               출석인원 확인
             </button>
           )}
@@ -96,16 +93,13 @@ const ConsecutiveAttendance: React.FC<ConsecutiveAttendanceProps> = ({
             </div>
           </div>
           {selectedGukId !== '전체' && (
-            <button
-              className='view-button'
-              onClick={() => onOpenAttendancePopup('friday', '두란노사역자모임 4주간 연속 출석 인원')}
-            >
+            <button className='view-button' onClick={() => onOpenAttendancePopup('friday', '두란노사역자모임')}>
               출석인원 확인
             </button>
           )}
         </div>
 
-        <div className='consecutive-card'>
+        {/* <div className='consecutive-card'>
           <h4 className='consecutive-title'>⛪ 주일청년예배</h4>
           <div className='consecutive-stats'>
             <div className='consecutive-stat'>
@@ -124,7 +118,7 @@ const ConsecutiveAttendance: React.FC<ConsecutiveAttendanceProps> = ({
           {selectedGukId !== '전체' && (
             <button
               className='view-button'
-              onClick={() => onOpenAttendancePopup('sundayYoungAdult', '주일청년예배 4주간 연속 출석 인원')}
+              onClick={() => onOpenAttendancePopup('sundayYoungAdult', '주일청년예배')}
             >
               출석인원 확인
             </button>
@@ -150,12 +144,12 @@ const ConsecutiveAttendance: React.FC<ConsecutiveAttendanceProps> = ({
           {selectedGukId !== '전체' && (
             <button
               className='view-button'
-              onClick={() => onOpenAttendancePopup('special', '대예배 4주간 연속 출석 인원')}
+              onClick={() => onOpenAttendancePopup('special', '대예배')}
             >
               출석인원 확인
             </button>
           )}
-        </div>
+        </div> */}
       </div>
     </div>
   );
