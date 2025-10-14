@@ -7,7 +7,7 @@ Chart.register(ChartDataLabels);
 
 interface AttendanceChartProps {
   attendanceData2025: {
-    attendanceXAxis: string[][];
+    attendanceXAxis: string[];
     attendanceYAxisMax: number | null;
     attendanceCounts: {
       sunday: number;
@@ -86,34 +86,34 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
       // 국별: "국"으로 끝나는 항목만 표시
       const gookIndices: number[] = [];
       attendanceData2025.attendanceXAxis?.forEach((item, index) => {
-        if (item[0] && item[0].endsWith('국')) {
+        if (item && item.endsWith('국')) {
           gookIndices.push(index);
         }
       });
 
-      filteredLabels = gookIndices.map(index => attendanceData2025.attendanceXAxis[index][0]);
+      filteredLabels = gookIndices.map(index => attendanceData2025.attendanceXAxis[index]);
       filteredCounts = gookIndices.map(index => attendanceData2025.attendanceCounts[index]);
     } else if (chartType === 'group') {
       // 그룹별: "그룹"으로 끝나는 항목만 표시
       const groupIndices: number[] = [];
       attendanceData2025.attendanceXAxis?.forEach((item, index) => {
-        if (item[0] && item[0].includes('그룹') && !item[0].includes('순')) {
+        if (item && item.includes('그룹') && !item.includes('순')) {
           groupIndices.push(index);
         }
       });
 
-      filteredLabels = groupIndices.map(index => attendanceData2025.attendanceXAxis[index][0]);
+      filteredLabels = groupIndices.map(index => attendanceData2025.attendanceXAxis[index]);
       filteredCounts = groupIndices.map(index => attendanceData2025.attendanceCounts[index]);
     } else if (chartType === 'sun') {
       // 순별: "순"으로 끝나는 항목만 표시
       const sunIndices: number[] = [];
       attendanceData2025.attendanceXAxis?.forEach((item, index) => {
-        if (item[0] && item[0].endsWith('순')) {
+        if (item && item.endsWith('순')) {
           sunIndices.push(index);
         }
       });
 
-      filteredLabels = sunIndices.map(index => attendanceData2025.attendanceXAxis[index][0]);
+      filteredLabels = sunIndices.map(index => attendanceData2025.attendanceXAxis[index]);
       filteredCounts = sunIndices.map(index => attendanceData2025.attendanceCounts[index]);
     }
 
@@ -134,8 +134,8 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
     } else {
       // 5단위로 끊기기 위해 최대값을 5의 배수로 올림
       yAxisMax = Math.ceil(maxValue / 5) * 5;
-      // 최소 1단위 여유 공간만 확보 (과도한 여백 방지)
-      if (yAxisMax - maxValue < 1) {
+      // 최소 5단위 여유 공간 확보 (막대가 그래프 영역을 벗어나지 않도록)
+      if (yAxisMax - maxValue < 5) {
         yAxisMax += 5;
       }
     }
