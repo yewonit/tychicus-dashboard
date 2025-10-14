@@ -34,6 +34,37 @@
   --nav-gradient-user: linear-gradient(180deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.3) 100%);
   --nav-gradient-avatar: linear-gradient(135deg, #ff8c42, #97b4de);
 
+  /* 대시보드 전용 색상 시스템 */
+  --dashboard-bg: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  --dashboard-card-bg: var(--alabaster-white);
+  --dashboard-card-hover-bg: #ffffff;
+
+  /* 상태별 색상 */
+  --status-success: #10b981;
+  --status-warning: #f59e0b;
+  --status-danger: #ef4444;
+  --status-info: #3b82f6;
+  --status-neutral: #6b7280;
+
+  /* 상태별 그라데이션 */
+  --gradient-success: linear-gradient(135deg, #10b981, #34d399);
+  --gradient-warning: linear-gradient(135deg, #f59e0b, #fbbf24);
+  --gradient-danger: linear-gradient(135deg, #ef4444, #f87171);
+  --gradient-info: linear-gradient(135deg, #3b82f6, #60a5fa);
+
+  /* 대시보드 그림자 */
+  --dashboard-shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --dashboard-shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --dashboard-shadow-heavy: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+
+  /* 차트 색상 팔레트 */
+  --chart-purple: rgba(153, 102, 255, 0.8);
+  --chart-blue: rgba(54, 162, 235, 0.8);
+  --chart-yellow: rgba(255, 206, 86, 0.8);
+  --chart-teal: rgba(75, 192, 192, 0.8);
+  --chart-red: rgba(255, 99, 132, 0.8);
+  --chart-orange: rgba(255, 159, 64, 0.8);
+
   /* ========================
      기존 변수를 DUGIGO 토큰으로 교체 (전체 적용)
      ======================== */
@@ -3687,6 +3718,75 @@ html {
 
   .visitation-table {
     min-width: 600px;
+  }
+}
+
+/* ========================
+   대시보드 메인 페이지 스타일 - 가이드 완벽 구현
+   ======================== */
+
+/* 대시보드 컨테이너 */
+.dashboard-container {
+  padding: 10px;
+  min-height: 100vh;
+  background: transparent;
+}
+
+/* 대시보드 헤더 */
+.dashboard-header {
+  margin-bottom: 20px;
+}
+
+.dashboard-header h1 {
+  font-size: 2rem; /* 32px */
+  font-weight: 800; /* Extra Bold */
+  color: var(--text-primary);
+  margin-bottom: 5px;
+  line-height: 1.2;
+}
+
+.dashboard-header p {
+  font-size: 1rem; /* 16px */
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* 반응형 - 태블릿 */
+@media (max-width: 1024px) {
+  .dashboard-container {
+    padding: 8px;
+  }
+
+  .dashboard-header {
+    margin-bottom: 15px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 1.8rem; /* 28.8px */
+  }
+
+  .dashboard-header p {
+    font-size: 0.9rem; /* 14.4px */
+  }
+}
+
+/* 반응형 - 모바일 */
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 6px;
+  }
+
+  .dashboard-header {
+    margin-bottom: 12px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 1.6rem; /* 25.6px */
+  }
+
+  .dashboard-header p {
+    font-size: 0.85rem; /* 13.6px */
   }
 }
 
