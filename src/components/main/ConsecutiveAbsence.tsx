@@ -98,7 +98,7 @@ const ConsecutiveAbsence: React.FC<ConsecutiveAbsenceProps> = ({ continuousAtten
                   {member.role && <span className='absence-member-role'>{member.role}</span>}
                   <span className='absence-team-name'>{member.team}</span>
                 </div>
-                <span className='absence-badge high-severity'>{member.consecutiveWeeks}주 연속</span>
+                <span className='absence-badge high-severity'>4주 연속</span>
               </div>
             ))}
           </div>
@@ -117,7 +117,7 @@ const ConsecutiveAbsence: React.FC<ConsecutiveAbsenceProps> = ({ continuousAtten
                   {member.role && <span className='absence-member-role'>{member.role}</span>}
                   <span className='absence-team-name'>{member.team}</span>
                 </div>
-                <span className='absence-badge medium-severity'>{member.consecutiveWeeks}주 연속</span>
+                <span className='absence-badge medium-severity'>3주 연속</span>
               </div>
             ))}
           </div>
@@ -136,7 +136,7 @@ const ConsecutiveAbsence: React.FC<ConsecutiveAbsenceProps> = ({ continuousAtten
                   {member.role && <span className='absence-member-role'>{member.role}</span>}
                   <span className='absence-team-name'>{member.team}</span>
                 </div>
-                <span className='absence-badge low-severity'>{member.consecutiveWeeks}주 연속</span>
+                <span className='absence-badge low-severity'>2주 연속</span>
               </div>
             ))}
           </div>
