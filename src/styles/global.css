@@ -186,6 +186,22 @@
   --chart-success: var(--state-success);
   --chart-warning: var(--state-warning);
   --chart-danger: var(--state-danger);
+  
+  /* 부록 G 추가 토큰 */
+  /* 심방 관리 메서드 배지 색상 */
+  --method-meeting-bg: #e3f2fd;
+  --method-meeting-text: #1976d2;
+  --method-call-bg: #f3e5f5;
+  --method-call-text: #7b1fa2;
+  --method-kakao-bg: #fff3e0;
+  --method-kakao-text: #f57c00;
+  
+  /* 아이콘 상태 색상 */
+  --icon-inactive: #CCCCCC;
+  --icon-favorite: #FFD700;
+  
+  /* 로고 텍스트 그라데이션 */
+  --gradient-logo: linear-gradient(135deg, var(--alabaster-white) 0%, var(--pastel-gray) 100%);
 }
 
 /* 전역 리셋 */
@@ -2443,15 +2459,15 @@ html {
 }
 
 .quick-stat-growth.positive {
-  color: var(--success-light);
-  background: rgba(16, 185, 129, 0.1);
-  border-color: rgba(16, 185, 129, 0.2);
+  color: var(--state-success);
+  background: rgba(40, 167, 69, 0.1);
+  border-color: rgba(40, 167, 69, 0.2);
 }
 
 .quick-stat-growth.negative {
-  color: var(--error-light);
-  background: rgba(239, 68, 68, 0.1);
-  border-color: rgba(239, 68, 68, 0.2);
+  color: var(--state-danger);
+  background: rgba(220, 53, 69, 0.1);
+  border-color: rgba(220, 53, 69, 0.2);
 }
 
 .growth-icon {
@@ -3359,18 +3375,18 @@ html {
 }
 
 .visitation-method-badge.만남 {
-  background: rgba(151, 180, 222, 0.2);
-  color: var(--secondary-dark);
+  background: var(--method-meeting-bg);
+  color: var(--method-meeting-text);
 }
 
 .visitation-method-badge.통화 {
-  background: rgba(38, 58, 153, 0.2);
-  color: var(--secondary-dark);
+  background: var(--method-call-bg);
+  color: var(--method-call-text);
 }
 
 .visitation-method-badge.카카오톡 {
-  background: rgba(220, 208, 190, 0.3);
-  color: var(--text-primary);
+  background: var(--method-kakao-bg);
+  color: var(--method-kakao-text);
 }
 
 .visitation-empty-message {
@@ -5644,18 +5660,18 @@ html {
 }
 
 .visitation-detail-method-badge.만남 {
-  background: rgba(151, 180, 222, 0.2);
-  color: var(--secondary-dark);
+  background: var(--method-meeting-bg);
+  color: var(--method-meeting-text);
 }
 
 .visitation-detail-method-badge.통화 {
-  background: rgba(38, 58, 153, 0.2);
-  color: var(--secondary-dark);
+  background: var(--method-call-bg);
+  color: var(--method-call-text);
 }
 
 .visitation-detail-method-badge.카카오톡 {
-  background: rgba(220, 208, 190, 0.3);
-  color: var(--text-secondary);
+  background: var(--method-kakao-bg);
+  color: var(--method-kakao-text);
 }
 
 .visitation-detail-content-text {
@@ -6702,6 +6718,31 @@ html {
   background: var(--surface-muted);
 }
 
+/* 테이블 상태 배지 세분화 */
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: white;
+}
+
+.status-badge.present {
+  background: var(--state-success);
+}
+
+.status-badge.absent {
+  background: var(--state-danger);
+}
+
+.status-badge.late {
+  background: var(--state-warning);
+}
+
+.status-badge.excused {
+  background: var(--text-secondary-dugigo);
+}
+
 .dugigo-table-header-cell {
   padding: 16px;
   font-weight: 600;
@@ -6934,6 +6975,24 @@ html {
   color: var(--brand-text);
 }
 
+/* 차트 하이라이트 그라데이션 */
+.dugigo-chart-container.highlight {
+  background: var(--gradient-indigo);
+  color: white;
+}
+
+.dugigo-chart-container.highlight .dugigo-chart-title {
+  color: white;
+}
+
+.dugigo-chart-container.highlight .dugigo-chart-summary-label {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.dugigo-chart-container.highlight .dugigo-chart-summary-value {
+  color: white;
+}
+
 /* 반응형 차트 */
 @media (max-width: 1024px) {
   .dugigo-chart-container {
@@ -6977,7 +7036,11 @@ html {
 .dugigo-sidebar-title {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
-  color: white;
+  background: var(--gradient-logo);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: white; /* fallback */
   margin: 0 0 4px 0;
   text-align: center;
 }
@@ -7030,19 +7093,30 @@ html {
   display: flex;
   align-items: center;
   gap: 12px;
-  color: var(--text-primary-dugigo);
+  color: rgba(255, 255, 255, 0.8);
   font-size: var(--font-size-base);
+  position: relative;
 }
 
 .dugigo-sidebar-menu-button:hover {
   background: var(--bg-hover-dugigo);
-  color: var(--brand-primary);
+  color: white;
 }
 
 .dugigo-sidebar-menu-button.active {
   background: var(--gradient-primary-dugigo);
   color: white;
   font-weight: var(--font-weight-bold);
+}
+
+.dugigo-sidebar-menu-button.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--accent-secondary-dugigo);
 }
 
 .dugigo-sidebar-menu-icon {
