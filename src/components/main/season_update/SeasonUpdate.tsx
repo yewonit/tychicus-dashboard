@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { SheetData } from '../../../types';
 import { EXCEL_TO_API_FIELD_MAPPING, SYNC_IDENTIFIER_FIELDS } from '../../../utils/excelFieldMapping';
 import { EditableDataTable, ExcelDownloadButton, FileUpload } from '../../ui';
 import ApplyModal from './ApplyModal';
+import CompletionModal from './CompletionModal';
+import LoadingModal from './LoadingModal';
 import ProgressModal from './ProgressModal';
 import SyncModal from './SyncModal';
 
@@ -12,6 +15,7 @@ import SyncModal from './SyncModal';
  * 청년회 회기를 변경하고 관리하는 화면
  */
 const SeasonUpdate: React.FC = () => {
+  const navigate = useNavigate();
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [excelData, setExcelData] = useState<SheetData[] | null>(null);
   const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
@@ -19,6 +23,7 @@ const SeasonUpdate: React.FC = () => {
   const [syncProgressStep, setSyncProgressStep] = useState(0);
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
+  const [isApplyComplete, setIsApplyComplete] = useState(false);
 
   /**
    * 컴포넌트 마운트 시 localStorage에서 데이터 불러오기
@@ -190,6 +195,8 @@ const SeasonUpdate: React.FC = () => {
       return;
     }
 
+    // 확인 모달 닫고 로딩 모달 시작
+    setIsApplyModalOpen(false);
     setIsApplying(true);
 
     try {
@@ -215,27 +222,35 @@ const SeasonUpdate: React.FC = () => {
       });
 
       if (response.status === 200) {
-        alert('회기 변경이 성공적으로 적용되었습니다.');
-        // 성공 후 처리 (예: 페이지 이동, 데이터 초기화 등)
+        // 성공 처리
       }
       */
 
       // 임시: 성공 시뮬레이션
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
       // eslint-disable-next-line no-console
       console.log('회기 변경 적용 데이터:', payload);
-      alert(
-        `회기 변경이 성공적으로 적용되었습니다.\n(총 ${excelData.length}개 시트, ${excelData.reduce((sum, sheet) => sum + sheet.rows.length, 0)}개 행)`
-      );
 
-      setIsApplyModalOpen(false);
+      // 로딩 모달 닫고 완료 모달 표시
+      setIsApplying(false);
+      setIsApplyComplete(true);
     } catch (error) {
       console.error('회기 변경 적용 오류:', error);
-      alert('회기 변경 적용 중 오류가 발생했습니다.');
-    } finally {
       setIsApplying(false);
+      alert('회기 변경 적용 중 오류가 발생했습니다.');
     }
+  };
+
+  /**
+   * 회기 변경 완료 후 대시보드로 이동
+   */
+  const handleApplyComplete = () => {
+    // localStorage 정리 (선택사항)
+    localStorage.removeItem('seasonUpdateData');
+
+    // 대시보드로 이동
+    navigate('/main/dashboard');
   };
 
   return (
@@ -335,10 +350,22 @@ const SeasonUpdate: React.FC = () => {
       {/* 회기 변경 적용 확인 모달 */}
       <ApplyModal
         isOpen={isApplyModalOpen}
-        isApplying={isApplying}
+        isApplying={false}
         excelData={excelData}
         onClose={() => setIsApplyModalOpen(false)}
         onConfirm={handleSeasonUpdate}
+      />
+
+      {/* 회기 변경 적용 중 로딩 모달 */}
+      <LoadingModal isOpen={isApplying} message='회기 변경 적용 중...' />
+
+      {/* 회기 변경 완료 모달 */}
+      <CompletionModal
+        isOpen={isApplyComplete}
+        title='회기 변경 완료'
+        message='회기 변경이 성공적으로 적용되었습니다.'
+        confirmButtonText='대시보드로 이동'
+        onConfirm={handleApplyComplete}
       />
     </div>
   );
