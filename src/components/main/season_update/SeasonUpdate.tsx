@@ -4,6 +4,7 @@ import { SheetData } from '../../../types';
 import { EXCEL_TO_API_FIELD_MAPPING, SYNC_IDENTIFIER_FIELDS } from '../../../utils/excelFieldMapping';
 import { EditableDataTable, ExcelDownloadButton, FileUpload } from '../../ui';
 import ApplyModal from './ApplyModal';
+import ProgressModal from './ProgressModal';
 import SyncModal from './SyncModal';
 
 /**
@@ -15,6 +16,7 @@ const SeasonUpdate: React.FC = () => {
   const [excelData, setExcelData] = useState<SheetData[] | null>(null);
   const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [syncProgressStep, setSyncProgressStep] = useState(0);
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
 
@@ -75,10 +77,13 @@ const SeasonUpdate: React.FC = () => {
       return;
     }
 
+    // 확인 모달 닫고 진행 모달 시작
+    setIsSyncModalOpen(false);
     setIsSyncing(true);
+    setSyncProgressStep(1); // 1단계: 데이터 가져오는 중
 
     try {
-      // 1. 모든 시트의 데이터에서 이름과 전화번호 추출
+      // 1단계: 모든 시트의 데이터에서 이름과 전화번호 추출
       const identifiers: Array<{ name: string; phone: string }> = [];
 
       excelData.forEach(sheet => {
@@ -95,12 +100,16 @@ const SeasonUpdate: React.FC = () => {
       if (identifiers.length === 0) {
         alert('동기화할 수 있는 데이터가 없습니다. (이름, 전화번호 필수)');
         setIsSyncing(false);
+        setSyncProgressStep(0);
         return;
       }
 
-      // 2. TODO: 서버에 동기화 요청
+      // TODO: 서버에 동기화 요청
       // const response = await axiosClient.post('/api/members/sync', identifiers);
       // const serverData = response.data;
+
+      // 임시: 서버 요청 시뮬레이션
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       // 임시 응답 데이터 (실제로는 서버에서 받아옴)
       const serverData = identifiers.map(id => ({
@@ -111,7 +120,12 @@ const SeasonUpdate: React.FC = () => {
         // ... 기타 서버에서 받아온 최신 정보
       }));
 
-      // 3. 서버 데이터로 엑셀 데이터 업데이트
+      // 2단계: 서버 데이터로 엑셀 데이터 업데이트
+      setSyncProgressStep(2); // 2단계: 데이터 적용 중
+
+      // 임시: 데이터 적용 시뮬레이션
+      await new Promise(resolve => setTimeout(resolve, 800));
+
       const updatedExcelData = excelData.map(sheet => {
         const updatedRows = sheet.rows.map(row => {
           const name = row[SYNC_IDENTIFIER_FIELDS.name];
@@ -152,13 +166,17 @@ const SeasonUpdate: React.FC = () => {
       setExcelData(updatedExcelData);
       localStorage.setItem('seasonUpdateData', JSON.stringify(updatedExcelData));
 
-      alert(`${identifiers.length}건의 데이터가 동기화되었습니다.`);
-      setIsSyncModalOpen(false);
+      // 완료 후 모달 자동 닫기
+      setTimeout(() => {
+        setIsSyncing(false);
+        setSyncProgressStep(0);
+        alert(`${identifiers.length}건의 데이터가 동기화되었습니다.`);
+      }, 500);
     } catch (error) {
       console.error('서버 동기화 오류:', error);
       alert('서버 동기화 중 오류가 발생했습니다.');
-    } finally {
       setIsSyncing(false);
+      setSyncProgressStep(0);
     }
   };
 
@@ -306,10 +324,13 @@ const SeasonUpdate: React.FC = () => {
       {/* 정보 동기화 확인 모달 */}
       <SyncModal
         isOpen={isSyncModalOpen}
-        isSyncing={isSyncing}
+        isSyncing={false}
         onClose={() => setIsSyncModalOpen(false)}
         onConfirm={handleSyncWithServer}
       />
+
+      {/* 정보 동기화 진행 상황 모달 */}
+      <ProgressModal isOpen={isSyncing} currentStep={syncProgressStep} totalSteps={2} />
 
       {/* 회기 변경 적용 확인 모달 */}
       <ApplyModal
