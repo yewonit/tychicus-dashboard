@@ -235,9 +235,6 @@ const SeasonUpdate: React.FC = () => {
       // 임시: 성공 시뮬레이션
       await new Promise(resolve => setTimeout(resolve, 2000));
 
-      // eslint-disable-next-line no-console
-      console.log('회기 변경 적용 데이터:', payload);
-
       // 로딩 모달 닫고 완료 모달 표시
       setIsApplying(false);
       setIsApplyComplete(true);
@@ -263,15 +260,12 @@ const SeasonUpdate: React.FC = () => {
     <div className='season-update-container'>
       <div className='season-update-header'>
         <h1>회기 변경 관리</h1>
-        <p>청년회 회기를 변경하고 관리하세요</p>
       </div>
 
       <div className='season-update-content'>
         {!excelData ? (
           // 데이터가 없을 때: 엑셀 파일 업로드 화면
           <div className='season-change-section'>
-            <h2>엑셀 파일 업로드</h2>
-            <p className='section-description'>회기 변경에 사용할 엑셀 파일을 업로드하세요.</p>
             <FileUpload onFileSelect={handleFileSelect} />
             {uploadedFile && (
               <div className='file-info'>
@@ -286,10 +280,6 @@ const SeasonUpdate: React.FC = () => {
           <>
             <div className='season-data-section'>
               <div className='season-data-header'>
-                <div>
-                  <h2>데이터 확인 및 수정</h2>
-                  <p className='section-description'>업로드된 데이터를 확인하고 수정할 수 있습니다.</p>
-                </div>
                 <button
                   className='reset-button'
                   onClick={() => {
@@ -316,9 +306,6 @@ const SeasonUpdate: React.FC = () => {
                   onBeforeDownload={() => {
                     return window.confirm('현재 데이터를 엑셀 파일로 다운로드하시겠습니까?');
                   }}
-                  onAfterDownload={() => {
-                    alert('엑셀 파일이 다운로드되었습니다.');
-                  }}
                 />
               </div>
 
@@ -332,8 +319,6 @@ const SeasonUpdate: React.FC = () => {
             </div>
 
             <div className='season-apply-section'>
-              <h2>회기 변경 적용</h2>
-              <p className='section-description'>데이터를 확인한 후 회기 변경을 적용하세요.</p>
               <button className='apply-button' onClick={() => setIsApplyModalOpen(true)}>
                 회기 변경 적용
               </button>
