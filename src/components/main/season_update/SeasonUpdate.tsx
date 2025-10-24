@@ -18,6 +18,7 @@ const SeasonUpdate: React.FC = () => {
   const navigate = useNavigate();
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [excelData, setExcelData] = useState<SheetData[] | null>(null);
+  const [isConverting, setIsConverting] = useState(false);
   const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncProgressStep, setSyncProgressStep] = useState(0);
@@ -47,6 +48,7 @@ const SeasonUpdate: React.FC = () => {
    */
   const handleFileSelect = async (file: File) => {
     setUploadedFile(file);
+    setIsConverting(true);
 
     try {
       const arrayBuffer = await file.arrayBuffer();
@@ -62,12 +64,16 @@ const SeasonUpdate: React.FC = () => {
         };
       });
 
-      setExcelData(sheets); // sheets 배열을 직접 저장
+      // 변환 완료 후 상태와 localStorage에 저장
+      // 최소 500ms 동안 로딩 표시
+      await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Local Storage에 저장
+      setExcelData(sheets); // sheets 배열을 직접 저장
       localStorage.setItem('seasonUpdateData', JSON.stringify(sheets));
+      setIsConverting(false);
     } catch (error) {
       console.error('엑셀 파일 변환 오류:', error);
+      setIsConverting(false);
       alert('엑셀 파일을 읽는 중 오류가 발생했습니다.');
     }
   };
@@ -355,6 +361,9 @@ const SeasonUpdate: React.FC = () => {
         onClose={() => setIsApplyModalOpen(false)}
         onConfirm={handleSeasonUpdate}
       />
+
+      {/* 엑셀 변환 중 로딩 모달 */}
+      <LoadingModal isOpen={isConverting} message='데이터 변환 중...' />
 
       {/* 회기 변경 적용 중 로딩 모달 */}
       <LoadingModal isOpen={isApplying} message='회기 변경 적용 중...' />
