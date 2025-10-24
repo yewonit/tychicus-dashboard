@@ -7487,6 +7487,31 @@ html {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
+.download-button-wrapper {
+  margin-bottom: 16px;
+}
+
+.excel-download-button {
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  background: var(--success);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.excel-download-button:hover {
+  background: var(--success-light);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
 /* 반응형 디자인 */
 @media (max-width: 768px) {
   .season-update-header h1 {

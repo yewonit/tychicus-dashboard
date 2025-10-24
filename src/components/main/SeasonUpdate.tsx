@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import * as XLSX from 'xlsx';
-import { FileUpload } from '../ui';
+import { ExcelDownloadButton, FileUpload } from '../ui';
 
 /**
  * 회기 변경 관리 컴포넌트
@@ -27,15 +27,14 @@ const SeasonUpdate: React.FC = () => {
         const jsonData = XLSX.utils.sheet_to_json(worksheet);
         return {
           sheetName,
-          data: jsonData,
+          rows: jsonData, // 'rows'로 키 이름 변경
         };
       });
 
-      const jsonResult = { sheets };
-      setExcelData(jsonResult);
+      setExcelData(sheets); // sheets 배열을 직접 저장
 
       // Local Storage에 저장
-      localStorage.setItem('seasonUpdateData', JSON.stringify(jsonResult));
+      localStorage.setItem('seasonUpdateData', JSON.stringify(sheets));
     } catch (error) {
       console.error('엑셀 파일 변환 오류:', error);
       alert('엑셀 파일을 읽는 중 오류가 발생했습니다.');
@@ -83,6 +82,24 @@ const SeasonUpdate: React.FC = () => {
           <div className='season-data-section'>
             <h2>2. 데이터 확인 및 수정</h2>
             <p className='section-description'>업로드된 데이터를 확인하고 수정할 수 있습니다.</p>
+
+            {/* 엑셀 다운로드 버튼 */}
+            <div className='download-button-wrapper'>
+              <ExcelDownloadButton
+                data={excelData}
+                fileName='season-update-data'
+                buttonText='📥 엑셀 다운로드'
+                className='excel-download-button'
+                onBeforeDownload={() => {
+                  // 다운로드 전 확인
+                  return window.confirm('현재 데이터를 엑셀 파일로 다운로드하시겠습니까?');
+                }}
+                onAfterDownload={() => {
+                  alert('엑셀 파일이 다운로드되었습니다.');
+                }}
+              />
+            </div>
+
             {/* TODO: 데이터 테이블 컴포넌트 추가 */}
             <pre style={{ background: '#f5f5f5', padding: '16px', borderRadius: '8px', overflow: 'auto' }}>
               {JSON.stringify(excelData, null, 2)}
