@@ -13,6 +13,8 @@ const SeasonUpdate: React.FC = () => {
   const [excelData, setExcelData] = useState<SheetData[] | null>(null);
   const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+  const [isApplying, setIsApplying] = useState(false);
 
   /**
    * 엑셀 파일을 JSON으로 변환
@@ -141,10 +143,62 @@ const SeasonUpdate: React.FC = () => {
     }
   };
 
-  // TODO: 회기 변경 로직 구현
-  const handleSeasonUpdate = () => {
-    // eslint-disable-next-line no-console
-    console.log('회기 변경 처리');
+  /**
+   * 회기 변경 적용
+   * 현재 엑셀 데이터를 백엔드로 전송하여 새로운 회기 정보 생성/업데이트
+   */
+  const handleSeasonUpdate = async () => {
+    if (!excelData || excelData.length === 0) {
+      alert('적용할 데이터가 없습니다.');
+      return;
+    }
+
+    setIsApplying(true);
+
+    try {
+      // JSON 데이터 준비
+      const payload = {
+        sheets: excelData,
+        timestamp: new Date().toISOString(),
+      };
+
+      // TODO: 백엔드 API 호출
+      // 대용량 JSON 전송을 위한 설정
+      // - maxContentLength: Infinity
+      // - maxBodyLength: Infinity
+      // - timeout: 60000 (60초)
+      /*
+      const response = await axiosClient.post('/api/season/update', payload, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity,
+        timeout: 60000, // 60초
+      });
+
+      if (response.status === 200) {
+        alert('회기 변경이 성공적으로 적용되었습니다.');
+        // 성공 후 처리 (예: 페이지 이동, 데이터 초기화 등)
+      }
+      */
+
+      // 임시: 성공 시뮬레이션
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // eslint-disable-next-line no-console
+      console.log('회기 변경 적용 데이터:', payload);
+      alert(
+        `회기 변경이 성공적으로 적용되었습니다.\n(총 ${excelData.length}개 시트, ${excelData.reduce((sum, sheet) => sum + sheet.rows.length, 0)}개 행)`
+      );
+
+      setIsApplyModalOpen(false);
+    } catch (error) {
+      console.error('회기 변경 적용 오류:', error);
+      alert('회기 변경 적용 중 오류가 발생했습니다.');
+    } finally {
+      setIsApplying(false);
+    }
   };
 
   return (
@@ -206,12 +260,12 @@ const SeasonUpdate: React.FC = () => {
           </div>
         )}
 
-        {/* TODO: 3단계 - 회기 변경 적용 */}
+        {/* 3단계 - 회기 변경 적용 */}
         {excelData && (
           <div className='season-apply-section'>
             <h2>3. 회기 변경 적용</h2>
             <p className='section-description'>데이터를 확인한 후 회기 변경을 적용하세요.</p>
-            <button className='apply-button' onClick={handleSeasonUpdate}>
+            <button className='apply-button' onClick={() => setIsApplyModalOpen(true)}>
               회기 변경 적용
             </button>
           </div>
@@ -232,6 +286,40 @@ const SeasonUpdate: React.FC = () => {
             </button>
             <button className='sync-modal-confirm-button' onClick={handleSyncWithServer} disabled={isSyncing}>
               {isSyncing ? '동기화 중...' : '확인'}
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* 회기 변경 적용 확인 모달 */}
+      <Modal
+        isOpen={isApplyModalOpen}
+        title='회기 변경 적용'
+        onClose={() => !isApplying && setIsApplyModalOpen(false)}
+        size='medium'
+      >
+        <div className='sync-modal-content'>
+          <p className='sync-modal-message'>
+            현재 정보로 새로운 회기 정보를 생성 / 업데이트 할까요?
+            {excelData && (
+              <>
+                <br />
+                <span className='sync-modal-note'>
+                  ({excelData.length}개 시트, {excelData.reduce((sum, sheet) => sum + sheet.rows.length, 0)}개 행)
+                </span>
+              </>
+            )}
+          </p>
+          <div className='sync-modal-buttons'>
+            <button
+              className='sync-modal-cancel-button'
+              onClick={() => setIsApplyModalOpen(false)}
+              disabled={isApplying}
+            >
+              취소
+            </button>
+            <button className='sync-modal-confirm-button' onClick={handleSeasonUpdate} disabled={isApplying}>
+              {isApplying ? '적용 중...' : '확인'}
             </button>
           </div>
         </div>
