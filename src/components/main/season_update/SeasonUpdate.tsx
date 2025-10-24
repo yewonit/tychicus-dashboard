@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import * as XLSX from 'xlsx';
+import { useSeasonData } from '../../../hooks';
+import { applySeasonUpdate, syncWithServer } from '../../../services/seasonUpdateService';
 import { SheetData } from '../../../types';
-import { EXCEL_TO_API_FIELD_MAPPING, SYNC_IDENTIFIER_FIELDS } from '../../../utils/excelFieldMapping';
+import { convertExcelToJson, extractSyncIdentifiers, syncExcelDataWithServer } from '../../../utils';
 import { EditableDataTable, ExcelDownloadButton, FileUpload } from '../../ui';
 import ApplyModal from './ApplyModal';
 import CompletionModal from './CompletionModal';
@@ -10,14 +11,12 @@ import LoadingModal from './LoadingModal';
 import ProgressModal from './ProgressModal';
 import SyncModal from './SyncModal';
 
-/**
- * 회기 변경 관리 컴포넌트
- * 청년회 회기를 변경하고 관리하는 화면
- */
 const SeasonUpdate: React.FC = () => {
   const navigate = useNavigate();
+  const { data: excelData, saveData, clearData } = useSeasonData();
+
+  // UI 상태 관리
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [excelData, setExcelData] = useState<SheetData[] | null>(null);
   const [isConverting, setIsConverting] = useState(false);
   const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -27,60 +26,34 @@ const SeasonUpdate: React.FC = () => {
   const [isApplyComplete, setIsApplyComplete] = useState(false);
 
   /**
-   * 컴포넌트 마운트 시 localStorage에서 데이터 불러오기
-   */
-  useEffect(() => {
-    const savedData = localStorage.getItem('seasonUpdateData');
-    if (savedData) {
-      try {
-        const parsedData = JSON.parse(savedData) as SheetData[];
-        setExcelData(parsedData);
-      } catch (error) {
-        console.error('저장된 데이터 파싱 오류:', error);
-        // 파싱 실패 시 localStorage 클리어
-        localStorage.removeItem('seasonUpdateData');
-      }
-    }
-  }, []);
-
-  /**
-   * 엑셀 파일을 JSON으로 변환
+   * 엑셀 파일 선택 핸들러
+   * 파일을 JSON으로 변환하고 저장
    */
   const handleFileSelect = async (file: File) => {
     setUploadedFile(file);
     setIsConverting(true);
 
     try {
-      const arrayBuffer = await file.arrayBuffer();
-      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-
-      // sheets 리스트 안에 object(row) 리스트 형태로 변환
-      const sheets: SheetData[] = workbook.SheetNames.map(sheetName => {
-        const worksheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet) as Record<string, any>[];
-        return {
-          sheetName,
-          rows: jsonData, // 'rows'로 키 이름 변경
-        };
-      });
-
-      // 변환 완료 후 상태와 localStorage에 저장
-      // 최소 500ms 동안 로딩 표시
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      setExcelData(sheets); // sheets 배열을 직접 저장
-      localStorage.setItem('seasonUpdateData', JSON.stringify(sheets));
+      const sheets = await convertExcelToJson(file, { minLoadingTime: 500 });
+      saveData(sheets);
       setIsConverting(false);
     } catch (error) {
-      console.error('엑셀 파일 변환 오류:', error);
       setIsConverting(false);
-      alert('엑셀 파일을 읽는 중 오류가 발생했습니다.');
+      alert(error instanceof Error ? error.message : '엑셀 파일 변환 중 오류가 발생했습니다.');
     }
   };
 
   /**
+   * 데이터 편집 핸들러
+   * 사용자가 테이블 데이터를 수정할 때 호출
+   */
+  const handleDataChange = (updatedData: SheetData[]) => {
+    saveData(updatedData);
+  };
+
+  /**
    * 서버 데이터와 동기화
-   * 이름과 전화번호를 기준으로 서버에서 최신 정보를 가져와 엑셀 데이터 업데이트
+   * 이름과 전화번호를 기준으로 서버에서 최신 정보를 가져와 업데이트
    */
   const handleSyncWithServer = async () => {
     if (!excelData || excelData.length === 0) {
@@ -91,22 +64,11 @@ const SeasonUpdate: React.FC = () => {
     // 확인 모달 닫고 진행 모달 시작
     setIsSyncModalOpen(false);
     setIsSyncing(true);
-    setSyncProgressStep(1); // 1단계: 데이터 가져오는 중
+    setSyncProgressStep(1);
 
     try {
-      // 1단계: 모든 시트의 데이터에서 이름과 전화번호 추출
-      const identifiers: Array<{ name: string; phone: string }> = [];
-
-      excelData.forEach(sheet => {
-        sheet.rows.forEach(row => {
-          const name = row[SYNC_IDENTIFIER_FIELDS.name];
-          const phone = row[SYNC_IDENTIFIER_FIELDS.phoneNumber];
-
-          if (name && phone) {
-            identifiers.push({ name, phone });
-          }
-        });
-      });
+      // 1단계: 동기화용 식별자 추출
+      const identifiers = extractSyncIdentifiers(excelData);
 
       if (identifiers.length === 0) {
         alert('동기화할 수 있는 데이터가 없습니다. (이름, 전화번호 필수)');
@@ -115,67 +77,15 @@ const SeasonUpdate: React.FC = () => {
         return;
       }
 
-      // TODO: 서버에 동기화 요청
-      // const response = await axiosClient.post('/api/members/sync', identifiers);
-      // const serverData = response.data;
-
-      // 임시: 서버 요청 시뮬레이션
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // 임시 응답 데이터 (실제로는 서버에서 받아옴)
-      const serverData = identifiers.map(id => ({
-        name: id.name,
-        phoneNumber: id.phone,
-        email: `${id.name}@example.com`,
-        genderType: 'M',
-        // ... 기타 서버에서 받아온 최신 정보
-      }));
+      // 서버에서 데이터 가져오기
+      const serverData = await syncWithServer(identifiers);
 
       // 2단계: 서버 데이터로 엑셀 데이터 업데이트
-      setSyncProgressStep(2); // 2단계: 데이터 적용 중
-
-      // 임시: 데이터 적용 시뮬레이션
+      setSyncProgressStep(2);
       await new Promise(resolve => setTimeout(resolve, 800));
 
-      const updatedExcelData = excelData.map(sheet => {
-        const updatedRows = sheet.rows.map(row => {
-          const name = row[SYNC_IDENTIFIER_FIELDS.name];
-          const phone = row[SYNC_IDENTIFIER_FIELDS.phoneNumber];
-
-          // 서버 데이터에서 해당 행과 일치하는 데이터 찾기
-          const matchedServerData = serverData.find(
-            serverRow => serverRow.name === name && serverRow.phoneNumber === phone
-          );
-
-          if (matchedServerData) {
-            // 서버 데이터의 각 필드를 엑셀 컬럼명으로 매핑하여 업데이트
-            const updatedRow = { ...row };
-
-            Object.entries(matchedServerData).forEach(([apiField, value]) => {
-              // API 필드명을 엑셀 컬럼명으로 변환
-              const excelField = Object.entries(EXCEL_TO_API_FIELD_MAPPING).find(
-                ([_, mappedApiField]) => mappedApiField === apiField
-              )?.[0];
-
-              if (excelField) {
-                updatedRow[excelField] = value;
-              }
-            });
-
-            return updatedRow;
-          }
-
-          return row;
-        });
-
-        return {
-          ...sheet,
-          rows: updatedRows,
-        };
-      });
-
-      setExcelData(updatedExcelData);
-      localStorage.setItem('seasonUpdateData', JSON.stringify(updatedExcelData));
+      const updatedExcelData = syncExcelDataWithServer(excelData, serverData);
+      saveData(updatedExcelData);
 
       // 완료 후 모달 자동 닫기
       setTimeout(() => {
@@ -185,7 +95,7 @@ const SeasonUpdate: React.FC = () => {
       }, 500);
     } catch (error) {
       console.error('서버 동기화 오류:', error);
-      alert('서버 동기화 중 오류가 발생했습니다.');
+      alert(error instanceof Error ? error.message : '서버 동기화 중 오류가 발생했습니다.');
       setIsSyncing(false);
       setSyncProgressStep(0);
     }
@@ -206,34 +116,12 @@ const SeasonUpdate: React.FC = () => {
     setIsApplying(true);
 
     try {
-      // JSON 데이터 준비
       const payload = {
         sheets: excelData,
         timestamp: new Date().toISOString(),
       };
 
-      // TODO: 백엔드 API 호출
-      // 대용량 JSON 전송을 위한 설정
-      // - maxContentLength: Infinity
-      // - maxBodyLength: Infinity
-      // - timeout: 60000 (60초)
-      /*
-      const response = await axiosClient.post('/api/season/update', payload, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        maxContentLength: Infinity,
-        maxBodyLength: Infinity,
-        timeout: 60000, // 60초
-      });
-
-      if (response.status === 200) {
-        // 성공 처리
-      }
-      */
-
-      // 임시: 성공 시뮬레이션
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await applySeasonUpdate(payload);
 
       // 로딩 모달 닫고 완료 모달 표시
       setIsApplying(false);
@@ -241,7 +129,7 @@ const SeasonUpdate: React.FC = () => {
     } catch (error) {
       console.error('회기 변경 적용 오류:', error);
       setIsApplying(false);
-      alert('회기 변경 적용 중 오류가 발생했습니다.');
+      alert(error instanceof Error ? error.message : '회기 변경 적용 중 오류가 발생했습니다.');
     }
   };
 
@@ -249,11 +137,18 @@ const SeasonUpdate: React.FC = () => {
    * 회기 변경 완료 후 대시보드로 이동
    */
   const handleApplyComplete = () => {
-    // localStorage 정리 (선택사항)
-    localStorage.removeItem('seasonUpdateData');
-
-    // 대시보드로 이동
+    clearData();
     navigate('/main/dashboard');
+  };
+
+  /**
+   * 새 파일 업로드 (기존 데이터 초기화)
+   */
+  const handleResetData = () => {
+    if (window.confirm('현재 데이터를 삭제하고 새로운 파일을 업로드하시겠습니까?')) {
+      clearData();
+      setUploadedFile(null);
+    }
   };
 
   return (
@@ -280,16 +175,7 @@ const SeasonUpdate: React.FC = () => {
           <>
             <div className='season-data-section'>
               <div className='season-data-header'>
-                <button
-                  className='reset-button'
-                  onClick={() => {
-                    if (window.confirm('현재 데이터를 삭제하고 새로운 파일을 업로드하시겠습니까?')) {
-                      setExcelData(null);
-                      setUploadedFile(null);
-                      localStorage.removeItem('seasonUpdateData');
-                    }
-                  }}
-                >
+                <button className='reset-button' onClick={handleResetData}>
                   🔄 새 파일 업로드
                 </button>
               </div>
@@ -309,13 +195,7 @@ const SeasonUpdate: React.FC = () => {
                 />
               </div>
 
-              <EditableDataTable
-                data={excelData}
-                onChange={updatedData => {
-                  setExcelData(updatedData);
-                  localStorage.setItem('seasonUpdateData', JSON.stringify(updatedData));
-                }}
-              />
+              <EditableDataTable data={excelData} onChange={handleDataChange} />
             </div>
 
             <div className='season-apply-section'>
@@ -328,12 +208,7 @@ const SeasonUpdate: React.FC = () => {
       </div>
 
       {/* 정보 동기화 확인 모달 */}
-      <SyncModal
-        isOpen={isSyncModalOpen}
-        isSyncing={false}
-        onClose={() => setIsSyncModalOpen(false)}
-        onConfirm={handleSyncWithServer}
-      />
+      <SyncModal isOpen={isSyncModalOpen} onClose={() => setIsSyncModalOpen(false)} onConfirm={handleSyncWithServer} />
 
       {/* 정보 동기화 진행 상황 모달 */}
       <ProgressModal isOpen={isSyncing} currentStep={syncProgressStep} totalSteps={2} />

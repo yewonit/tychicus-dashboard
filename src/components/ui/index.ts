@@ -2,10 +2,10 @@
 export { Badge } from './Badge';
 export { Button } from './Button';
 export { Card } from './Card';
-export { default as EditableDataTable } from './EditableDataTable';
 export { EmptyState } from './EmptyState';
-export { default as ExcelDownloadButton } from './ExcelDownloadButton';
-export { default as FileUpload } from './FileUpload';
+export { default as EditableDataTable } from './excel/EditableDataTable';
+export { default as ExcelDownloadButton } from './excel/ExcelDownloadButton';
+export { default as FileUpload } from './excel/FileUpload';
 export { FormField } from './FormField';
 export { LoadingSpinner } from './LoadingSpinner';
 export { MobileRestrictionOverlay } from './MobileRestrictionOverlay';

@@ -74,7 +74,7 @@ export const CELL_VALIDATION_RULES: Record<string, ValidationFunction> = {
  * @param value 셀 값
  * @returns 유효하면 true, 무효하면 false
  */
-export const validateCellData = (columnName: string, value: any): boolean => {
+export const validateCell = (columnName: string, value: any): boolean => {
   const validationFn = CELL_VALIDATION_RULES[columnName];
 
   // 검증 규칙이 없으면 항상 유효
@@ -84,3 +84,8 @@ export const validateCellData = (columnName: string, value: any): boolean => {
 
   return validationFn(value);
 };
+
+/**
+ * @deprecated 대신 validateCell을 사용하세요
+ */
+export const validateCellData = validateCell;

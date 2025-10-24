@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { SheetData } from '../../types';
-import { validateCellData } from '../../utils/cellValidation';
+import { validateCellData } from '../../utils/excel/cellValidation';
 
 interface EditableDataTableProps {
   /** 시트 데이터 배열 */
