@@ -7,7 +7,7 @@ import Dashboard from './components/main/Dashboard';
 import ForumManagement from './components/main/ForumManagement';
 import MemberDetail from './components/main/MemberDetail';
 import MembersManagement from './components/main/MembersManagement';
-import SeasonUpdate from './components/main/SeasonUpdate';
+import { SeasonUpdate } from './components/main/season_update';
 import TempPage from './components/main/TempPage';
 import VisitationDetail from './components/main/VisitationDetail';
 import VisitationManagement from './components/main/VisitationManagement';

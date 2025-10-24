@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import * as XLSX from 'xlsx';
-import { SheetData } from '../../types';
-import { EXCEL_TO_API_FIELD_MAPPING, SYNC_IDENTIFIER_FIELDS } from '../../utils/excelFieldMapping';
-import { EditableDataTable, ExcelDownloadButton, FileUpload, Modal } from '../ui';
+import { SheetData } from '../../../types';
+import { EXCEL_TO_API_FIELD_MAPPING, SYNC_IDENTIFIER_FIELDS } from '../../../utils/excelFieldMapping';
+import { EditableDataTable, ExcelDownloadButton, FileUpload } from '../../ui';
+import ApplyModal from './ApplyModal';
+import SyncModal from './SyncModal';
 
 /**
  * 회기 변경 관리 컴포넌트
@@ -15,6 +17,23 @@ const SeasonUpdate: React.FC = () => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
+
+  /**
+   * 컴포넌트 마운트 시 localStorage에서 데이터 불러오기
+   */
+  useEffect(() => {
+    const savedData = localStorage.getItem('seasonUpdateData');
+    if (savedData) {
+      try {
+        const parsedData = JSON.parse(savedData) as SheetData[];
+        setExcelData(parsedData);
+      } catch (error) {
+        console.error('저장된 데이터 파싱 오류:', error);
+        // 파싱 실패 시 localStorage 클리어
+        localStorage.removeItem('seasonUpdateData');
+      }
+    }
+  }, []);
 
   /**
    * 엑셀 파일을 JSON으로 변환
@@ -209,121 +228,97 @@ const SeasonUpdate: React.FC = () => {
       </div>
 
       <div className='season-update-content'>
-        {/* 1단계: 엑셀 파일 업로드 */}
-        <div className='season-change-section'>
-          <h2>1. 엑셀 파일 업로드</h2>
-          <p className='section-description'>회기 변경에 사용할 엑셀 파일을 업로드하세요.</p>
-          <FileUpload onFileSelect={handleFileSelect} />
-          {uploadedFile && (
-            <div className='file-info'>
-              <p>
-                ✅ 업로드된 파일: <strong>{uploadedFile.name}</strong>
-              </p>
-            </div>
-          )}
-        </div>
+        {!excelData ? (
+          // 데이터가 없을 때: 엑셀 파일 업로드 화면
+          <div className='season-change-section'>
+            <h2>엑셀 파일 업로드</h2>
+            <p className='section-description'>회기 변경에 사용할 엑셀 파일을 업로드하세요.</p>
+            <FileUpload onFileSelect={handleFileSelect} />
+            {uploadedFile && (
+              <div className='file-info'>
+                <p>
+                  ✅ 업로드된 파일: <strong>{uploadedFile.name}</strong>
+                </p>
+              </div>
+            )}
+          </div>
+        ) : (
+          // 데이터가 있을 때: 편집 화면
+          <>
+            <div className='season-data-section'>
+              <div className='season-data-header'>
+                <div>
+                  <h2>데이터 확인 및 수정</h2>
+                  <p className='section-description'>업로드된 데이터를 확인하고 수정할 수 있습니다.</p>
+                </div>
+                <button
+                  className='reset-button'
+                  onClick={() => {
+                    if (window.confirm('현재 데이터를 삭제하고 새로운 파일을 업로드하시겠습니까?')) {
+                      setExcelData(null);
+                      setUploadedFile(null);
+                      localStorage.removeItem('seasonUpdateData');
+                    }
+                  }}
+                >
+                  🔄 새 파일 업로드
+                </button>
+              </div>
 
-        {/* TODO: 2단계 - 데이터 수정 표 */}
-        {excelData && (
-          <div className='season-data-section'>
-            <h2>2. 데이터 확인 및 수정</h2>
-            <p className='section-description'>업로드된 데이터를 확인하고 수정할 수 있습니다.</p>
+              <div className='action-buttons-wrapper'>
+                <button className='sync-button' onClick={() => setIsSyncModalOpen(true)}>
+                  🔄 정보 동기화
+                </button>
+                <ExcelDownloadButton
+                  data={excelData}
+                  fileName='season-update-data'
+                  buttonText='📥 엑셀 다운로드'
+                  className='excel-download-button'
+                  onBeforeDownload={() => {
+                    return window.confirm('현재 데이터를 엑셀 파일로 다운로드하시겠습니까?');
+                  }}
+                  onAfterDownload={() => {
+                    alert('엑셀 파일이 다운로드되었습니다.');
+                  }}
+                />
+              </div>
 
-            {/* 엑셀 다운로드 및 동기화 버튼 */}
-            <div className='action-buttons-wrapper'>
-              <button className='sync-button' onClick={() => setIsSyncModalOpen(true)}>
-                🔄 정보 동기화
-              </button>
-              <ExcelDownloadButton
+              <EditableDataTable
                 data={excelData}
-                fileName='season-update-data'
-                buttonText='📥 엑셀 다운로드'
-                className='excel-download-button'
-                onBeforeDownload={() => {
-                  // 다운로드 전 확인
-                  return window.confirm('현재 데이터를 엑셀 파일로 다운로드하시겠습니까?');
-                }}
-                onAfterDownload={() => {
-                  alert('엑셀 파일이 다운로드되었습니다.');
+                onChange={updatedData => {
+                  setExcelData(updatedData);
+                  localStorage.setItem('seasonUpdateData', JSON.stringify(updatedData));
                 }}
               />
             </div>
 
-            {/* 편집 가능한 데이터 테이블 */}
-            <EditableDataTable
-              data={excelData}
-              onChange={updatedData => {
-                setExcelData(updatedData);
-                localStorage.setItem('seasonUpdateData', JSON.stringify(updatedData));
-              }}
-            />
-          </div>
-        )}
-
-        {/* 3단계 - 회기 변경 적용 */}
-        {excelData && (
-          <div className='season-apply-section'>
-            <h2>3. 회기 변경 적용</h2>
-            <p className='section-description'>데이터를 확인한 후 회기 변경을 적용하세요.</p>
-            <button className='apply-button' onClick={() => setIsApplyModalOpen(true)}>
-              회기 변경 적용
-            </button>
-          </div>
+            <div className='season-apply-section'>
+              <h2>회기 변경 적용</h2>
+              <p className='section-description'>데이터를 확인한 후 회기 변경을 적용하세요.</p>
+              <button className='apply-button' onClick={() => setIsApplyModalOpen(true)}>
+                회기 변경 적용
+              </button>
+            </div>
+          </>
         )}
       </div>
 
       {/* 정보 동기화 확인 모달 */}
-      <Modal isOpen={isSyncModalOpen} title='정보 동기화' onClose={() => setIsSyncModalOpen(false)} size='medium'>
-        <div className='sync-modal-content'>
-          <p className='sync-modal-message'>
-            서버 데이터를 가져와 현재 엑셀을 업데이트 할까요?
-            <br />
-            <span className='sync-modal-note'>(이름, 전화번호 기준)</span>
-          </p>
-          <div className='sync-modal-buttons'>
-            <button className='sync-modal-cancel-button' onClick={() => setIsSyncModalOpen(false)} disabled={isSyncing}>
-              취소
-            </button>
-            <button className='sync-modal-confirm-button' onClick={handleSyncWithServer} disabled={isSyncing}>
-              {isSyncing ? '동기화 중...' : '확인'}
-            </button>
-          </div>
-        </div>
-      </Modal>
+      <SyncModal
+        isOpen={isSyncModalOpen}
+        isSyncing={isSyncing}
+        onClose={() => setIsSyncModalOpen(false)}
+        onConfirm={handleSyncWithServer}
+      />
 
       {/* 회기 변경 적용 확인 모달 */}
-      <Modal
+      <ApplyModal
         isOpen={isApplyModalOpen}
-        title='회기 변경 적용'
-        onClose={() => !isApplying && setIsApplyModalOpen(false)}
-        size='medium'
-      >
-        <div className='sync-modal-content'>
-          <p className='sync-modal-message'>
-            현재 정보로 새로운 회기 정보를 생성 / 업데이트 할까요?
-            {excelData && (
-              <>
-                <br />
-                <span className='sync-modal-note'>
-                  ({excelData.length}개 시트, {excelData.reduce((sum, sheet) => sum + sheet.rows.length, 0)}개 행)
-                </span>
-              </>
-            )}
-          </p>
-          <div className='sync-modal-buttons'>
-            <button
-              className='sync-modal-cancel-button'
-              onClick={() => setIsApplyModalOpen(false)}
-              disabled={isApplying}
-            >
-              취소
-            </button>
-            <button className='sync-modal-confirm-button' onClick={handleSeasonUpdate} disabled={isApplying}>
-              {isApplying ? '적용 중...' : '확인'}
-            </button>
-          </div>
-        </div>
-      </Modal>
+        isApplying={isApplying}
+        excelData={excelData}
+        onClose={() => setIsApplyModalOpen(false)}
+        onConfirm={handleSeasonUpdate}
+      />
     </div>
   );
 };
