@@ -1,5 +1,6 @@
 // 유틸리티 함수 Export
 export * from './axiosClient';
+export * from './cellValidation';
 export * from './chartUtils';
 export * from './constants';
 export * from './dateUtils';

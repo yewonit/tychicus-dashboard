@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import * as XLSX from 'xlsx';
 import { SheetData } from '../../types';
 import { EXCEL_TO_API_FIELD_MAPPING, SYNC_IDENTIFIER_FIELDS } from '../../utils/excelFieldMapping';
-import { ExcelDownloadButton, FileUpload, Modal } from '../ui';
+import { EditableDataTable, ExcelDownloadButton, FileUpload, Modal } from '../ui';
 
 /**
  * 회기 변경 관리 컴포넌트
@@ -195,10 +195,14 @@ const SeasonUpdate: React.FC = () => {
               />
             </div>
 
-            {/* TODO: 데이터 테이블 컴포넌트 추가 */}
-            <pre style={{ background: '#f5f5f5', padding: '16px', borderRadius: '8px', overflow: 'auto' }}>
-              {JSON.stringify(excelData, null, 2)}
-            </pre>
+            {/* 편집 가능한 데이터 테이블 */}
+            <EditableDataTable
+              data={excelData}
+              onChange={updatedData => {
+                setExcelData(updatedData);
+                localStorage.setItem('seasonUpdateData', JSON.stringify(updatedData));
+              }}
+            />
           </div>
         )}
 

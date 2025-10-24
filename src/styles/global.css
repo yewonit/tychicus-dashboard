@@ -7600,6 +7600,140 @@ html {
   cursor: not-allowed;
 }
 
+/* 편집 가능한 데이터 테이블 스타일 */
+.editable-table-container {
+  border: 1px solid var(--border-medium);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg-elevated);
+}
+
+.editable-table-empty {
+  padding: 32px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+.editable-table-wrapper {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 600px;
+}
+
+.editable-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.9rem;
+}
+
+.editable-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg-card);
+}
+
+.row-number-header,
+.editable-table-header {
+  padding: 12px 8px;
+  text-align: left;
+  font-weight: 700;
+  color: var(--text-primary);
+  border-bottom: 2px solid var(--border-medium);
+  background: var(--bg-card);
+  white-space: nowrap;
+}
+
+.row-number-header {
+  width: 50px;
+  text-align: center;
+  background: var(--bg-secondary);
+  position: sticky;
+  left: 0;
+  z-index: 11;
+}
+
+.row-number-cell {
+  padding: 8px;
+  text-align: center;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-medium);
+  border-bottom: 1px solid var(--border-light);
+  position: sticky;
+  left: 0;
+  z-index: 5;
+}
+
+.editable-table-cell {
+  padding: 0;
+  border-bottom: 1px solid var(--border-light);
+  border-right: 1px solid var(--border-light);
+  min-width: 120px;
+}
+
+.editable-table-cell.invalid {
+  background: rgba(239, 83, 80, 0.1);
+}
+
+.editable-cell-input {
+  width: 100%;
+  padding: 8px;
+  border: none;
+  background: transparent;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  outline: none;
+  font-family: inherit;
+}
+
+.editable-cell-input:focus {
+  background: var(--bg-card);
+  box-shadow: inset 0 0 0 2px var(--primary);
+}
+
+.editable-table-cell.invalid .editable-cell-input {
+  color: var(--error);
+}
+
+/* 시트 탭 스타일 */
+.sheet-tabs-container {
+  display: flex;
+  gap: 4px;
+  padding: 8px;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-medium);
+  overflow-x: auto;
+}
+
+.sheet-tab {
+  padding: 8px 16px;
+  border: none;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 4px 4px 0 0;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.sheet-tab:hover {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+.sheet-tab.active {
+  background: var(--bg-elevated);
+  color: var(--primary);
+  font-weight: 700;
+  border-bottom: 3px solid var(--primary);
+}
+
 /* 반응형 디자인 */
 @media (max-width: 768px) {
   .season-update-header h1 {
