@@ -8,12 +8,12 @@
      DUGIGO 브랜드 컬러 토큰
      ======================== */
   /* 브랜드 기본 색상 */
-  --charleston-green: #2A2829;
-  --dark-sky-blue: #97B4DE;
-  --royal-blue: #263A99;
-  --alabaster-white: #F0EBE5;
-  --pastel-gray: #DCD0BE;
-  
+  --charleston-green: #2a2829;
+  --dark-sky-blue: #97b4de;
+  --royal-blue: #263a99;
+  --alabaster-white: #f0ebe5;
+  --pastel-gray: #dcd0be;
+
   /* DUGIGO 유틸리티 컬러 */
   --text-primary-dugigo: var(--charleston-green);
   --text-secondary-dugigo: #6c757d;
@@ -22,12 +22,12 @@
   --background-secondary-dugigo: var(--pastel-gray);
   --accent-primary-dugigo: var(--royal-blue);
   --accent-secondary-dugigo: var(--dark-sky-blue);
-  
+
   /* 미정의 변수 해결 */
   --blue-oblivion: var(--royal-blue);
   --sapphire-dust: var(--dark-sky-blue);
-  --caramel-essence: #E3AF64;
-  
+  --caramel-essence: #e3af64;
+
   /* ========================
      기존 변수를 DUGIGO 토큰으로 교체 (전체 적용)
      ======================== */
@@ -54,17 +54,17 @@
   --state-success: #28a745;
   --state-warning: #ffc107;
   --state-danger: #dc3545;
-  --state-success-light: #10B981;
-  --state-warning-light: #F59E0B;
-  --state-danger-light: #EF4444;
-  
+  --state-success-light: #10b981;
+  --state-warning-light: #f59e0b;
+  --state-danger-light: #ef4444;
+
   /* DUGIGO 표면/보더 토큰 */
   --surface-muted: #f8f9fa;
   --border-subtle: #e9ecef;
-  --border-neutral: #E5E7EB;
+  --border-neutral: #e5e7eb;
   --bg-card-dugigo: #ffffff;
   --bg-hover-dugigo: #f8f9fa;
-  
+
   /* 중성 색상 (그레이 스케일) */
   --gray-100: #f1f1f1;
   --gray-300: #c1c1c1;
@@ -77,7 +77,7 @@
   --gradient-background-dugigo: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   --gradient-text-dugigo: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   --gradient-indigo: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  
+
   /* 기존 그라데이션 (호환성) */
   --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
   --gradient-secondary: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
@@ -152,22 +152,22 @@
   --tablet-min-width: 768px;
   --tablet-max-width: 1024px;
   --desktop-min-width: 1025px;
-  
+
   /* DUGIGO 레이아웃 토큰 */
   --sidebar-width-desktop: 240px;
   --sidebar-width-tablet: 200px;
   --sidebar-width-mobile: 180px;
-  
+
   /* DUGIGO 그림자 시스템 */
   --shadow-light-dugigo: 0 2px 8px rgba(0, 0, 0, 0.05);
   --shadow-medium-dugigo: 0 4px 12px rgba(0, 0, 0, 0.08);
   --shadow-heavy-dugigo: 0 8px 25px rgba(0, 0, 0, 0.15);
-  
+
   /* 트랜지션 */
   --transition-fast: 0.2s ease;
   --transition-normal: 0.3s ease;
   --transition-slow: 0.5s ease;
-  
+
   /* ========================
      DUGIGO 매핑 변수 (점진적 전환용)
      ======================== */
@@ -177,16 +177,16 @@
   --brand-text: var(--charleston-green);
   --brand-background: var(--alabaster-white);
   --brand-surface: var(--pastel-gray);
-  
+
   /* 차트 팔레트 토큰 */
-  --chart-axis: #6B7280;
-  --chart-grid: #E5E7EB;
+  --chart-axis: #6b7280;
+  --chart-grid: #e5e7eb;
   --chart-primary: var(--royal-blue);
   --chart-secondary: var(--dark-sky-blue);
   --chart-success: var(--state-success);
   --chart-warning: var(--state-warning);
   --chart-danger: var(--state-danger);
-  
+
   /* 부록 G 추가 토큰 */
   /* 심방 관리 메서드 배지 색상 */
   --method-meeting-bg: #e3f2fd;
@@ -195,11 +195,11 @@
   --method-call-text: #7b1fa2;
   --method-kakao-bg: #fff3e0;
   --method-kakao-text: #f57c00;
-  
+
   /* 아이콘 상태 색상 */
-  --icon-inactive: #CCCCCC;
-  --icon-favorite: #FFD700;
-  
+  --icon-inactive: #cccccc;
+  --icon-favorite: #ffd700;
+
   /* 로고 텍스트 그라데이션 */
   --gradient-logo: linear-gradient(135deg, var(--alabaster-white) 0%, var(--pastel-gray) 100%);
 }
@@ -418,7 +418,7 @@ html {
   .mobile-restriction-overlay {
     display: flex;
   }
-  
+
   /* 사용자가 강제 진입을 선택한 경우 숨김 */
   .mobile-restriction-overlay.allow-mobile {
     display: none;
@@ -6797,11 +6797,11 @@ html {
   .dugigo-table-container {
     overflow-x: auto;
   }
-  
+
   .dugigo-table {
     min-width: 600px;
   }
-  
+
   .dugigo-table-header-cell,
   .dugigo-table-cell {
     padding: 12px 8px;
@@ -6998,11 +6998,11 @@ html {
   .dugigo-chart-container {
     padding: var(--spacing-md);
   }
-  
+
   .dugigo-chart-title {
     font-size: var(--font-size-base);
   }
-  
+
   .dugigo-chart-summary {
     flex-direction: column;
     gap: var(--spacing-sm);
@@ -7188,7 +7188,7 @@ html {
     width: var(--sidebar-width-mobile);
     transform: translateX(-100%);
   }
-  
+
   .dugigo-sidebar-container.open {
     transform: translateX(0);
   }
@@ -7237,7 +7237,7 @@ html {
   .dugigo-main-content {
     margin-left: var(--sidebar-width-tablet);
   }
-  
+
   .dugigo-main-content-inner {
     padding: var(--spacing-md);
   }
@@ -7248,7 +7248,7 @@ html {
     margin-left: 0;
     width: 100%;
   }
-  
+
   .dugigo-main-content-inner {
     padding: var(--spacing-sm);
   }
@@ -7327,5 +7327,182 @@ html {
 
   .button-group {
     margin-bottom: var(--spacing-md);
+  }
+}
+
+/* ========================
+   파일 업로드 컴포넌트 스타일
+   ======================== */
+.file-upload-wrapper {
+  width: 100%;
+}
+
+.file-upload-area {
+  border: 3px dashed var(--border-medium);
+  border-radius: 12px;
+  padding: 48px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: var(--bg-elevated);
+}
+
+.file-upload-area:hover {
+  border-color: var(--primary);
+  background: var(--bg-card);
+}
+
+.file-upload-area.dragging {
+  border-color: var(--primary);
+  background: var(--bg-card);
+  transform: scale(1.02);
+}
+
+.file-upload-area.error {
+  border-color: var(--error);
+}
+
+.file-upload-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.file-upload-message {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.file-upload-error {
+  color: var(--error);
+  font-size: 0.9rem;
+  margin-top: 8px;
+}
+
+.file-info {
+  margin-top: 16px;
+  padding: 12px;
+  background: var(--bg-card);
+  border-radius: 8px;
+  border-left: 4px solid var(--success);
+}
+
+.file-info p {
+  margin: 0;
+  color: var(--text-primary);
+}
+
+/* 회기 변경 관리 추가 스타일 */
+.season-update-container {
+  padding: 10px;
+  min-height: 100vh;
+}
+
+.season-update-header {
+  margin-bottom: 30px;
+}
+
+.season-update-header h1 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.season-update-header p {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+}
+
+.season-update-content {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.current-season-section,
+.season-change-section,
+.season-data-section,
+.season-apply-section {
+  background: var(--bg-elevated);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-light);
+}
+
+.current-season-section h2,
+.season-change-section h2,
+.season-data-section h2,
+.season-apply-section h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+
+.current-season-display {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: var(--bg-card);
+  border-radius: 12px;
+  border: 2px solid var(--primary);
+}
+
+.season-label {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.season-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.section-description {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.apply-button {
+  padding: 12px 24px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: white;
+  background: var(--primary);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.apply-button:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .season-update-header h1 {
+    font-size: 1.8rem;
+  }
+
+  .current-season-display {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .season-value {
+    font-size: 1.3rem;
+  }
+
+  .file-upload-area {
+    padding: 32px 16px;
   }
 }
