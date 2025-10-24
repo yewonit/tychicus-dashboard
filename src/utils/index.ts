@@ -4,5 +4,6 @@ export * from './chartUtils';
 export * from './constants';
 export * from './dateUtils';
 export * from './envConfig';
+export * from './excelFieldMapping';
 export * from './logger';
 export * from './validation';

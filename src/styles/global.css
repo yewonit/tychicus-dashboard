@@ -7487,8 +7487,11 @@ html {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.download-button-wrapper {
+.action-buttons-wrapper {
   margin-bottom: 16px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .excel-download-button {
@@ -7510,6 +7513,91 @@ html {
   background: var(--success-light);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.sync-button {
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  background: var(--primary);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sync-button:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 동기화 모달 스타일 */
+.sync-modal-content {
+  padding: 16px;
+}
+
+.sync-modal-message {
+  font-size: 1rem;
+  color: var(--text-primary);
+  margin-bottom: 24px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.sync-modal-note {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.sync-modal-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.sync-modal-cancel-button,
+.sync-modal-confirm-button {
+  padding: 10px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 100px;
+}
+
+.sync-modal-cancel-button {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-medium);
+}
+
+.sync-modal-cancel-button:hover:not(:disabled) {
+  background: var(--bg-secondary);
+}
+
+.sync-modal-confirm-button {
+  background: var(--primary);
+  color: white;
+}
+
+.sync-modal-confirm-button:hover:not(:disabled) {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.sync-modal-cancel-button:disabled,
+.sync-modal-confirm-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* 반응형 디자인 */
