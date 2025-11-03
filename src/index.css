@@ -1,0 +1,119 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--gradient-background);
+  min-height: 100vh;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* DUGIGO Team Color Palette */
+:root {
+  /* Primary Colors */
+  --charleston-green: #2A2829;
+  --charleston-green-rgb: 42, 40, 41;
+  --charleston-green-cmyk: 0, 5, 2, 84;
+  
+  --dark-sky-blue: #97B4DE;
+  --dark-sky-blue-rgb: 151, 180, 222;
+  --dark-sky-blue-cmyk: 32, 19, 0, 13;
+  
+  --royal-blue: #263A99;
+  --royal-blue-rgb: 38, 58, 153;
+  --royal-blue-cmyk: 75, 62, 0, 40;
+  
+  /* Background Colors */
+  --alabaster-white: #F0EBE5;
+  --alabaster-white-rgb: 240, 235, 229;
+  --alabaster-white-cmyk: 0, 2, 5, 6;
+  
+  --pastel-gray: #DCD0BE;
+  --pastel-gray-rgb: 220, 208, 190;
+  --pastel-gray-cmyk: 0, 5, 14, 14;
+  
+  /* Utility Colors */
+  --text-primary: var(--charleston-green);
+  --text-secondary: #6c757d;
+  --text-muted: #636e72;
+  --background-primary: var(--alabaster-white);
+  --background-secondary: var(--pastel-gray);
+  --accent-primary: var(--royal-blue);
+  --accent-secondary: var(--dark-sky-blue);
+  
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, var(--royal-blue), var(--dark-sky-blue));
+  --gradient-background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  --gradient-text: linear-gradient(135deg, #667eea, #764ba2);
+  
+  /* Legacy variables for backward compatibility */
+  --bg-primary: var(--background-primary);
+  --bg-secondary: var(--background-secondary);
+  --bg-card: var(--alabaster-white);
+  --bg-hover: #F9FAFB;
+  
+  --border-light: var(--pastel-gray);
+  --border-medium: #D1D5DB;
+  --border-color: var(--pastel-gray);
+  
+  --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-heavy: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  
+  /* Error Colors */
+  --error-color: #dc3545;
+  --error-hover: #c82333;
+  
+  /* Responsive Breakpoints - Tablet only support */
+  --tablet-max-width: 1024px;
+  --tablet-min-width: 768px;
+  --mobile-max-width: 767px;
+}
+
+/* 태블릿 크기까지만 지원하는 반응형 설정 */
+@media (max-width: 1024px) {
+  /* 태블릿 스타일 */
+  body {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 768px) {
+  /* 태블릿 세로 모드 및 작은 태블릿 */
+  body {
+    font-size: 13px;
+  }
+}
+
+/* 모바일 디바이스는 지원하지 않음 - 경고 메시지 표시 */
+@media (max-width: 767px) {
+  body::before {
+    content: "이 어드민 시스템은 태블릿 크기 이상의 화면에서만 지원됩니다. 더 큰 화면에서 접속해주세요.";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--background-primary);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+    font-size: 16px;
+    font-weight: 600;
+    z-index: 9999;
+  }
+} 

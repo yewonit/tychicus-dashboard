@@ -1,0 +1,348 @@
+/* ========================================
+   DUGIGO Team Color Palette
+   ======================================== */
+
+/* CSS Custom Properties (Variables) */
+:root {
+  /* Primary Colors */
+  --charleston-green: #2A2829;
+  --charleston-green-rgb: 42, 40, 41;
+  --charleston-green-cmyk: 0, 5, 2, 84;
+  
+  --dark-sky-blue: #97B4DE;
+  --dark-sky-blue-rgb: 151, 180, 222;
+  --dark-sky-blue-cmyk: 32, 19, 0, 13;
+  
+  --royal-blue: #263A99;
+  --royal-blue-rgb: 38, 58, 153;
+  --royal-blue-cmyk: 75, 62, 0, 40;
+  
+  /* Background Colors */
+  --alabaster-white: #F0EBE5;
+  --alabaster-white-rgb: 240, 235, 229;
+  --alabaster-white-cmyk: 0, 2, 5, 6;
+  
+  --pastel-gray: #DCD0BE;
+  --pastel-gray-rgb: 220, 208, 190;
+  --pastel-gray-cmyk: 0, 5, 14, 14;
+  
+  /* Utility Colors */
+  --text-primary: var(--charleston-green);
+  --text-secondary: #6c757d;
+  --text-muted: #636e72;
+  --background-primary: var(--alabaster-white);
+  --background-secondary: var(--pastel-gray);
+  --accent-primary: var(--royal-blue);
+  --accent-secondary: var(--dark-sky-blue);
+  
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, var(--royal-blue), var(--dark-sky-blue));
+  --gradient-background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  --gradient-text: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+/* ========================================
+   Color Classes
+   ======================================== */
+
+/* Background Colors */
+.bg-charleston-green {
+  background-color: var(--charleston-green);
+}
+
+.bg-dark-sky-blue {
+  background-color: var(--dark-sky-blue);
+}
+
+.bg-royal-blue {
+  background-color: var(--royal-blue);
+}
+
+.bg-alabaster-white {
+  background-color: var(--alabaster-white);
+}
+
+.bg-pastel-gray {
+  background-color: var(--pastel-gray);
+}
+
+/* Text Colors */
+.text-charleston-green {
+  color: var(--charleston-green);
+}
+
+.text-dark-sky-blue {
+  color: var(--dark-sky-blue);
+}
+
+.text-royal-blue {
+  color: var(--royal-blue);
+}
+
+.text-alabaster-white {
+  color: var(--alabaster-white);
+}
+
+.text-pastel-gray {
+  color: var(--pastel-gray);
+}
+
+/* Border Colors */
+.border-charleston-green {
+  border-color: var(--charleston-green);
+}
+
+.border-dark-sky-blue {
+  border-color: var(--dark-sky-blue);
+}
+
+.border-royal-blue {
+  border-color: var(--royal-blue);
+}
+
+.border-alabaster-white {
+  border-color: var(--alabaster-white);
+}
+
+.border-pastel-gray {
+  border-color: var(--pastel-gray);
+}
+
+/* ========================================
+   Gradient Classes
+   ======================================== */
+
+.gradient-charleston-green {
+  background: linear-gradient(135deg, var(--charleston-green), #1a1a1a);
+}
+
+.gradient-dark-sky-blue {
+  background: linear-gradient(135deg, var(--dark-sky-blue), #7fb3d3);
+}
+
+.gradient-royal-blue {
+  background: linear-gradient(135deg, var(--royal-blue), #1e2d7a);
+}
+
+.gradient-alabaster-white {
+  background: linear-gradient(135deg, var(--alabaster-white), #e8e0d7);
+}
+
+.gradient-pastel-gray {
+  background: linear-gradient(135deg, var(--pastel-gray), #d1c4b0);
+}
+
+/* ========================================
+   Component Classes
+   ======================================== */
+
+/* Button Styles */
+.btn-primary {
+  background-color: var(--royal-blue);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #1e2d7a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(38, 58, 153, 0.3);
+}
+
+.btn-secondary {
+  background-color: var(--dark-sky-blue);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background-color: #7fb3d3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(151, 180, 222, 0.3);
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: var(--royal-blue);
+  border: 2px solid var(--royal-blue);
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-outline:hover {
+  background-color: var(--royal-blue);
+  color: white;
+}
+
+/* Card Styles */
+.card {
+  background-color: var(--alabaster-white);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.card-primary {
+  border-left: 4px solid var(--royal-blue);
+}
+
+.card-secondary {
+  border-left: 4px solid var(--dark-sky-blue);
+}
+
+/* Header Styles */
+.header-primary {
+  background: var(--gradient-primary);
+  color: white;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.header-secondary {
+  background: var(--gradient-background);
+  color: var(--text-primary);
+  padding: 20px;
+  border-radius: 8px;
+}
+
+/* ========================================
+   Utility Classes
+   ======================================== */
+
+/* Spacing */
+.mt-1 { margin-top: 0.25rem; }
+.mt-2 { margin-top: 0.5rem; }
+.mt-3 { margin-top: 1rem; }
+.mt-4 { margin-top: 1.5rem; }
+.mt-5 { margin-top: 3rem; }
+
+.mb-1 { margin-bottom: 0.25rem; }
+.mb-2 { margin-bottom: 0.5rem; }
+.mb-3 { margin-bottom: 1rem; }
+.mb-4 { margin-bottom: 1.5rem; }
+.mb-5 { margin-bottom: 3rem; }
+
+.p-1 { padding: 0.25rem; }
+.p-2 { padding: 0.5rem; }
+.p-3 { padding: 1rem; }
+.p-4 { padding: 1.5rem; }
+.p-5 { padding: 3rem; }
+
+/* Text Utilities */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.font-bold { font-weight: 700; }
+.font-semibold { font-weight: 600; }
+.font-normal { font-weight: 400; }
+
+.text-sm { font-size: 0.875rem; }
+.text-base { font-size: 1rem; }
+.text-lg { font-size: 1.125rem; }
+.text-xl { font-size: 1.25rem; }
+.text-2xl { font-size: 1.5rem; }
+.text-3xl { font-size: 1.875rem; }
+
+/* Border Radius */
+.rounded-sm { border-radius: 0.125rem; }
+.rounded { border-radius: 0.25rem; }
+.rounded-md { border-radius: 0.375rem; }
+.rounded-lg { border-radius: 0.5rem; }
+.rounded-xl { border-radius: 0.75rem; }
+.rounded-2xl { border-radius: 1rem; }
+
+/* Shadows */
+.shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+.shadow { box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); }
+.shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+.shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+.shadow-xl { box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
+
+/* ========================================
+   Responsive Design
+   ======================================== */
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 16px;
+  }
+  
+  .card {
+    padding: 16px;
+  }
+  
+  .btn-primary,
+  .btn-secondary,
+  .btn-outline {
+    padding: 10px 20px;
+    font-size: 0.875rem;
+  }
+}
+
+/* ========================================
+   Animation Classes
+   ======================================== */
+
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+.slide-up {
+  animation: slideUp 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ========================================
+   Print Styles
+   ======================================== */
+
+@media print {
+  .btn-primary,
+  .btn-secondary,
+  .btn-outline {
+    background-color: var(--charleston-green) !important;
+    color: white !important;
+    border: none !important;
+  }
+  
+  .card {
+    box-shadow: none !important;
+    border: 1px solid var(--pastel-gray) !important;
+  }
+} 

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DUGIGO Color Palette - 사용 예시</title>
+    <link rel="stylesheet" href="color_palette.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--gradient-background);
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .section {
+            margin-bottom: 60px;
+        }
+        
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: var(--gradient-text);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .color-demo {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .color-swatch {
+            height: 100px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .color-swatch.light {
+            color: var(--charleston-green);
+            text-shadow: none;
+        }
+        
+        .component-demo {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .demo-item {
+            padding: 20px;
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .demo-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--text-primary);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="section">
+            <h1 class="section-title">DUGIGO 컬러 팔레트</h1>
+            <p class="text-center text-lg mb-5">프로젝트에서 사용할 수 있는 컬러 시스템</p>
+        </div>
+
+        <!-- 컬러 스왓치 -->
+        <div class="section">
+            <h2 class="section-title">컬러 팔레트</h2>
+            <div class="color-demo">
+                <div class="color-swatch bg-charleston-green">
+                    Charleston Green<br>#2A2829
+                </div>
+                <div class="color-swatch bg-dark-sky-blue">
+                    Dark Sky Blue<br>#97B4DE
+                </div>
+                <div class="color-swatch bg-royal-blue">
+                    Royal Blue<br>#263A99
+                </div>
+                <div class="color-swatch bg-alabaster-white light">
+                    Alabaster White<br>#F0EBE5
+                </div>
+                <div class="color-swatch bg-pastel-gray light">
+                    Pastel Gray<br>#DCD0BE
+                </div>
+            </div>
+        </div>
+
+        <!-- 버튼 컴포넌트 -->
+        <div class="section">
+            <h2 class="section-title">버튼 컴포넌트</h2>
+            <div class="component-demo">
+                <div class="demo-item">
+                    <div class="demo-title">기본 버튼</div>
+                    <div class="button-group">
+                        <button class="btn-primary">Primary Button</button>
+                        <button class="btn-secondary">Secondary Button</button>
+                        <button class="btn-outline">Outline Button</button>
+                    </div>
+                    <div class="code-block">
+.btn-primary { /* Royal Blue 배경 */ }
+.btn-secondary { /* Dark Sky Blue 배경 */ }
+.btn-outline { /* 투명 배경, Royal Blue 테두리 */ }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 카드 컴포넌트 -->
+        <div class="section">
+            <h2 class="section-title">카드 컴포넌트</h2>
+            <div class="component-demo">
+                <div class="card card-primary">
+                    <h3 class="text-royal-blue font-bold mb-3">Primary Card</h3>
+                    <p class="text-secondary">이 카드는 Royal Blue 액센트 컬러를 사용합니다. 주요 콘텐츠나 강조가 필요한 영역에 적합합니다.</p>
+                </div>
+                
+                <div class="card card-secondary">
+                    <h3 class="text-dark-sky-blue font-bold mb-3">Secondary Card</h3>
+                    <p class="text-secondary">이 카드는 Dark Sky Blue 액센트 컬러를 사용합니다. 부드럽고 친근한 느낌의 콘텐츠에 적합합니다.</p>
+                </div>
+                
+                <div class="card">
+                    <h3 class="text-charleston-green font-bold mb-3">Default Card</h3>
+                    <p class="text-secondary">기본 카드 스타일입니다. Alabaster White 배경에 깔끔한 그림자 효과를 제공합니다.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 헤더 컴포넌트 -->
+        <div class="section">
+            <h2 class="section-title">헤더 컴포넌트</h2>
+            <div class="component-demo">
+                <div class="header-primary">
+                    <h3 class="font-bold mb-2">Primary Header</h3>
+                    <p>Royal Blue와 Dark Sky Blue 그라데이션을 사용한 헤더입니다.</p>
+                </div>
+                
+                <div class="header-secondary">
+                    <h3 class="font-bold mb-2">Secondary Header</h3>
+                    <p>배경 그라데이션을 사용한 헤더입니다.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 유틸리티 클래스 -->
+        <div class="section">
+            <h2 class="section-title">유틸리티 클래스</h2>
+            <div class="component-demo">
+                <div class="demo-item">
+                    <div class="demo-title">텍스트 컬러</div>
+                    <p class="text-charleston-green">Charleston Green 텍스트</p>
+                    <p class="text-royal-blue">Royal Blue 텍스트</p>
+                    <p class="text-dark-sky-blue">Dark Sky Blue 텍스트</p>
+                    <p class="text-pastel-gray">Pastel Gray 텍스트</p>
+                </div>
+                
+                <div class="demo-item">
+                    <div class="demo-title">배경 컬러</div>
+                    <div class="p-3 mb-2 bg-charleston-green text-white rounded">Charleston Green 배경</div>
+                    <div class="p-3 mb-2 bg-royal-blue text-white rounded">Royal Blue 배경</div>
+                    <div class="p-3 mb-2 bg-dark-sky-blue text-white rounded">Dark Sky Blue 배경</div>
+                    <div class="p-3 mb-2 bg-alabaster-white rounded">Alabaster White 배경</div>
+                </div>
+                
+                <div class="demo-item">
+                    <div class="demo-title">그라데이션</div>
+                    <div class="p-3 mb-2 gradient-royal-blue text-white rounded">Royal Blue 그라데이션</div>
+                    <div class="p-3 mb-2 gradient-dark-sky-blue text-white rounded">Dark Sky Blue 그라데이션</div>
+                    <div class="p-3 mb-2 gradient-alabaster-white rounded">Alabaster White 그라데이션</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 애니메이션 -->
+        <div class="section">
+            <h2 class="section-title">애니메이션</h2>
+            <div class="component-demo">
+                <div class="card fade-in">
+                    <h3 class="font-bold mb-3">Fade In 애니메이션</h3>
+                    <p class="text-secondary">이 카드는 페이지 로드 시 페이드인 효과가 적용됩니다.</p>
+                </div>
+                
+                <div class="card slide-up">
+                    <h3 class="font-bold mb-3">Slide Up 애니메이션</h3>
+                    <p class="text-secondary">이 카드는 아래에서 위로 슬라이드되는 효과가 적용됩니다.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 사용법 가이드 -->
+        <div class="section">
+            <h2 class="section-title">사용법 가이드</h2>
+            <div class="card">
+                <h3 class="font-bold mb-4">CSS 변수 사용법</h3>
+                <div class="code-block">
+/* CSS 변수로 컬러 사용 */
+.my-element {
+    background-color: var(--royal-blue);
+    color: var(--alabaster-white);
+    border: 2px solid var(--dark-sky-blue);
+}
+
+/* RGB 값 사용 */
+.my-element {
+    background-color: rgba(var(--royal-blue-rgb), 0.8);
+}
+                </div>
+                
+                <h3 class="font-bold mb-4 mt-5">유틸리티 클래스 사용법</h3>
+                <div class="code-block">
+<!-- 배경 컬러 -->
+<div class="bg-royal-blue">Royal Blue 배경</div>
+
+<!-- 텍스트 컬러 -->
+<p class="text-charleston-green">Charleston Green 텍스트</p>
+
+<!-- 버튼 스타일 -->
+<button class="btn-primary">Primary 버튼</button>
+<button class="btn-secondary">Secondary 버튼</button>
+<button class="btn-outline">Outline 버튼</button>
+
+<!-- 카드 스타일 -->
+<div class="card card-primary">Primary 카드</div>
+<div class="card card-secondary">Secondary 카드</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

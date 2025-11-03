@@ -1,0 +1,1750 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>코람데오 청년회 어드민 - 공통 컴포넌트 가이드</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; color: #333; line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; margin-bottom: 30px; padding: 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 15px; }
+        .header h1 { font-size: 2.5rem; margin-bottom: 10px; }
+        .section { background: white; margin-bottom: 25px; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .section h2 { color: #2c3e50; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #ecf0f1; }
+        .component-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px; }
+        .card { background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #667eea; }
+        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; margin: 5px; }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block; margin: 5px; }
+        .status-active { background: #d4edda; color: #155724; }
+        .status-inactive { background: #f8d7da; color: #721c24; }
+        .alert { padding: 15px 20px; border-radius: 6px; margin: 15px 0; border-left: 4px solid; }
+        .alert-success { background: #d4edda; color: #155724; border-left-color: #28a745; }
+        .alert-warning { background: #fff3cd; color: #856404; border-left-color: #ffc107; }
+        .form-input { width: 100%; padding: 10px; border: 2px solid #e9ecef; border-radius: 6px; margin: 10px 0; }
+        .member-card { background: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .member-avatar { width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); color: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto; font-weight: 600; }
+        .attendance-status { padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; margin-top: 10px; }
+        .attendance-present { background: #d4edda; color: #155724; }
+        .attendance-absent { background: #f8d7da; color: #721c24; }
+        .attendance-late { background: #fff3cd; color: #856404; }
+        .color-palette { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 15px; margin: 20px 0; }
+        .color-swatch { text-align: center; padding: 15px 10px; border-radius: 6px; color: white; font-weight: 600; font-size: 0.9rem; }
+        .color-primary { background: #667eea; }
+        .color-secondary { background: #764ba2; }
+        .color-success { background: #28a745; }
+        .color-warning { background: #ffc107; color: #333; }
+        .color-danger { background: #dc3545; }
+        .tab-buttons { display: flex; border-bottom: 2px solid #e9ecef; margin-bottom: 20px; }
+        .tab-button { padding: 12px 20px; background: none; border: none; cursor: pointer; color: #6c757d; border-bottom: 3px solid transparent; }
+        .tab-button.active { color: #667eea; border-bottom-color: #667eea; }
+        .breadcrumb { display: flex; gap: 10px; align-items: center; margin: 20px 0; font-size: 0.9rem; }
+        .breadcrumb-item { color: #6c757d; }
+        .breadcrumb-item.active { color: #2c3e50; font-weight: 600; }
+        .pagination { display: flex; gap: 5px; justify-content: center; margin: 20px 0; }
+        .page-button { padding: 8px 12px; border: 1px solid #e9ecef; background: white; color: #333; cursor: pointer; border-radius: 4px; }
+        .page-button.active { background: #667eea; color: white; border-color: #667eea; }
+        
+        /* 날짜 범위 조회 컴포넌트 */
+        .date-range-container {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+            flex-wrap: nowrap;
+        }
+        
+        .date-input-group {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .date-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .date-input {
+            padding: 10px 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background: white;
+            color: #2c3e50;
+            min-width: 140px;
+        }
+        
+        .date-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .date-separator {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #6c757d;
+            margin: 0 8px;
+        }
+        
+        .quick-date-buttons {
+            display: flex;
+            gap: 8px;
+            margin: 0;
+            flex-wrap: nowrap;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+        
+        .btn-outline:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        /* 심방관리 테이블 컴포넌트 */
+        .visitation-table-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid #e9ecef;
+            overflow: hidden;
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+        
+        .visitation-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            min-width: 800px;
+        }
+        
+        .visitation-table-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .visitation-header-cell {
+            padding: 15px 12px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        
+        .visitation-table-row {
+            border-bottom: 1px solid #e9ecef;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .visitation-table-row:hover {
+            background: #f8f9fa;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .visitation-table-row:last-child {
+            border-bottom: none;
+        }
+        
+        .visitation-table-cell {
+            padding: 12px;
+            color: #333;
+            border-bottom: 1px solid #e9ecef;
+            white-space: nowrap;
+            text-align: center;
+        }
+        
+        .visitation-table-cell-bold {
+            padding: 12px;
+            color: #333;
+            border-bottom: 1px solid #e9ecef;
+            white-space: nowrap;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .visitation-table-cell-secondary {
+            padding: 12px;
+            color: #6c757d;
+            border-bottom: 1px solid #e9ecef;
+            white-space: nowrap;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+        
+        .star-icon {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 4px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #CCCCCC;
+        }
+        
+        .star-icon:hover {
+            background: rgba(255, 215, 0, 0.1);
+            transform: scale(1.1);
+            color: #FFD700;
+            text-shadow: 0 0 4px rgba(255, 215, 0, 0.4);
+        }
+        
+        .star-icon.favorited {
+            color: #FFD700;
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+            animation: starGlow 2s ease-in-out infinite;
+        }
+        
+        @keyframes starGlow {
+            0%, 100% { 
+                transform: scale(1);
+                text-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+            }
+            50% { 
+                transform: scale(1.05);
+                text-shadow: 0 0 12px rgba(255, 215, 0, 0.8);
+            }
+        }
+        
+        .method-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        .method-meeting {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .method-call {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+        
+        .method-kakao {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+        
+        /* 데이터 테이블 컴포넌트 */
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .table-title h4 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .table-count {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-left: 12px;
+        }
+        
+        .table-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+        
+        .table-wrapper {
+            overflow-x: auto;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        
+        .data-table th {
+            background: #f8f9fa;
+            padding: 16px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #2c3e50;
+            border-bottom: 2px solid #e9ecef;
+            white-space: nowrap;
+        }
+        
+        .data-table td {
+            padding: 16px 12px;
+            border-bottom: 1px solid #f0f0f0;
+            vertical-align: middle;
+        }
+        
+        .data-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .checkbox-column {
+            width: 50px;
+            text-align: center;
+        }
+        
+        .sortable-column {
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .sortable-column:hover {
+            background: #e9ecef;
+        }
+        
+        .sort-icon {
+            margin-left: 8px;
+            color: #6c757d;
+            font-size: 0.8rem;
+        }
+        
+        .action-column {
+            width: 100px;
+            text-align: center;
+        }
+        
+        .forum-name {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        .category-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        .category-faith {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .category-life {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+        
+        .category-worship {
+            background: #e8f5e8;
+            color: #388e3c;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+        
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .btn-edit:hover {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .btn-delete:hover {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+        
+        .table-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .table-info {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .table-pagination {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .page-btn {
+            padding: 8px 12px;
+            border: 1px solid #e9ecef;
+            background: white;
+            color: #6c757d;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            min-width: 36px;
+        }
+        
+        .page-btn:hover:not(:disabled) {
+            background: #f8f9fa;
+            border-color: #667eea;
+        }
+        
+        .page-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .page-size-select {
+            padding: 6px 12px;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            background: white;
+            color: #2c3e50;
+            font-size: 0.9rem;
+        }
+        
+        /* 체크박스 스타일 */
+        .select-all, .row-checkbox {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .select-all:checked, .row-checkbox:checked {
+            background: #667eea;
+            border-color: #667eea;
+        }
+        
+        /* 레이아웃 컴포넌트 스타일 정보 */
+        .style-info {
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 16px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .style-info h4 {
+            color: #2c3e50;
+            margin-bottom: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .style-info ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .style-info li {
+            padding: 4px 0;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .style-info strong {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        
+        /* 스타일 가이드 섹션 */
+        .style-guide {
+            margin-top: 32px;
+            padding: 24px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .style-section {
+            margin-bottom: 32px;
+        }
+        
+        .style-section h4 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 8px;
+        }
+        
+        .style-section h5 {
+            color: #34495e;
+            margin: 16px 0 8px 0;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        /* 간격 예시 */
+        .spacing-examples {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 16px;
+            margin: 16px 0;
+        }
+        
+        .spacing-item {
+            text-align: center;
+        }
+        
+        .spacing-visual {
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .spacing-item span {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+        
+        /* 테두리 예시 */
+        .border-examples {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 16px;
+            margin: 16px 0;
+        }
+        
+        .border-item {
+            text-align: center;
+        }
+        
+        .border-visual {
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            background: white;
+        }
+        
+        .border-item span {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+        
+        /* 그리드 예시 */
+        .grid-examples {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+            margin: 16px 0;
+        }
+        
+        .grid-item {
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        /* 어드민 헤더 예시 */
+        .admin-header-example {
+            margin: 24px 0;
+        }
+        
+        .admin-header-demo {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .admin-header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 20px 24px;
+            background: white;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .header-left h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 0;
+        }
+        
+        .header-left p {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin: 4px 0 0 0;
+        }
+        
+        .header-right {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .header-breadcrumb {
+            padding: 16px 24px;
+            background: #f8f9fa;
+            border-top: 1px solid #f0f0f0;
+        }
+        
+        .header-code-example {
+            margin-top: 20px;
+        }
+        
+        .header-code-example h5 {
+            color: #2c3e50;
+            margin-bottom: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) { 
+            .container { padding: 15px; } 
+            .header h1 { font-size: 2rem; } 
+            .component-grid { grid-template-columns: 1fr; }
+            .spacing-examples { grid-template-columns: repeat(2, 1fr); }
+            .border-examples { grid-template-columns: repeat(2, 1fr); }
+            .grid-examples { grid-template-columns: 1fr; }
+            
+            /* 모바일에서 어드민 헤더 반응형 */
+            .admin-header-top {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+            
+            .header-right {
+                width: 100%;
+                justify-content: flex-start;
+            }
+            
+            .header-breadcrumb {
+                padding: 12px 16px;
+                font-size: 0.8rem;
+            }
+            
+            /* 모바일에서 날짜 범위 조회 반응형 */
+            .date-range-container {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+            
+            .date-input-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .date-separator {
+                align-self: center;
+                margin: 0;
+            }
+            
+            .quick-date-buttons {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            .btn-outline {
+                font-size: 0.8rem;
+                padding: 6px 12px;
+            }
+            
+            /* 모바일에서 심방관리 테이블 반응형 */
+            .visitation-table-container {
+                margin-top: 12px;
+                border-radius: 8px;
+            }
+            
+            .visitation-table {
+                font-size: 0.8rem;
+                min-width: 600px;
+            }
+            
+            .visitation-header-cell {
+                padding: 10px 8px;
+                font-size: 0.8rem;
+            }
+            
+            .visitation-table-cell,
+            .visitation-table-cell-bold,
+            .visitation-table-cell-secondary {
+                padding: 8px 6px;
+            }
+            
+            .visitation-table-cell-secondary {
+                font-size: 0.75rem;
+            }
+            
+            .star-icon {
+                font-size: 1rem;
+            }
+            
+            .method-badge {
+                font-size: 0.7rem;
+                padding: 3px 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>코람데오 청년회 어드민</h1>
+            <p>공통 컴포넌트 가이드 및 사용 예시</p>
+        </div>
+
+        <!-- 1. 레이아웃 컴포넌트 -->
+        <div class="section">
+            <h2>1. 레이아웃 컴포넌트</h2>
+            <div class="component-grid">
+                <div class="card">
+                    <h3>PageContainer</h3>
+                    <p>페이지 전체를 감싸는 기본 컨테이너</p>
+                    <div class="style-info">
+                        <h4>스타일 정보</h4>
+                        <ul>
+                            <li><strong>Margin:</strong> 0</li>
+                            <li><strong>Padding:</strong> 20px</li>
+                            <li><strong>Border:</strong> none</li>
+                            <li><strong>Border-radius:</strong> 0</li>
+                            <li><strong>Width:</strong> 100%</li>
+                            <li><strong>Min-height:</strong> 100vh</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>GridContainer</h3>
+                    <p>그리드 레이아웃을 위한 컨테이너</p>
+                    <div class="style-info">
+                        <h4>스타일 정보</h4>
+                        <ul>
+                            <li><strong>Margin:</strong> 20px 0</li>
+                            <li><strong>Padding:</strong> 0</li>
+                            <li><strong>Border:</strong> none</li>
+                            <li><strong>Border-radius:</strong> 0</li>
+                            <li><strong>Display:</strong> grid</li>
+                            <li><strong>Gap:</strong> 20px</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>CardContainer</h3>
+                    <p>카드 형태의 콘텐츠를 위한 컨테이너</p>
+                    <div class="style-info">
+                        <h4>스타일 정보</h4>
+                        <ul>
+                            <li><strong>Margin:</strong> 0</li>
+                            <li><strong>Padding:</strong> 20px</li>
+                            <li><strong>Border:</strong> 1px solid #e9ecef</li>
+                            <li><strong>Border-radius:</strong> 12px</li>
+                            <li><strong>Box-shadow:</strong> 0 2px 8px rgba(0,0,0,0.1)</li>
+                            <li><strong>Background:</strong> white</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>AdminHeader</h3>
+                    <p>어드민 화면 상단 헤더 영역</p>
+                    <div class="style-info">
+                        <h4>스타일 정보</h4>
+                        <ul>
+                            <li><strong>Margin:</strong> 0</li>
+                            <li><strong>Padding:</strong> 16px 24px</li>
+                            <li><strong>Border:</strong> none</li>
+                            <li><strong>Border-radius:</strong> 0</li>
+                            <li><strong>Box-shadow:</strong> 0 2px 8px rgba(0,0,0,0.1)</li>
+                            <li><strong>Background:</strong> white</li>
+                            <li><strong>Height:</strong> 64px</li>
+                            <li><strong>Z-index:</strong> 1000</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>PageTitle</h3>
+                    <p>페이지 제목과 설명을 포함한 헤더</p>
+                    <div class="style-info">
+                        <h4>스타일 정보</h4>
+                        <ul>
+                            <li><strong>Margin:</strong> 0 0 16px 0</li>
+                            <li><strong>Padding:</strong> 24px 0</li>
+                            <li><strong>Border:</strong> none</li>
+                            <li><strong>Border-radius:</strong> 0</li>
+                            <li><strong>Background:</strong> transparent</li>
+                            <li><strong>Text-align:</strong> left</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+                         <h3>레이아웃 컴포넌트 상세 스타일 가이드</h3>
+             <div class="style-guide">
+                 <div class="style-section">
+                     <h4>🏠 Admin Header Layout (어드민 헤더 레이아웃)</h4>
+                     <div class="admin-header-example">
+                         <div class="admin-header-demo">
+                             <div class="admin-header-top">
+                                 <div class="header-left">
+                                     <h1 style="font-size: 1.5rem; font-weight: 700; color: #2c3e50; margin: 0;">구성원 관리</h1>
+                                     <p style="font-size: 0.9rem; color: #6c757d; margin: 4px 0 0 0;">청년회 구성원 정보를 관리합니다</p>
+                                 </div>
+                                 <div class="header-right">
+                                     <button class="btn btn-primary" style="font-size: 0.9rem; padding: 8px 16px;">새 구성원 추가</button>
+                                     <button class="btn btn-secondary" style="font-size: 0.9rem; padding: 8px 16px;">일괄 수정</button>
+                                 </div>
+                             </div>
+                             <div class="header-breadcrumb">
+                                 <span style="color: #6c757d; font-size: 0.85rem;">홈</span>
+                                 <span style="color: #6c757d; margin: 0 8px;">/</span>
+                                 <span style="color: #6c757d; font-size: 0.85rem;">구성원 관리</span>
+                                 <span style="color: #6c757d; margin: 0 8px;">/</span>
+                                 <span style="color: #2c3e50; font-weight: 600; font-size: 0.85rem;">구성원 목록</span>
+                             </div>
+                         </div>
+                         <div class="header-code-example">
+                             <h5>사용 예시 코드</h5>
+                             <div class="code-block" style="background: #f8f9fa; padding: 16px; border-radius: 8px; border: 1px solid #e9ecef; margin-top: 16px; font-family: monospace; font-size: 0.9rem;">
+                                 <div style="color: #6c757d;">// AdminHeader 컴포넌트</div>
+                                 <div style="color: #2c3e50;">&lt;div class="admin-header"&gt;</div>
+                                 <div style="color: #2c3e50;">&nbsp;&nbsp;&lt;div class="header-content"&gt;</div>
+                                 <div style="color: #2c3e50;">&nbsp;&nbsp;&nbsp;&nbsp;&lt;div class="header-left"&gt;</div>
+                                 <div style="color: #2c3e50;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;h1&gt;구성원 관리&lt;/h1&gt;</div>
+                                 <div style="color: #2c3e50;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;p&gt;청년회 구성원 정보를 관리합니다&lt;/p&gt;</div>
+                                 <div style="color: #2c3e50;">&nbsp;&nbsp;&nbsp;&nbsp;&lt;/div&gt;</div>
+                                 <div style="color: #2c3e50;">&nbsp;&nbsp;&nbsp;&nbsp;&lt;div class="header-right"&gt;</div>
+                                 <div style="color: #2c3e50;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;button&gt;새 구성원 추가&lt;/button&gt;</div>
+                                 <div style="color: #2c3e50;">&nbsp;&nbsp;&nbsp;&nbsp;&lt;/div&gt;</div>
+                                 <div style="color: #2c3e50;">&nbsp;&nbsp;&lt;/div&gt;</div>
+                                 <div style="color: #2c3e50;">&lt;/div&gt;</div>
+                             </div>
+                         </div>
+                     </div>
+                 </div>
+                <div class="style-section">
+                    <h4>📏 Spacing (간격)</h4>
+                    <div class="spacing-examples">
+                        <div class="spacing-item">
+                            <div class="spacing-visual" style="margin: 8px; padding: 8px; background: #667eea; color: white; border-radius: 4px;">8px</div>
+                            <span>8px - 작은 간격</span>
+                        </div>
+                        <div class="spacing-item">
+                            <div class="spacing-visual" style="margin: 16px; padding: 16px; background: #667eea; color: white; border-radius: 4px;">16px</div>
+                            <span>16px - 기본 간격</span>
+                        </div>
+                        <div class="spacing-item">
+                            <div class="spacing-visual" style="margin: 24px; padding: 24px; background: #667eea; color: white; border-radius: 4px;">24px</div>
+                            <span>24px - 큰 간격</span>
+                        </div>
+                        <div class="spacing-item">
+                            <div class="spacing-visual" style="margin: 32px; padding: 32px; background: #667eea; color: white; border-radius: 4px;">32px</div>
+                            <span>32px - 섹션 간격</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="style-section">
+                    <h4>🔲 Border & Radius (테두리 & 모서리)</h4>
+                    <div class="border-examples">
+                        <div class="border-item">
+                            <div class="border-visual" style="border: 1px solid #e9ecef; border-radius: 4px; padding: 16px; margin: 8px;">4px</div>
+                            <span>4px - 작은 모서리</span>
+                        </div>
+                        <div class="border-item">
+                            <div class="border-visual" style="border: 2px solid #667eea; border-radius: 8px; padding: 16px; margin: 8px;">8px - 기본 모서리</div>
+                        </div>
+                        <div class="border-item">
+                            <div class="border-visual" style="border: 3px solid #28a745; border-radius: 12px; padding: 16px; margin: 8px;">12px - 큰 모서리</div>
+                        </div>
+                        <div class="border-item">
+                            <div class="border-visual" style="border: 4px solid #dc3545; border-radius: 16px; padding: 16px; margin: 8px;">16px - 매우 큰 모서리</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="style-section">
+                    <h4>📐 Layout Grid (레이아웃 그리드)</h4>
+                    <div class="grid-examples">
+                        <div class="grid-item">
+                            <h5>1열 레이아웃</h5>
+                            <div style="display: grid; grid-template-columns: 1fr; gap: 16px; margin: 16px 0;">
+                                <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; border: 1px solid #e9ecef;">아이템 1</div>
+                            </div>
+                        </div>
+                        <div class="grid-item">
+                            <h5>2열 레이아웃</h5>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0;">
+                                <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; border: 1px solid #e9ecef;">아이템 1</div>
+                                <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; border: 1px solid #e9ecef;">아이템 2</div>
+                            </div>
+                        </div>
+                        <div class="grid-item">
+                            <h5>3열 레이아웃</h5>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 16px 0;">
+                                <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; border: 1px solid #e9ecef;">아이템 1</div>
+                                <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; border: 1px solid #e9ecef;">아이템 2</div>
+                                <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; border: 1px solid #e9ecef;">아이템 3</div>
+                            </div>
+                        </div>
+                        <div class="grid-item">
+                            <h5>반응형 그리드</h5>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 16px 0;">
+                                <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; border: 1px solid #e9ecef;">아이템 1</div>
+                                <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; border: 1px solid #e9ecef;">아이템 2</div>
+                                <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; border: 1px solid #e9ecef;">아이템 3</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. 필터 및 검색 컴포넌트 -->
+        <div class="section">
+            <h2>2. 필터 및 검색 컴포넌트</h2>
+            
+            <h3>기본 검색</h3>
+            <div style="margin: 15px 0;">
+                <input type="text" class="form-input" placeholder="구성원, 소그룹, 활동 검색..." style="width: 60%; display: inline-block;">
+                <button class="btn btn-primary">검색</button>
+            </div>
+            
+            <h3>필터 드롭다운</h3>
+            <select class="form-input" style="width: auto;">
+                <option>전체 소그룹</option>
+                <option>강남구</option>
+                <option>서초구</option>
+            </select>
+            
+            <h3>날짜 범위 조회</h3>
+            <div class="date-range-container">
+                <div class="date-input-group">
+                    <label class="date-label">시작일</label>
+                    <input type="date" class="date-input" value="2024-01-01">
+                </div>
+                <div class="date-separator">~</div>
+                <div class="date-input-group">
+                    <label class="date-label">종료일</label>
+                    <input type="date" class="date-input" value="2024-12-31">
+                </div>
+                <button class="btn btn-primary">조회</button>
+                <div class="quick-date-buttons">
+                    <button class="btn btn-outline">오늘</button>
+                    <button class="btn btn-outline">이번 주</button>
+                    <button class="btn btn-outline">이번 달</button>
+                    <button class="btn btn-outline">지난 3개월</button>
+                    <button class="btn btn-outline">올해</button>
+                </div>
+            </div>
+            
+            <h3>선택된 필터</h3>
+            <div style="margin: 15px 0;">
+                <span class="status-badge status-active">강남구 ×</span>
+                <span class="status-badge status-active">20대 ×</span>
+                <span class="status-badge status-active">2024-01-01 ~ 2024-12-31 ×</span>
+            </div>
+            
+            <!-- 필터 및 검색 컴포넌트 상세 스타일 가이드 -->
+            <div class="style-guide">
+                <div class="style-section">
+                    <h4>🔍 필터 및 검색 컴포넌트 스타일 정보</h4>
+                    
+                    <h5>📝 기본 검색</h5>
+                    <div class="style-info">
+                        <ul>
+                            <li><strong>검색 입력창:</strong> 폰트 크기 1rem (16px), 패딩 10px</li>
+                            <li><strong>검색 버튼:</strong> 폰트 크기 0.95rem (15.2px), 패딩 10px 20px</li>
+                            <li><strong>플레이스홀더:</strong> 폰트 크기 0.9rem (14.4px), 색상 #6c757d</li>
+                        </ul>
+                    </div>
+                    
+                    <h5>📋 필터 드롭다운</h5>
+                    <div class="style-info">
+                        <ul>
+                            <li><strong>드롭다운:</strong> 폰트 크기 0.95rem (15.2px), 패딩 10px</li>
+                            <li><strong>옵션 텍스트:</strong> 폰트 크기 0.9rem (14.4px)</li>
+                            <li><strong>테두리:</strong> 2px solid #e9ecef, 모서리 6px</li>
+                        </ul>
+                    </div>
+                    
+                    <h5>📅 날짜 범위 조회</h5>
+                    <div class="style-info">
+                        <ul>
+                            <li><strong>날짜 라벨:</strong> 폰트 크기 0.9rem (14.4px), 폰트 굵기 600</li>
+                            <li><strong>날짜 입력:</strong> 폰트 크기 0.95rem (15.2px), 패딩 10px 12px</li>
+                            <li><strong>구분자 (~):</strong> 폰트 크기 1.2rem (19.2px), 폰트 굵기 600</li>
+                            <li><strong>조회 버튼:</strong> 폰트 크기 0.95rem (15.2px), 패딩 10px 20px</li>
+                        </ul>
+                    </div>
+                    
+                    <h5>⚡ 빠른 날짜 선택</h5>
+                    <div class="style-info">
+                        <ul>
+                            <li><strong>빠른 선택 버튼:</strong> 폰트 크기 0.9rem (14.4px), 패딩 8px 16px</li>
+                            <li><strong>호버 효과:</strong> 배경색 #667eea, 텍스트 색상 white</li>
+                            <li><strong>테두리:</strong> 2px solid #667eea, 모서리 6px</li>
+                        </ul>
+                    </div>
+                    
+                    <h5>🏷️ 선택된 필터</h5>
+                    <div class="style-info">
+                        <ul>
+                            <li><strong>필터 배지:</strong> 폰트 크기 0.85rem (13.6px), 폰트 굵기 600</li>
+                            <li><strong>패딩:</strong> 4px 12px, 모서리 20px</li>
+                            <li><strong>삭제 버튼 (×):</strong> 폰트 크기 0.9rem (14.4px), 커서 pointer</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. 통계 데이터 표시 컴포넌트 -->
+        <div class="section">
+            <h2>3. 통계 데이터 표시 컴포넌트</h2>
+            
+            <h3>📊 대시보드 통계 카드</h3>
+            <div class="component-grid">
+                <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-align: center;">
+                    <div style="font-size: 2rem; font-weight: 800;">127</div>
+                    <div>전체 구성원</div>
+                </div>
+                <div class="card" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; text-align: center;">
+                    <div style="font-size: 2rem; font-weight: 800;">89%</div>
+                    <div>평균 출석률</div>
+                </div>
+                <div class="card" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); color: white; text-align: center;">
+                    <div style="font-size: 2rem; font-weight: 800;">24</div>
+                    <div>활성 소그룹</div>
+                </div>
+                <div class="card" style="background: linear-gradient(135deg, #feca57 0%, #ff9ff3 100%); color: white; text-align: center;">
+                    <div style="font-size: 2rem; font-weight: 800;">156</div>
+                    <div>이번 달 활동</div>
+                </div>
+            </div>
+            
+            <h3>📈 차트 및 그래프</h3>
+            <div class="component-grid">
+                <div class="card">
+                    <h4>출석률 트렌드</h4>
+                    <div style="height: 200px; background: #f8f9fa; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #6c757d;">
+                        📊 출석률 차트 영역
+                    </div>
+                </div>
+                <div class="card">
+                    <h4>연령대별 분포</h4>
+                    <div style="height: 200px; background: #f8f9fa; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #6c757d;">
+                        🍰 연령대별 파이 차트
+                    </div>
+                </div>
+            </div>
+            
+            <h3>🔢 상세 통계 정보</h3>
+            <div class="component-grid">
+                <div class="card">
+                    <h4>소그룹별 현황</h4>
+                    <div style="margin: 15px 0;">
+                        <div style="display: flex; justify-content: space-between; margin: 8px 0;">
+                            <span>강남구</span>
+                            <span style="font-weight: 600; color: #667eea;">42명</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin: 8px 0;">
+                            <span>서초구</span>
+                            <span style="font-weight: 600; color: #667eea;">38명</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin: 8px 0;">
+                            <span>송파구</span>
+                            <span style="font-weight: 600; color: #667eea;">47명</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h4>최근 활동 현황</h4>
+                    <div style="margin: 15px 0;">
+                        <div style="display: flex; justify-content: space-between; margin: 8px 0;">
+                            <span>이번 주 출석</span>
+                            <span style="font-weight: 600; color: #28a745;">89명</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin: 8px 0;">
+                            <span>이번 주 결석</span>
+                            <span style="font-weight: 600; color: #dc3545;">38명</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin: 8px 0;">
+                            <span>이번 주 지각</span>
+                            <span style="font-weight: 600; color: #ffc107;">12명</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 통계 데이터 표시 컴포넌트 상세 스타일 가이드 -->
+            <div class="style-guide">
+                <div class="style-section">
+                    <h4>📊 통계 데이터 표시 컴포넌트 스타일 정보</h4>
+                    
+                    <h5>🏷️ 통계 카드</h5>
+                    <div class="style-info">
+                        <ul>
+                            <li><strong>카드 배경:</strong> 그라데이션 배경, 흰색 텍스트</li>
+                            <li><strong>숫자 표시:</strong> 폰트 크기 2rem (32px), 폰트 굵기 800</li>
+                            <li><strong>라벨 텍스트:</strong> 폰트 크기 1rem (16px), 중앙 정렬</li>
+                            <li><strong>카드 크기:</strong> 최소 250px 너비, 자동 높이</li>
+                        </ul>
+                    </div>
+                    
+                    <h5>📈 차트 영역</h5>
+                    <div class="style-info">
+                        <ul>
+                            <li><strong>차트 컨테이너:</strong> 높이 200px, 회색 배경</li>
+                            <li><strong>차트 제목:</strong> 폰트 크기 1.1rem (17.6px), 폰트 굵기 600</li>
+                            <li><strong>플레이스홀더:</strong> 중앙 정렬, 회색 텍스트</li>
+                        </ul>
+                    </div>
+                    
+                    <h5>🔢 상세 통계</h5>
+                    <div class="style-info">
+                        <ul>
+                            <li><strong>섹션 제목:</strong> 폰트 크기 1.1rem (17.6px), 폰트 굵기 600</li>
+                            <li><strong>통계 항목:</strong> flexbox로 좌우 배치, 8px 마진</li>
+                            <li><strong>숫자 강조:</strong> 폰트 굵기 600, 브랜드 컬러 적용</li>
+                        </ul>
+                    </div>
+                    
+                    <h5>🎨 색상 시스템</h5>
+                    <div class="style-info">
+                        <ul>
+                            <li><strong>전체 구성원:</strong> #667eea ~ #764ba2 (파란색 그라데이션)</li>
+                            <li><strong>출석률:</strong> #28a745 ~ #20c997 (초록색 그라데이션)</li>
+                            <li><strong>소그룹:</strong> #ff6b6b ~ #ee5a24 (빨간색 그라데이션)</li>
+                            <li><strong>활동:</strong> #feca57 ~ #ff9ff3 (노란색 그라데이션)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. 데이터 테이블 (Grid) 컴포넌트 -->
+        <div class="section">
+            <h2>4. 데이터 테이블 (Grid) 컴포넌트</h2>
+            <div class="visitation-table-container">
+                <table class="visitation-table">
+                    <thead class="visitation-table-header">
+                        <tr>
+                            <th class="visitation-header-cell">찜하기</th>
+                            <th class="visitation-header-cell">심방일자</th>
+                            <th class="visitation-header-cell">대상자 이름</th>
+                            <th class="visitation-header-cell">기수</th>
+                            <th class="visitation-header-cell">국</th>
+                            <th class="visitation-header-cell">그룹</th>
+                            <th class="visitation-header-cell">순</th>
+                            <th class="visitation-header-cell">진행자 이름</th>
+                            <th class="visitation-header-cell">심방방법</th>
+                        </tr>
+                    </thead>
+                    <tbody class="visitation-table-body">
+                        <tr class="visitation-table-row">
+                            <td class="visitation-table-cell">
+                                <button class="star-icon favorited" title="찜하기 해제">★</button>
+                            </td>
+                            <td class="visitation-table-cell-bold" style="cursor: pointer;">2024-01-20</td>
+                            <td class="visitation-table-cell-bold" style="cursor: pointer;">김민수</td>
+                            <td class="visitation-table-cell-secondary">29기</td>
+                            <td class="visitation-table-cell">1국</td>
+                            <td class="visitation-table-cell">김민수 그룹</td>
+                            <td class="visitation-table-cell">김민수 순</td>
+                            <td class="visitation-table-cell-bold">이지은</td>
+                            <td class="visitation-table-cell">
+                                <span class="method-badge method-meeting">만남</span>
+                            </td>
+                        </tr>
+                        <tr class="visitation-table-row">
+                            <td class="visitation-table-cell">
+                                <button class="star-icon" title="찜하기">☆</button>
+                            </td>
+                            <td class="visitation-table-cell-bold" style="cursor: pointer;">2024-01-19</td>
+                            <td class="visitation-table-cell-bold" style="cursor: pointer;">박준호</td>
+                            <td class="visitation-table-cell-secondary">30기</td>
+                            <td class="visitation-table-cell">2국</td>
+                            <td class="visitation-table-cell">박준호 그룹</td>
+                            <td class="visitation-table-cell">박준호 순</td>
+                            <td class="visitation-table-cell-bold">정현우</td>
+                            <td class="visitation-table-cell">
+                                <span class="method-badge method-call">통화</span>
+                            </td>
+                        </tr>
+                        <tr class="visitation-table-row">
+                            <td class="visitation-table-cell">
+                                <button class="star-icon favorited" title="찜하기 해제">★</button>
+                            </td>
+                            <td class="visitation-table-cell-bold" style="cursor: pointer;">2024-01-18</td>
+                            <td class="visitation-table-cell-bold" style="cursor: pointer;">최수진</td>
+                            <td class="visitation-table-cell-secondary">28기</td>
+                            <td class="visitation-table-cell">3국</td>
+                            <td class="visitation-table-cell">최수진 그룹</td>
+                            <td class="visitation-table-cell">최수진 순</td>
+                            <td class="visitation-table-cell-bold">김태영</td>
+                            <td class="visitation-table-cell">
+                                <span class="method-badge method-kakao">카카오톡</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- 데이터 테이블 컴포넌트 상세 스타일 가이드 -->
+            <div class="style-guide">
+                <div class="style-section">
+                    <h4>📊 심방관리 테이블 컴포넌트 스타일 정보</h4>
+                    
+                    <h5>🏷️ 테이블 컨테이너</h5>
+                    <div class="style-info">
+                        <ul>
+                            <li><strong>배경색:</strong> white</li>
+                            <li><strong>테두리:</strong> 1px solid #e9ecef</li>
+                            <li><strong>모서리:</strong> 16px (border-radius)</li>
+                            <li><strong>그림자:</strong> 0 2px 8px rgba(0,0,0,0.1)</li>
+                            <li><strong>오버플로우:</strong> hidden, overflow-x: auto</li>
+                            <li><strong>최소 너비:</strong> 800px</li>
+                        </ul>
+                    </div>
+                    
+                    <h5>📋 테이블 헤더</h5>
+                    <div class="style-info">
+                        <ul>
+                            <li><strong>배경:</strong> linear-gradient(135deg, #667eea 0%, #764ba2 100%)</li>
+                            <li><strong>텍스트 색상:</strong> white</li>
+                            <li><strong>패딩:</strong> 15px 12px</li>
+                            <li><strong>폰트 굵기:</strong> 600</li>
+                            <li><strong>폰트 크기:</strong> 0.9rem</li>
+                            <li><strong>정렬:</strong> center</li>
+                        </ul>
+                    </div>
+                    
+                    <h5>📝 테이블 데이터</h5>
+                    <div class="style-info">
+                        <ul>
+                            <li><strong>기본 셀:</strong> 패딩 12px, 색상 #333, 중앙 정렬</li>
+                            <li><strong>굵은 텍스트 셀:</strong> 폰트 굵기 600, 클릭 가능</li>
+                            <li><strong>보조 텍스트 셀:</strong> 색상 #6c757d, 폰트 크기 0.85rem</li>
+                            <li><strong>테두리:</strong> 1px solid #e9ecef (하단)</li>
+                            <li><strong>호버 효과:</strong> 배경 #f8f9fa, transform translateY(-1px)</li>
+                        </ul>
+                    </div>
+                    
+                    <h5>⭐ 찜하기 아이콘</h5>
+                    <div class="style-info">
+                        <ul>
+                            <li><strong>기본 상태:</strong> 색상 #CCCCCC, 크기 1.2rem</li>
+                            <li><strong>호버 효과:</strong> 배경 rgba(255, 215, 0, 0.1), 색상 #FFD700</li>
+                            <li><strong>찜한 상태:</strong> 색상 #FFD700, 애니메이션 starGlow</li>
+                            <li><strong>애니메이션:</strong> 2초 무한 반복, 크기 변화 및 그림자 효과</li>
+                        </ul>
+                    </div>
+                    
+                    <h5>🏷️ 심방방법 배지</h5>
+                    <div class="style-info">
+                        <ul>
+                            <li><strong>만남:</strong> 배경 #e3f2fd, 색상 #1976d2</li>
+                            <li><strong>통화:</strong> 배경 #f3e5f5, 색상 #7b1fa2</li>
+                            <li><strong>카카오톡:</strong> 배경 #fff3e0, 색상 #f57c00</li>
+                            <li><strong>패딩:</strong> 4px 8px</li>
+                            <li><strong>모서리:</strong> 12px</li>
+                            <li><strong>폰트 크기:</strong> 0.8rem</li>
+                        </ul>
+                    </div>
+                    
+                    <h5>📱 반응형 디자인</h5>
+                    <div class="style-info">
+                        <ul>
+                            <li><strong>태블릿 (1024px 이하):</strong> 패딩 12px 10px, 폰트 크기 0.85rem</li>
+                            <li><strong>모바일 (768px 이하):</strong> 패딩 10px 8px, 폰트 크기 0.8rem</li>
+                            <li><strong>최소 너비:</strong> 태블릿 700px, 모바일 600px</li>
+                            <li><strong>가로 스크롤:</strong> overflow-x: auto</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. 액션 컴포넌트 -->
+        <div class="section">
+            <h2>5. 액션 컴포넌트</h2>
+            
+            <h3>🔘 기본 액션 버튼</h3>
+            <div style="margin: 15px 0;">
+                <button class="btn btn-primary">새 구성원 추가</button>
+                <button class="btn btn-secondary">일괄 수정</button>
+                <button class="btn btn-success">데이터 내보내기</button>
+                <button class="btn btn-danger">선택 삭제</button>
+            </div>
+            
+            <h3>📏 버튼 크기 변형</h3>
+            <div style="margin: 15px 0;">
+                <button class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem;">작은 버튼</button>
+                <button class="btn btn-primary" style="padding: 10px 20px; font-size: 0.95rem;">기본 버튼</button>
+                <button class="btn btn-primary" style="padding: 14px 28px; font-size: 1.1rem;">큰 버튼</button>
+            </div>
+            
+            <h3>🎨 버튼 스타일 변형</h3>
+            <div style="margin: 15px 0;">
+                <button class="btn btn-primary" style="border-radius: 20px;">둥근 버튼</button>
+                <button class="btn btn-outline" style="background: transparent; color: #667eea; border: 2px solid #667eea;">아웃라인 버튼</button>
+                <button class="btn btn-primary" style="box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);">그림자 버튼</button>
+            </div>
+            
+            <h3>⚡ 아이콘 버튼</h3>
+            <div style="margin: 15px 0;">
+                <button class="btn btn-primary" style="padding: 8px; width: 40px; height: 40px; border-radius: 50%;">➕</button>
+                <button class="btn btn-secondary" style="padding: 8px; width: 40px; height: 40px; border-radius: 50%;">✏️</button>
+                <button class="btn btn-success" style="padding: 8px; width: 40px; height: 40px; border-radius: 50%;">📤</button>
+                <button class="btn btn-danger" style="padding: 8px; width: 40px; height: 40px; border-radius: 50%;">🗑️</button>
+            </div>
+            
+            <!-- 액션 컴포넌트 상세 스타일 가이드 -->
+            <div class="style-guide">
+                <div class="style-section">
+                    <h4>🔘 액션 컴포넌트 스타일 정보</h4>
+                    
+                    <h5>📏 기본 버튼</h5>
+                    <div class="style-info">
+                        <ul>
+                            <li><strong>기본 패딩:</strong> 10px 20px (상하 10px, 좌우 20px)</li>
+                            <li><strong>기본 폰트 크기:</strong> 0.95rem (15.2px)</li>
+                            <li><strong>폰트 굵기:</strong> 600 (semi-bold)</li>
+                            <li><strong>테두리:</strong> none</li>
+                            <li><strong>모서리:</strong> 6px</li>
+                            <li><strong>커서:</strong> pointer</li>
+                        </ul>
+                    </div>
+                    
+                    <h5>🎨 버튼 색상 시스템</h5>
+                    <div class="style-info">
+                        <ul>
+                            <li><strong>Primary (주요):</strong> #667eea (파란색)</li>
+                            <li><strong>Secondary (보조):</strong> #6c757d (회색)</li>
+                            <li><strong>Success (성공):</strong> #28a745 (초록색)</li>
+                            <li><strong>Danger (위험):</strong> #dc3545 (빨간색)</li>
+                            <li><strong>텍스트 색상:</strong> white (모든 버튼)</li>
+                        </ul>
+                    </div>
+                    
+                    <h5>📐 버튼 크기 변형</h5>
+                    <div class="style-info">
+                        <ul>
+                            <li><strong>작은 버튼:</strong> 패딩 6px 12px, 폰트 0.8rem (12.8px)</li>
+                            <li><strong>기본 버튼:</strong> 패딩 10px 20px, 폰트 0.95rem (15.2px)</li>
+                            <li><strong>큰 버튼:</strong> 패딩 14px 28px, 폰트 1.1rem (17.6px)</li>
+                            <li><strong>아이콘 버튼:</strong> 크기 40px × 40px, 패딩 8px</li>
+                        </ul>
+                    </div>
+                    
+                    <h5>🔲 버튼 스타일 변형</h5>
+                    <div class="style-info">
+                        <ul>
+                            <li><strong>둥근 버튼:</strong> border-radius: 20px</li>
+                            <li><strong>아웃라인 버튼:</strong> 투명 배경, 테두리 2px solid</li>
+                            <li><strong>그림자 버튼:</strong> box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3)</li>
+                            <li><strong>원형 아이콘:</strong> border-radius: 50%</li>
+                        </ul>
+                    </div>
+                    
+                    <h5>⚡ 상호작용 효과</h5>
+                    <div class="style-info">
+                        <ul>
+                            <li><strong>호버 효과:</strong> 기본적으로 제공 (브라우저 기본)</li>
+                            <li><strong>포커스:</strong> outline: none (커스텀 스타일링)</li>
+                            <li><strong>활성화:</strong> :active 상태에서 약간의 압축 효과</li>
+                            <li><strong>비활성화:</strong> opacity: 0.6, cursor: not-allowed</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. 폼 컴포넌트 -->
+        <div class="section">
+            <h2>6. 폼 컴포넌트</h2>
+            
+            <h3>📝 기본 폼 입력</h3>
+            <div class="card">
+                <h4>구성원 정보 입력</h4>
+                <input type="text" class="form-input" placeholder="이름을 입력하세요">
+                <select class="form-input">
+                    <option>소그룹을 선택하세요</option>
+                    <option>강남구</option>
+                    <option>서초구</option>
+                </select>
+                <input type="tel" class="form-input" placeholder="연락처를 입력하세요">
+                <div style="margin: 15px 0;">
+                    <button class="btn btn-primary">저장</button>
+                    <button class="btn btn-secondary">취소</button>
+                </div>
+            </div>
+            
+            <h3>🔘 폼 액션 버튼</h3>
+            <div style="margin: 15px 0;">
+                <button class="btn btn-primary">저장</button>
+                <button class="btn btn-secondary">취소</button>
+                <button class="btn btn-outline">초기화</button>
+                <button class="btn btn-success">제출</button>
+            </div>
+            
+            <!-- 폼 컴포넌트 상세 스타일 가이드 -->
+            <div class="style-guide">
+                <div class="style-section">
+                    <h4>📝 폼 컴포넌트 스타일 정보</h4>
+                    
+                    <h5>🏷️ 입력 필드</h5>
+                    <div class="style-info">
+                        <ul>
+                            <li><strong>기본 입력:</strong> 폰트 크기 1rem (16px), 패딩 10px</li>
+                            <li><strong>플레이스홀더:</strong> 폰트 크기 0.9rem (14.4px), 색상 #6c757d</li>
+                            <li><strong>테두리:</strong> 2px solid #e9ecef, 모서리 6px</li>
+                            <li><strong>너비:</strong> 100% (부모 컨테이너 기준)</li>
+                            <li><strong>마진:</strong> 10px 0 (상하 10px)</li>
+                        </ul>
+                    </div>
+                    
+                    <h5>🔘 폼 버튼</h5>
+                    <div class="style-info">
+                        <ul>
+                            <li><strong>저장 버튼:</strong> Primary 스타일, 폰트 크기 0.95rem (15.2px)</li>
+                            <li><strong>취소 버튼:</strong> Secondary 스타일, 폰트 크기 0.95rem (15.2px)</li>
+                            <li><strong>초기화 버튼:</strong> Outline 스타일, 폰트 크기 0.95rem (15.2px)</li>
+                            <li><strong>제출 버튼:</strong> Success 스타일, 폰트 크기 0.95rem (15.2px)</li>
+                        </ul>
+                    </div>
+                    
+                    <h5>📏 상세 스타일 정보</h5>
+                    <div class="style-info">
+                        <ul>
+                            <li><strong>입력 필드 패딩:</strong> 10px (상하좌우 동일)</li>
+                            <li><strong>입력 필드 마진:</strong> 10px 0 (상하 10px, 좌우 0)</li>
+                            <li><strong>입력 필드 테두리:</strong> 2px solid #e9ecef</li>
+                            <li><strong>입력 필드 모서리:</strong> 6px (border-radius)</li>
+                            <li><strong>입력 필드 포커스:</strong> 테두리 색상 #667eea, 그림자 효과</li>
+                            <li><strong>버튼 패딩:</strong> 10px 20px (상하 10px, 좌우 20px)</li>
+                            <li><strong>버튼 마진:</strong> 5px (모든 방향)</li>
+                            <li><strong>버튼 모서리:</strong> 6px (border-radius)</li>
+                        </ul>
+                    </div>
+                    
+                    <h5>🎨 폼 레이아웃</h5>
+                    <div class="style-info">
+                        <ul>
+                            <li><strong>폼 컨테이너:</strong> 카드 스타일, 패딩 20px</li>
+                            <li><strong>입력 그룹:</strong> 세로 배치, 간격 10px</li>
+                            <li><strong>버튼 그룹:</strong> 가로 배치, 간격 5px</li>
+                            <li><strong>반응형:</strong> 모바일에서 세로 배치로 변경</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. 피드백 컴포넌트 -->
+        <div class="section">
+            <h2>7. 피드백 컴포넌트</h2>
+            <div class="alert alert-success">✅ 구성원 정보가 성공적으로 저장되었습니다.</div>
+            <div class="alert alert-warning">⚠️ 일부 데이터가 누락되었습니다.</div>
+            <div class="alert" style="background: #f8d7da; color: #721c24; border-left-color: #dc3545;">❌ 저장 중 오류가 발생했습니다.</div>
+        </div>
+
+        <!-- 8. 모달 및 팝업 컴포넌트 -->
+        <div class="section">
+            <h2>8. 모달 및 팝업 컴포넌트</h2>
+            
+            <h3>🔘 기본 모달 버튼</h3>
+            <div style="margin: 15px 0;">
+                <button class="btn btn-primary" onclick="alert('모달 예시: 구성원 삭제 확인')">모달 열기</button>
+                <button class="btn btn-secondary" onclick="alert('팝업 예시: 새 심방 기록')">팝업 열기</button>
+            </div>
+            
+            <h3>📋 심방 기록 팝업 레이아웃</h3>
+            <div class="card" style="background: white; border: 2px solid #e9ecef; max-width: 600px; margin: 20px auto;">
+                <!-- 팝업 헤더 -->
+                <div style="background: #f8f9fa; padding: 20px; border-bottom: 1px solid #e9ecef; display: flex; justify-content: space-between; align-items: center;">
+                    <h4 style="margin: 0; color: #2c3e50; font-size: 1.2rem;">새 심방 기록</h4>
+                    <button style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #6c757d;">×</button>
+                </div>
+                
+                <!-- 팝업 본문 -->
+                <div style="padding: 24px;">
+                    <!-- 심방 대상 정보 -->
+                    <div style="margin-bottom: 24px;">
+                        <h5 style="color: #2c3e50; margin-bottom: 16px; font-size: 1rem;">심방 대상 정보</h5>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-size: 0.9rem; color: #2c3e50;">이름</label>
+                                <input type="text" style="width: 100%; padding: 10px; border: 2px solid #e9ecef; border-radius: 6px; font-size: 0.95rem;" placeholder="이름을 입력하세요">
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-size: 0.9rem; color: #2c3e50;">연락처</label>
+                                <input type="tel" style="width: 100%; padding: 10px; border: 2px solid #e9ecef; border-radius: 6px; font-size: 0.95rem;" placeholder="연락처를 입력하세요">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 심방 일정 -->
+                    <div style="margin-bottom: 24px;">
+                        <h5 style="color: #2c3e50; margin-bottom: 16px; font-size: 1rem;">심방 일정</h5>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-size: 0.9rem; color: #2c3e50;">심방 날짜</label>
+                                <input type="date" style="width: 100%; padding: 10px; border: 2px solid #e9ecef; border-radius: 6px; font-size: 0.95rem;">
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-size: 0.9rem; color: #2c3e50;">심방 시간</label>
+                                <input type="time" style="width: 100%; padding: 10px; border: 2px solid #e9ecef; border-radius: 6px; font-size: 0.95rem;">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 심방 내용 -->
+                    <div style="margin-bottom: 24px;">
+                        <h5 style="color: #2c3e50; margin-bottom: 16px; font-size: 1rem;">심방 내용</h5>
+                        <textarea style="width: 100%; padding: 12px; border: 2px solid #e9ecef; border-radius: 6px; font-size: 0.95rem; min-height: 100px; resize: vertical;" placeholder="심방 내용을 입력하세요"></textarea>
+                    </div>
+                    
+                    <!-- 심방 결과 -->
+                    <div style="margin-bottom: 24px;">
+                        <h5 style="color: #2c3e50; margin-bottom: 16px; font-size: 1rem;">심방 결과</h5>
+                        <select style="width: 100%; padding: 10px; border: 2px solid #e9ecef; border-radius: 6px; font-size: 0.95rem;">
+                            <option>심방 결과를 선택하세요</option>
+                            <option>성공</option>
+                            <option>실패</option>
+                            <option>재심방 필요</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- 팝업 푸터 -->
+                <div style="background: #f8f9fa; padding: 20px; border-top: 1px solid #e9ecef; display: flex; justify-content: flex-end; gap: 12px;">
+                    <button class="btn btn-secondary" style="font-size: 0.9rem; padding: 8px 16px;">취소</button>
+                    <button class="btn btn-primary" style="font-size: 0.9rem; padding: 8px 16px;">저장</button>
+                </div>
+            </div>
+            
+            <!-- 모달 및 팝업 컴포넌트 상세 스타일 가이드 -->
+            <div class="style-guide">
+                <div class="style-section">
+                    <h4>📋 모달 및 팝업 컴포넌트 스타일 정보</h4>
+                    
+                    <h5>🏷️ 팝업 헤더</h5>
+                    <div class="style-info">
+                        <ul>
+                            <li><strong>배경색:</strong> #f8f9fa (연한 회색)</li>
+                            <li><strong>패딩:</strong> 20px (상하좌우 동일)</li>
+                            <li><strong>테두리:</strong> 1px solid #e9ecef (하단만)</li>
+                            <li><strong>제목 폰트:</strong> 1.2rem (19.2px), 색상 #2c3e50</li>
+                            <li><strong>닫기 버튼:</strong> 1.5rem (24px), 색상 #6c757d</li>
+                        </ul>
+                    </div>
+                    
+                    <h5>📝 팝업 본문</h5>
+                    <div class="style-info">
+                        <ul>
+                            <li><strong>패딩:</strong> 24px (상하좌우 동일)</li>
+                            <li><strong>섹션 간격:</strong> 24px (하단 마진)</li>
+                            <li><strong>섹션 제목:</strong> 1rem (16px), 색상 #2c3e50</li>
+                            <li><strong>라벨 폰트:</strong> 0.9rem (14.4px), 색상 #2c3e50</li>
+                            <li><strong>입력 필드:</strong> 0.95rem (15.2px), 패딩 10px</li>
+                        </ul>
+                    </div>
+                    
+                    <h5>🔘 팝업 푸터</h5>
+                    <div class="style-info">
+                        <ul>
+                            <li><strong>배경색:</strong> #f8f9fa (연한 회색)</li>
+                            <li><strong>패딩:</strong> 20px (상하좌우 동일)</li>
+                            <li><strong>테두리:</strong> 1px solid #e9ecef (상단만)</li>
+                            <li><strong>버튼 간격:</strong> 12px</li>
+                            <li><strong>버튼 크기:</strong> 0.9rem (14.4px), 패딩 8px 16px</li>
+                        </ul>
+                    </div>
+                    
+                    <h5>📏 팝업 레이아웃 구조</h5>
+                    <div class="style-info">
+                        <ul>
+                            <li><strong>최대 너비:</strong> 600px (중앙 정렬)</li>
+                            <li><strong>그리드 레이아웃:</strong> 2열 배치 (1fr 1fr)</li>
+                            <li><strong>컬럼 간격:</strong> 16px</li>
+                            <li><strong>입력 필드 높이:</strong> 자동 (패딩 기준)</li>
+                            <li><strong>텍스트 영역:</strong> 최소 100px, 세로 리사이즈 가능</li>
+                        </ul>
+                    </div>
+                    
+                    <h5>🎨 팝업 색상 시스템</h5>
+                    <div class="style-info">
+                        <ul>
+                            <li><strong>헤더/푸터 배경:</strong> #f8f9fa</li>
+                            <li><strong>본문 배경:</strong> white</li>
+                            <li><strong>테두리:</strong> #e9ecef</li>
+                            <li><strong>제목 텍스트:</strong> #2c3e50</li>
+                            <li><strong>라벨 텍스트:</strong> #2c3e50</li>
+                            <li><strong>입력 텍스트:</strong> #333 (기본)</li>
+                        </ul>
+                    </div>
+                    
+                    <h5>⚡ 팝업 상호작용</h5>
+                    <div class="style-info">
+                        <ul>
+                            <li><strong>닫기 버튼:</strong> 호버 시 색상 변경</li>
+                            <li><strong>입력 필드:</strong> 포커스 시 테두리 #667eea</li>
+                            <li><strong>버튼:</strong> 호버 효과 및 활성화 상태</li>
+                            <li><strong>반응형:</strong> 모바일에서 단일 컬럼으로 변경</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 9. 반응형 컴포넌트 -->
+        <div class="section">
+            <h2>9. 반응형 컴포넌트</h2>
+            <div class="tab-buttons">
+                <button class="tab-button active">구성원 현황</button>
+                <button class="tab-button">출석 통계</button>
+                <button class="tab-button">활동 기록</button>
+            </div>
+            <div style="padding: 20px 0;">
+                <p>구성원 현황 탭의 내용입니다.</p>
+            </div>
+        </div>
+
+        <!-- 10. 스타일링 컴포넌트 -->
+        <div class="section">
+            <h2>10. 스타일링 컴포넌트</h2>
+            <div class="color-palette">
+                <div class="color-swatch color-primary">Primary<br>#667eea</div>
+                <div class="color-swatch color-secondary">Secondary<br>#764ba2</div>
+                <div class="color-swatch color-success">Success<br>#28a745</div>
+                <div class="color-swatch color-warning">Warning<br>#ffc107</div>
+                <div class="color-swatch color-danger">Danger<br>#dc3545</div>
+            </div>
+        </div>
+
+        <!-- 11. 유틸리티 컴포넌트 -->
+        <div class="section">
+            <h2>11. 유틸리티 컴포넌트</h2>
+            <div class="breadcrumb">
+                <span class="breadcrumb-item">홈</span>
+                <span>/</span>
+                <span class="breadcrumb-item">구성원 관리</span>
+                <span>/</span>
+                <span class="breadcrumb-item active">구성원 상세</span>
+            </div>
+            <div class="pagination">
+                <button class="page-button">이전</button>
+                <button class="page-button">1</button>
+                <button class="page-button active">2</button>
+                <button class="page-button">3</button>
+                <button class="page-button">다음</button>
+            </div>
+        </div>
+
+        <!-- 12. 특화 컴포넌트 (청년회 도메인) -->
+        <div class="section">
+            <h2>12. 특화 컴포넌트 (청년회 도메인)</h2>
+            <div class="component-grid">
+                <div class="member-card">
+                    <div class="member-avatar">김</div>
+                    <div style="font-size: 1.2rem; font-weight: 600; margin-bottom: 5px;">김철수</div>
+                    <div style="color: #6c757d; margin-bottom: 10px;">강남구 소그룹장</div>
+                    <div class="attendance-status attendance-present">출석</div>
+                </div>
+                <div class="member-card">
+                    <div class="member-avatar">이</div>
+                    <div style="font-size: 1.2rem; font-weight: 600; margin-bottom: 5px;">이영희</div>
+                    <div style="color: #6c757d; margin-bottom: 10px;">서초구 회계</div>
+                    <div class="attendance-status attendance-late">지각</div>
+                </div>
+                <div class="member-card">
+                    <div class="member-avatar">박</div>
+                    <div style="font-size: 1.2rem; font-weight: 600; margin-bottom: 5px;">박민수</div>
+                    <div style="color: #6c757d; margin-bottom: 10px;">송파구 회원</div>
+                    <div class="attendance-status attendance-absent">결석</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 13. 접근성 컴포넌트 -->
+        <div class="section">
+            <h2>13. 접근성 컴포넌트</h2>
+            <p>건너뛰기 링크, 포커스 표시기, 스크린 리더 지원 등이 포함되어 있습니다.</p>
+        </div>
+    </div>
+
+    <script>
+        // 탭 기능
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
