@@ -1,57 +1,59 @@
 /**
  * 셀 데이터 검증 규칙 상수
- * 각 컬럼명에 대한 검증 함수를 정의합니다.
+ * 회기 변경 관리 엑셀 데이터 검증용
  */
 
 /**
  * 검증 함수 타입
+ * @param value 셀 값
+ * @param rowData 행 전체 데이터 (다른 컬럼 참조가 필요한 경우)
  * @returns true면 유효, false면 무효
  */
-type ValidationFunction = (value: any) => boolean;
+type ValidationFunction = (value: any, rowData?: Record<string, any>) => boolean;
 
 /**
- * 날짜 형식 검증 (YYYY-MM-DD 또는 YYYY/MM/DD)
+ * 번호(전화번호) 형식 검증
+ * 규칙:
+ * 1. 직분이 없으면 검증하지 않음
+ * 2. 직분이 있는데 번호가 비어있으면 무효
+ * 3. 번호가 있으면 '3자리-4자리-4자리' 형식이어야 함
  */
-const validateDate = (value: any): boolean => {
-  if (!value) return true; // 빈 값은 허용
-  const datePattern = /^\d{4}[-/](0[1-9]|1[0-2])[-/](0[1-9]|[12]\d|3[01])$/;
-  return datePattern.test(String(value));
+const validatePhone = (value: any, rowData?: Record<string, any>): boolean => {
+  const phoneStr = String(value || '').trim();
+  const role = rowData?.['직분'] ? String(rowData['직분']).trim() : '';
+
+  // 규칙 1: 직분이 없으면 검증하지 않음 (항상 유효)
+  if (!role) {
+    return true;
+  }
+
+  // 규칙 2: 직분이 있는데 번호가 비어있으면 무효
+  if (!phoneStr) {
+    return false;
+  }
+
+  // 규칙 3: 번호가 있으면 '3자리-4자리-4자리' 형식이어야 함
+  const phonePattern = /^\d{3}-\d{4}-\d{4}$/;
+  return phonePattern.test(phoneStr);
 };
 
 /**
- * 이메일 형식 검증
+ * 기수 형식 검증
+ * 규칙:
+ * 1. 기수가 비어있으면 무효
+ * 2. 기수는 2자리 숫자여야 함 (문자열 타입)
  */
-const validateEmail = (value: any): boolean => {
-  if (!value) return true; // 빈 값은 허용
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailPattern.test(String(value));
-};
+const validateBirthdate = (value: any): boolean => {
+  const birthdateStr = String(value || '').trim();
 
-/**
- * 전화번호 형식 검증 (010-1234-5678 또는 01012345678)
- */
-const validatePhoneNumber = (value: any): boolean => {
-  if (!value) return true; // 빈 값은 허용
-  const phonePattern = /^01[0-9]-?\d{3,4}-?\d{4}$/;
-  return phonePattern.test(String(value).replace(/\s/g, ''));
-};
+  // 규칙 1: 기수가 비어있으면 무효
+  if (!birthdateStr) {
+    return false;
+  }
 
-/**
- * Y/N 값 검증
- */
-const validateYesNo = (value: any): boolean => {
-  if (!value) return true; // 빈 값은 허용
-  const upperValue = String(value).toUpperCase();
-  return upperValue === 'Y' || upperValue === 'N';
-};
-
-/**
- * 성별 형식 검증 (M/F 또는 남/여)
- */
-const validateGender = (value: any): boolean => {
-  if (!value) return true; // 빈 값은 허용
-  const upperValue = String(value).toUpperCase();
-  return upperValue === 'M' || upperValue === 'F' || value === '남' || value === '여';
+  // 규칙 2: 2자리 숫자여야 함
+  const birthdatePattern = /^\d{2}$/;
+  return birthdatePattern.test(birthdateStr);
 };
 
 /**
@@ -59,22 +61,18 @@ const validateGender = (value: any): boolean => {
  * 키: 엑셀 컬럼명, 값: 검증 함수
  */
 export const CELL_VALIDATION_RULES: Record<string, ValidationFunction> = {
-  생년월일: validateDate,
-  교회등록일: validateDate,
-  이메일: validateEmail,
-  전화번호: validatePhoneNumber,
-  성별: validateGender,
-  새가족여부: validateYesNo,
-  장기결석여부: validateYesNo,
+  번호: validatePhone,
+  기수: validateBirthdate,
 };
 
 /**
  * 셀 데이터 검증
  * @param columnName 컬럼명
  * @param value 셀 값
+ * @param rowData 행 전체 데이터 (선택)
  * @returns 유효하면 true, 무효하면 false
  */
-export const validateCell = (columnName: string, value: any): boolean => {
+export const validateCell = (columnName: string, value: any, rowData?: Record<string, any>): boolean => {
   const validationFn = CELL_VALIDATION_RULES[columnName];
 
   // 검증 규칙이 없으면 항상 유효
@@ -82,7 +80,7 @@ export const validateCell = (columnName: string, value: any): boolean => {
     return true;
   }
 
-  return validationFn(value);
+  return validationFn(value, rowData);
 };
 
 /**

@@ -1,12 +1,16 @@
+/**
+ * 엑셀 컬럼명을 API 필드명으로 변환하는 매핑
+ * 회기 변경 관리 엑셀 업로드용
+ */
 export const EXCEL_TO_API_FIELD_MAPPING: Record<string, string> = {
+  국: 'gook',
+  그룹: 'group',
+  순: 'soon',
   이름: 'name',
-  전화번호: 'phoneNumber',
-  이메일: 'email',
-  성별: 'gender',
-  생년월일: 'birthDate',
-  교회등록일: 'registrationDate',
-  새가족여부: 'isNewMember',
-  장기결석여부: 'isLongTermAbsentee',
+  구분: 'name_suffix',
+  번호: 'phone',
+  직분: 'role',
+  기수: 'birth_date',
 };
 
 /**
@@ -26,5 +30,5 @@ export const API_TO_EXCEL_FIELD_MAPPING: Record<string, string> = Object.entries
  */
 export const SYNC_IDENTIFIER_FIELDS = {
   name: '이름',
-  phoneNumber: '전화번호',
+  phone: '번호',
 } as const;

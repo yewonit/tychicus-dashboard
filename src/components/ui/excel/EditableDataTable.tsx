@@ -44,9 +44,12 @@ const EditableDataTable: React.FC<EditableDataTableProps> = ({ data, onChange })
 
   /**
    * 셀 값 검증
+   * @param columnName 컬럼명
+   * @param value 셀 값
+   * @param rowData 행 전체 데이터 (다른 컬럼 참조 필요 시)
    */
-  const isCellValid = (columnName: string, value: any): boolean => {
-    return validateCellData(columnName, value);
+  const isCellValid = (columnName: string, value: any, rowData: Record<string, any>): boolean => {
+    return validateCellData(columnName, value, rowData);
   };
 
   return (
@@ -70,7 +73,7 @@ const EditableDataTable: React.FC<EditableDataTableProps> = ({ data, onChange })
                 <td className='row-number-cell'>{rowIndex + 1}</td>
                 {columns.map((column, colIndex) => {
                   const cellValue = row[column];
-                  const isValid = isCellValid(column, cellValue);
+                  const isValid = isCellValid(column, cellValue, row);
                   return (
                     <td key={colIndex} className={`editable-table-cell ${!isValid ? 'invalid' : ''}`}>
                       <input
