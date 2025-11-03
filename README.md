@@ -1,259 +1,217 @@
-# 교회 출석 관리 시스템 (Tychicus Dashboard)
+# 청년회 어드민 시스템
 
-React + TypeScript로 개발된 교회 청년회 출석 관리 시스템입니다.
-
-## 🎯 프로젝트 개요
-
-이 시스템은 교회 청년회의 구성원 관리, 출석 현황, 심방 관리, 포럼 관리 등의 기능을 제공하는 웹 애플리케이션입니다.
-
-## 🛠️ 기술 스택
-
-- **Frontend**: React 18 + TypeScript
-- **스타일링**: CSS Modules + Material-UI
-- **라우팅**: React Router v6
-- **상태 관리**: React Hooks (useState, useEffect, useContext)
-- **차트**: Chart.js + Recharts
-- **빌드 도구**: Create React App
-
-## 📁 프로젝트 구조
-
-```
-src/
-├── components/           # React 컴포넌트
-│   ├── layouts/         # 레이아웃 컴포넌트
-│   │   ├── MainLayout.tsx    # 메인 레이아웃
-│   │   └── Sidebar.tsx       # 사이드바
-│   ├── main/           # 메인 페이지 컴포넌트
-│   │   ├── Dashboard.tsx          # 대시보드
-│   │   ├── MembersManagement.tsx  # 구성원 관리
-│   │   ├── MemberDetail.tsx       # 구성원 상세
-│   │   ├── VisitationManagement.tsx # 심방 관리
-│   │   ├── VisitationDetail.tsx    # 심방 상세
-│   │   ├── ForumManagement.tsx     # 포럼 관리
-│   │   ├── WorshipStatus.tsx      # 예배 현황
-│   │   ├── AttendanceChart.tsx    # 출석 차트
-│   │   ├── WelcomePage.tsx        # 환영 페이지
-│   │   └── TempPage.tsx           # 임시 페이지
-│   └── ui/             # 공통 UI 컴포넌트
-│       ├── Button.tsx
-│       ├── Card.tsx
-│       ├── FormField.tsx
-│       ├── LoadingSpinner.tsx
-│       ├── EmptyState.tsx
-│       └── index.ts
-├── data/               # 데이터 파일
-│   └── mockData.js     # 목업 데이터
-├── hooks/              # 커스텀 훅
-│   ├── useForm.ts      # 폼 상태 관리
-│   ├── useToggle.ts    # 토글 상태 관리
-│   ├── useDebounce.ts  # 디바운스
-│   ├── useLocalStorage.ts # 로컬 스토리지
-│   └── index.ts
-├── styles/             # 스타일 파일
-│   └── global.css      # 글로벌 스타일
-├── types/              # TypeScript 타입 정의
-│   └── index.ts
-├── utils/              # 유틸리티 함수
-│   ├── axiosClient.ts  # API 클라이언트
-│   ├── constants.ts    # 상수
-│   ├── dateUtils.ts    # 날짜 유틸리티
-│   ├── envConfig.ts    # 환경 설정
-│   ├── logger.ts       # 로깅
-│   ├── validation.ts   # 검증 함수
-│   └── index.ts
-├── App.tsx             # 메인 앱 컴포넌트
-├── index.tsx           # 앱 진입점
-└── react-app-env.d.ts  # React 앱 타입 정의
-```
+코람데오 교회 청년회를 위한 관리 시스템입니다. React와 Python FastAPI를 기반으로 구축되었습니다.
 
 ## 🎨 디자인 시스템
 
-### 색상 테마
+Cosmic Essence 컬러 팔레트를 적용하여 따뜻함과 우주적 깊이가 만나는 조화로운 디자인을 구현했습니다.
 
-- **Primary**: 민트 그린 (#4ecdc4)
-- **Secondary**: 스카이 블루 (#5dade2)
-- **Success**: 성공 그린 (#66bb6a)
-- **Warning**: 주황색 (#ffa726)
-- **Error**: 부드러운 빨강 (#ef5350)
+### 컬러 팔레트
+- **Rapture's Light** (#F8F7F5) - 부드러운 아이보리 톤
+- **Caramel Essence** (#E3AF64) - 따뜻한 캐러멜 골드
+- **Cosmic Odyssey** (#0F1939) - 깊은 우주의 네이비
+- **Milk Tooth** (#FAEBD7) - 자연스러운 밀크 베이지
+- **Blue Oblivion** (#26428B) - 클래식한 로얄 블루
+- **Sapphire Dust** (#516AC8) - 밝은 사파이어 블루
 
-### 타이포그래피
+## 📱 반응형 지원
 
-- **Font Family**: Noto Sans KR, Apple System Fonts
-- **Font Sizes**: 12px ~ 48px (4px 단위)
-- **Font Weights**: 400 (Normal), 500 (Medium), 700 (Bold)
+이 어드민 시스템은 **태블릿 크기 이상의 화면에서만 지원**됩니다.
 
-### 간격 시스템
+### 지원 화면 크기
+- **최소 화면 너비**: 768px (태블릿 세로 모드)
+- **권장 화면 너비**: 1024px 이상 (태블릿 가로 모드, 데스크톱)
+- **최적화된 화면**: 1200px 이상 (데스크톱)
 
-- **Spacing**: 4px 기반 (4px, 8px, 16px, 24px, 32px, 48px)
+### 모바일 지원
+- 모바일 디바이스(767px 이하)에서는 접속 시 경고 메시지가 표시됩니다.
+- 태블릿 크기 이상의 화면에서 접속해주세요.
 
-## 🚀 주요 기능
+## 🚀 기능
 
-### 1. 대시보드
-
-- 전체 현황 통계
-- 국별/그룹별 출석률 차트
-- 최근 활동 내역
-- 연속 결석자 정보
-
-### 2. 구성원 관리
-
-- 구성원 목록 조회 및 검색
-- 구성원 상세 정보
-- 프로필 사진 관리
-- 히스토리 관리 (기본이력/영적흐름)
-
-### 3. 심방 관리
-
-- 심방 기록 등록/수정/삭제
-- 심방 내역 조회 및 필터링
-- 심방 상세 정보
-- 통계 및 분석
-
-### 4. 포럼 관리
-
-- 포럼 게시글 관리
-- 한줄 기도문 관리
-- 구성원별 활동 내역
-
-### 5. 예배 현황
-
-- 예배별 출석 현황
+### 대시보드
+- 전체 구성원 현황
 - 출석률 통계
-- 결석자 관리
+- 월별 트렌드 차트
+- 그룹별 출석률 파이 차트
+- 이번 주 예배별 출석 현황
+- 최근 활동 내역
 
-## 📱 반응형 디자인
+### 구성원 관리
+- 구성원 목록 조회
+- 검색 및 필터링
+- 구성원 추가/수정/삭제
+- 출석 현황 관리
 
-- **Mobile First** 접근법
-- **Breakpoints**: 480px, 768px, 1024px, 1280px, 1920px
-- **터치 인터페이스** 최적화
-- **하단 탭 네비게이션** 지원
+### 메뉴 구성
+- 📊 대시보드
+- 👥 구성원 관리
+- 📝 출결 관리
+- 💬 포럼 관리
+- 🏠 심방 관리
+- 📍 지역모임 관리
 
-## 🔧 개발 환경 설정
+## 🛠 기술 스택
 
-### 필수 요구사항
+### Frontend
+- React 18
+- React Router DOM
+- Styled Components
+- Recharts (차트 라이브러리)
 
-- Node.js 16.x 이상
-- npm 또는 yarn
+### Backend
+- Python 3.8+
+- FastAPI
+- Pydantic
+- Uvicorn
 
-### 설치 및 실행
+## 📦 설치 및 실행
 
+### 1. 프로젝트 클론
+```bash
+git clone <repository-url>
+cd youth-admin-dashboard
+```
+
+### 2. Frontend 설정
 ```bash
 # 의존성 설치
 npm install
 
 # 개발 서버 실행
 npm start
-
-# 프로덕션 빌드
-npm run build
 ```
 
-### 환경 변수
-
+### 3. Backend 설정
 ```bash
-# .env 파일 생성
-REACT_APP_ENV=local
-REACT_APP_USE_MOCK=true
+# Python 가상환경 생성 (선택사항)
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+
+# 의존성 설치
+cd backend
+pip install -r requirements.txt
+
+# API 서버 실행
+python main.py
 ```
 
-## 📋 개발 가이드라인
+### 4. 접속
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8000
+- API 문서: http://localhost:8000/docs
 
-### 코드 스타일
-
-- **Prettier** 자동 포맷팅 사용
-- **ESLint** 린팅 규칙 준수
-- **TypeScript** 타입 안정성 확보
-
-### 컴포넌트 구조
-
-- **함수형 컴포넌트** 사용
-- **커스텀 훅** 적극 활용
-- **CSS 클래스** 기반 스타일링
-- **Material-UI** 컴포넌트 활용
-
-### 상태 관리
-
-- **React Hooks** 기반 상태 관리
-- **Context API** 필요시 사용
-- **로컬 스토리지** 활용
-
-## 🗂️ 라우팅 구조
+## 📁 프로젝트 구조
 
 ```
-/                    # 환영 페이지
-/main/               # 메인 애플리케이션
-├── dashboard        # 대시보드
-├── worship          # 예배 현황
-├── member-management # 구성원 관리
-│   └── :id         # 구성원 상세
-├── groups           # 소그룹 관리 (임시)
-├── attendance       # 출결 관리 (임시)
-├── forum            # 포럼 관리
-├── visitation       # 심방 관리
-│   └── :id         # 심방 상세
-├── meeting-records  # 지역모임 관리 (임시)
-└── events           # 행사 관리 (임시)
+DUGIGO/
+├── public/
+│   └── index.html
+├── src/
+│   ├── components/
+│   │   ├── Sidebar.js
+│   │   ├── Dashboard.js
+│   │   └── MembersManagement.js
+│   ├── data/
+│   │   ├── mockData.js
+│   │   ├── attendanceData.js
+│   │   ├── testAttendanceData.js
+│   │   └── exportAttendanceData.js
+│   ├── App.js
+│   ├── index.js
+│   └── index.css
+├── backend/
+│   ├── main.py
+│   └── requirements.txt
+├── package.json
+├── youth_ministry_org.md
+└── README.md
 ```
+
+## 🔧 개발 가이드
+
+### 새로운 페이지 추가
+1. `src/components/` 폴더에 새 컴포넌트 생성
+2. `src/App.js`에 라우트 추가
+3. `src/components/Sidebar.js`에 메뉴 항목 추가
+
+### API 엔드포인트 추가
+1. `backend/main.py`에 새 엔드포인트 정의
+2. Pydantic 모델 추가 (필요시)
+3. 가상 데이터 추가
+
+### 스타일링
+- CSS 변수를 통한 컬러 팔레트 관리
+- Styled Components 사용
+- 반응형 디자인 적용
 
 ## 📊 데이터 구조
 
+### 청년회 조직 구조
+청년회는 다음과 같은 계층적 구조로 구성됩니다:
+- **교역자**: 목사, 전도사 (전체 총괄)
+- **회장단**: 회장, 부회장, 서기, 부서기, 회계, 부회계, 총무
+- **국장단**: 5개국 국장, 부국장 (각 국당 3-4개 그룹 관리)
+- **그룹장단**: 각 그룹별 그룹장, 부그룹장 (각 그룹당 3-4개 순 관리)
+- **순장**: 각 순의 소그룹 리더 (각 순당 최대 10명 관리)
+- **EBS**: 새가족 담당자 (각 순별 1-2명)
+- **순원**: 기존 청년들 (활발참여자, 단기결석자, 장기결석자)
+- **새가족**: 새로 등록한 청년들
+
+### 예배 종류
+- **주일청년예배**: 일요일
+- **수요제자기도회**: 수요일
+- **두란도사역자모임**: 금요일
+- **대예배**: 일요일 (주일 청년예배 전)
+
 ### 구성원 데이터
-
-```typescript
-interface Member {
-  id: number;
-  이름: string;
-  생일연도: string;
-  소속국: string;
-  소속그룹: string;
-  소속순: string;
-  직분: string;
-  주일청년예배출석일자: string;
-  수요예배출석일자: string;
+```javascript
+{
+  id: 1,
+  소속국: "1국",
+  소속그룹: "1국-1그룹",
+  소속순: "1국-1그룹-1순",
+  이름: "김민수",
+  직분: "순장",
+  연락처: "010-1234-5678",
+  가입일: "2023-01-15",
+  // 최근 4주간 출석 데이터
+  주1주_주일청년예배출석여부: "출석",
+  주1주_주일청년예배출석일자: "2024-01-21",
+  주1주_수요제자기도회출석여부: "출석",
+  주1주_수요제자기도회출석일자: "2024-01-17",
+  주1주_두란도사역자모임출석여부: "출석",
+  주1주_두란도사역자모임출석일자: "2024-01-19",
+  주1주_대예배출석여부: "출석",
+  주1주_대예배출석일자: "2024-01-21",
+  // ... 주2주, 주3주, 주4주 데이터
 }
 ```
 
-### 심방 데이터
+### 데이터 샘플 파일
+- `src/data/attendanceData.js`: 최근 4주간 출석 데이터 생성
+- `src/data/testAttendanceData.js`: 데이터 테스트 및 확인
+- `src/data/exportAttendanceData.js`: CSV 내보내기 유틸리티
 
-```typescript
-interface Visitation {
-  id: number;
-  대상자_이름: string;
-  대상자_국: string;
-  대상자_그룹: string;
-  대상자_순: string;
-  심방날짜: string;
-  심방방법: string;
-  진행자_이름: string;
-  심방내용: string;
-  작성일시: string;
-}
-```
+### 데이터 규모
+- **총 구성원**: 약 150-200명
+- **국 수**: 5개
+- **그룹 수**: 15-20개 (국당 3-4개)
+- **순 수**: 45-80개 (그룹당 3-4개)
+- **순별 구성원**: 3-10명
 
-## 🔄 향후 계획
+## 🤝 기여하기
 
-### 단기 계획
-
-- [ ] 소그룹 관리 기능 구현
-- [ ] 출결 관리 기능 구현
-- [ ] 행사 관리 기능 구현
-- [ ] 알림 시스템 구현
-
-### 장기 계획
-
-- [ ] 실제 API 연동
-- [ ] 사용자 인증 시스템
-- [ ] 데이터 백업/복원
-- [ ] 모바일 앱 개발
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ## 📝 라이선스
 
-이 프로젝트는 교회 내부 사용을 위한 프로젝트입니다.
+이 프로젝트는 MIT 라이선스 하에 배포됩니다.
 
-## 👥 기여자
+## 📞 문의
 
-- 개발팀
-
----
-
-**참고**: 이 프로젝트는 교회 청년회 출석 관리를 위한 시스템입니다. 모든 데이터는 교회 내부에서만 사용됩니다.
+프로젝트에 대한 문의사항이 있으시면 이슈를 생성해 주세요. 
