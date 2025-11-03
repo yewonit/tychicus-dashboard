@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { SheetData } from '../../types';
-import { validateCellData } from '../../utils/excel/cellValidation';
+import { SheetData } from '../../../types';
+import { validateCellData } from '../../../utils/excel/cellValidation';
 
 interface EditableDataTableProps {
   /** 시트 데이터 배열 */
   data: SheetData[];
   /** 데이터 변경 콜백 */
   onChange: (updatedData: SheetData[]) => void;
+  /** 에러 행 표시 (sheetIndex-rowIndex 형식) */
+  errorRows?: Set<string>;
 }
 
 /**
@@ -15,7 +17,7 @@ interface EditableDataTableProps {
  * - 셀 편집 기능
  * - 형식 검증 및 에러 하이라이트
  */
-const EditableDataTable: React.FC<EditableDataTableProps> = ({ data, onChange }) => {
+const EditableDataTable: React.FC<EditableDataTableProps> = ({ data, onChange, errorRows }) => {
   const [activeSheetIndex, setActiveSheetIndex] = useState(0);
 
   if (!data || data.length === 0) {
@@ -68,25 +70,28 @@ const EditableDataTable: React.FC<EditableDataTableProps> = ({ data, onChange })
             </tr>
           </thead>
           <tbody>
-            {activeSheet.rows.map((row, rowIndex) => (
-              <tr key={rowIndex}>
-                <td className='row-number-cell'>{rowIndex + 1}</td>
-                {columns.map((column, colIndex) => {
-                  const cellValue = row[column];
-                  const isValid = isCellValid(column, cellValue, row);
-                  return (
-                    <td key={colIndex} className={`editable-table-cell ${!isValid ? 'invalid' : ''}`}>
-                      <input
-                        type='text'
-                        value={cellValue ?? ''}
-                        onChange={e => handleCellChange(rowIndex, column, e.target.value)}
-                        className='editable-cell-input'
-                      />
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
+            {activeSheet.rows.map((row, rowIndex) => {
+              const isErrorRow = errorRows?.has(`${activeSheetIndex}-${rowIndex}`);
+              return (
+                <tr key={rowIndex} className={isErrorRow ? 'error-row' : ''}>
+                  <td className='row-number-cell'>{rowIndex + 1}</td>
+                  {columns.map((column, colIndex) => {
+                    const cellValue = row[column];
+                    const isValid = isCellValid(column, cellValue, row);
+                    return (
+                      <td key={colIndex} className={`editable-table-cell ${!isValid ? 'invalid' : ''}`}>
+                        <input
+                          type='text'
+                          value={cellValue ?? ''}
+                          onChange={e => handleCellChange(rowIndex, column, e.target.value)}
+                          className='editable-cell-input'
+                        />
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

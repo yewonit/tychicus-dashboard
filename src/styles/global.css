@@ -7914,6 +7914,21 @@ html {
   color: var(--error);
 }
 
+/* 에러 행 스타일 (동명이인으로 인한 동기화 실패) */
+.editable-table tbody tr.error-row {
+  background: rgba(239, 83, 80, 0.15);
+}
+
+.editable-table tbody tr.error-row .row-number-cell {
+  background: rgba(239, 83, 80, 0.2);
+  color: var(--error);
+  font-weight: 700;
+}
+
+.editable-table tbody tr.error-row .editable-table-cell {
+  background: rgba(239, 83, 80, 0.15);
+}
+
 /* 시트 탭 스타일 */
 .sheet-tabs-container {
   display: flex;

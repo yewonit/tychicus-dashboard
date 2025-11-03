@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSeasonData } from '../../../hooks';
-import { applySeasonUpdate, syncWithServer } from '../../../services/seasonUpdateService';
+import { applySeasonUpdate, fetchAllUsers } from '../../../services/seasonUpdateService';
 import { SheetData } from '../../../types';
-import { convertExcelToJson, extractSyncIdentifiers, syncExcelDataWithServer } from '../../../utils';
+import { convertExcelToJson, syncExcelDataWithUserData } from '../../../utils';
 import { EditableDataTable, ExcelDownloadButton, FileUpload } from '../../ui';
 import ApplyModal from './ApplyModal';
 import CompletionModal from './CompletionModal';
@@ -24,6 +24,7 @@ const SeasonUpdate: React.FC = () => {
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
   const [isApplyComplete, setIsApplyComplete] = useState(false);
+  const [errorRows, setErrorRows] = useState<Set<string>>(new Set());
 
   /**
    * 엑셀 파일 선택 핸들러
@@ -32,6 +33,7 @@ const SeasonUpdate: React.FC = () => {
   const handleFileSelect = async (file: File) => {
     setUploadedFile(file);
     setIsConverting(true);
+    setErrorRows(new Set()); // 새 파일 업로드 시 에러 행 초기화
 
     try {
       const sheets = await convertExcelToJson(file, { minLoadingTime: 500 });
@@ -53,7 +55,7 @@ const SeasonUpdate: React.FC = () => {
 
   /**
    * 서버 데이터와 동기화
-   * 이름과 전화번호를 기준으로 서버에서 최신 정보를 가져와 업데이트
+   * 이름을 기준으로 서버에서 최신 정보를 가져와 빈칸 채우기
    */
   const handleSyncWithServer = async () => {
     if (!excelData || excelData.length === 0) {
@@ -67,31 +69,32 @@ const SeasonUpdate: React.FC = () => {
     setSyncProgressStep(1);
 
     try {
-      // 1단계: 동기화용 식별자 추출
-      const identifiers = extractSyncIdentifiers(excelData);
+      // 1단계: 서버에서 전체 유저 데이터 가져오기
+      const allUsers = await fetchAllUsers();
 
-      if (identifiers.length === 0) {
-        alert('동기화할 수 있는 데이터가 없습니다. (이름, 전화번호 필수)');
-        setIsSyncing(false);
-        setSyncProgressStep(0);
-        return;
-      }
-
-      // 서버에서 데이터 가져오기
-      const serverData = await syncWithServer(identifiers);
-
-      // 2단계: 서버 데이터로 엑셀 데이터 업데이트
+      // 2단계: 데이터 적용
       setSyncProgressStep(2);
       await new Promise(resolve => setTimeout(resolve, 800));
 
-      const updatedExcelData = syncExcelDataWithServer(excelData, serverData);
-      saveData(updatedExcelData);
+      // 서버 데이터로 엑셀 데이터 업데이트 및 에러 행 수집
+      const { updatedData, errorRows: newErrorRows } = syncExcelDataWithUserData(excelData, allUsers);
+
+      saveData(updatedData);
+      setErrorRows(newErrorRows);
 
       // 완료 후 모달 자동 닫기
       setTimeout(() => {
         setIsSyncing(false);
         setSyncProgressStep(0);
-        alert(`${identifiers.length}건의 데이터가 동기화되었습니다.`);
+
+        // 에러 행이 있으면 알림
+        if (newErrorRows.size > 0) {
+          alert(
+            `동기화 완료! ${newErrorRows.size}개의 행에서 동명이인이 발견되어 '구분' 확인이 필요합니다. (빨간색 표시)`
+          );
+        } else {
+          alert('데이터 동기화가 완료되었습니다.');
+        }
       }, 500);
     } catch (error) {
       console.error('서버 동기화 오류:', error);
@@ -195,7 +198,7 @@ const SeasonUpdate: React.FC = () => {
                 />
               </div>
 
-              <EditableDataTable data={excelData} onChange={handleDataChange} />
+              <EditableDataTable data={excelData} onChange={handleDataChange} errorRows={errorRows} />
             </div>
 
             <div className='season-apply-section'>

@@ -23,12 +23,3 @@ export const API_TO_EXCEL_FIELD_MAPPING: Record<string, string> = Object.entries
   },
   {} as Record<string, string>
 );
-
-/**
- * 동기화에 사용할 식별 필드
- * 서버로 보낼 때와 매칭할 때 사용하는 필드
- */
-export const SYNC_IDENTIFIER_FIELDS = {
-  name: '이름',
-  phone: '번호',
-} as const;
