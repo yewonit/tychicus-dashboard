@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSeasonData } from '../../../hooks';
+import { useAutoSave, useSeasonData } from '../../../hooks';
 import { applySeasonUpdate, fetchAllUsers } from '../../../services/seasonUpdateService';
 import { SheetData } from '../../../types';
 import { convertExcelToJson, syncExcelDataWithUserData } from '../../../utils';
@@ -13,7 +13,17 @@ import SyncModal from './SyncModal';
 
 const SeasonUpdate: React.FC = () => {
   const navigate = useNavigate();
-  const { data: excelData, saveData, clearData } = useSeasonData();
+  const { data: savedData, saveData, clearData } = useSeasonData();
+
+  // 편집 중인 데이터 (자동 저장 전)
+  const [excelData, setExcelData] = useState<SheetData[] | null>(savedData);
+
+  // 자동 저장 기능
+  const { isSaving, lastSavedTime, hasUnsavedChanges, saveNow, resetSaveState } = useAutoSave(excelData, {
+    onSave: saveData,
+    delay: 3000, // 3초 후 자동 저장
+    enabled: true,
+  });
 
   // UI 상태 관리
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -26,6 +36,14 @@ const SeasonUpdate: React.FC = () => {
   const [isApplyComplete, setIsApplyComplete] = useState(false);
   const [errorRows, setErrorRows] = useState<Set<string>>(new Set());
 
+  // savedData 변경 시 excelData 동기화 (localStorage에서 로드될 때)
+  React.useEffect(() => {
+    if (savedData !== excelData) {
+      setExcelData(savedData);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [savedData]);
+
   /**
    * 엑셀 파일 선택 핸들러
    * 파일을 JSON으로 변환하고 저장
@@ -37,7 +55,9 @@ const SeasonUpdate: React.FC = () => {
 
     try {
       const sheets = await convertExcelToJson(file, { minLoadingTime: 500 });
-      saveData(sheets);
+      setExcelData(sheets);
+      saveData(sheets); // 즉시 저장
+      resetSaveState(); // 저장 상태 초기화
       setIsConverting(false);
     } catch (error) {
       setIsConverting(false);
@@ -47,10 +67,23 @@ const SeasonUpdate: React.FC = () => {
 
   /**
    * 데이터 편집 핸들러
-   * 사용자가 테이블 데이터를 수정할 때 호출
+   * 사용자가 테이블 데이터를 수정할 때 호출 (자동 저장됨)
    */
   const handleDataChange = (updatedData: SheetData[]) => {
-    saveData(updatedData);
+    setExcelData(updatedData);
+    // 자동 저장은 useAutoSave 훅이 처리
+  };
+
+  /**
+   * 수동 저장 핸들러
+   */
+  const handleManualSave = () => {
+    try {
+      saveNow();
+      alert('저장되었습니다.');
+    } catch (error) {
+      alert(error instanceof Error ? error.message : '저장 중 오류가 발생했습니다.');
+    }
   };
 
   /**
@@ -79,7 +112,8 @@ const SeasonUpdate: React.FC = () => {
       // 서버 데이터로 엑셀 데이터 업데이트 및 에러 행 수집
       const { updatedData, errorRows: newErrorRows } = syncExcelDataWithUserData(excelData, allUsers);
 
-      saveData(updatedData);
+      setExcelData(updatedData);
+      saveData(updatedData); // 동기화 후 즉시 저장
       setErrorRows(newErrorRows);
 
       // 완료 후 모달 자동 닫기
@@ -145,12 +179,19 @@ const SeasonUpdate: React.FC = () => {
   };
 
   /**
-   * 새 파일 업로드 (기존 데이터 초기화)
+   * 데이터 초기화 (기존 데이터 삭제 및 업로드 화면으로 복귀)
    */
   const handleResetData = () => {
-    if (window.confirm('현재 데이터를 삭제하고 새로운 파일을 업로드하시겠습니까?')) {
+    if (
+      window.confirm(
+        '현재 데이터를 삭제하고 새로운 파일을 업로드하시겠습니까?\n저장되지 않은 변경사항이 있다면 삭제됩니다.'
+      )
+    ) {
       clearData();
+      setExcelData(null);
       setUploadedFile(null);
+      setErrorRows(new Set());
+      resetSaveState();
     }
   };
 
@@ -178,9 +219,33 @@ const SeasonUpdate: React.FC = () => {
           <>
             <div className='season-data-section'>
               <div className='season-data-header'>
-                <button className='reset-button' onClick={handleResetData}>
-                  🔄 새 파일 업로드
-                </button>
+                <div className='header-left'>
+                  {/* 저장 상태 표시 */}
+                  <div className='save-status'>
+                    {isSaving ? (
+                      <span className='status-saving'>💾 저장 중...</span>
+                    ) : hasUnsavedChanges ? (
+                      <span className='status-unsaved'>⚠️ 저장되지 않은 변경사항</span>
+                    ) : lastSavedTime ? (
+                      <span className='status-saved'>
+                        ✅ 마지막 저장:{' '}
+                        {lastSavedTime.toLocaleTimeString('ko-KR', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          second: '2-digit',
+                        })}
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
+                <div className='header-right'>
+                  <button className='save-button' onClick={handleManualSave} disabled={isSaving || !hasUnsavedChanges}>
+                    💾 저장
+                  </button>
+                  <button className='reset-button' onClick={handleResetData}>
+                    ❌ 초기화
+                  </button>
+                </div>
               </div>
 
               <div className='action-buttons-wrapper'>
@@ -193,6 +258,15 @@ const SeasonUpdate: React.FC = () => {
                   buttonText='📥 엑셀 다운로드'
                   className='excel-download-button'
                   onBeforeDownload={() => {
+                    // 저장되지 않은 변경사항이 있으면 먼저 저장
+                    if (hasUnsavedChanges) {
+                      try {
+                        saveNow();
+                      } catch (error) {
+                        alert('저장 중 오류가 발생했습니다.');
+                        return false;
+                      }
+                    }
                     return window.confirm('현재 데이터를 엑셀 파일로 다운로드하시겠습니까?');
                   }}
                 />
