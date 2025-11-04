@@ -52,14 +52,24 @@ export interface SyncResult {
 }
 
 /**
+ * 회원 데이터 (API 전송용)
+ */
+export interface SeasonMemberData {
+  gook: string;
+  group: string;
+  soon: string;
+  name: string;
+  name_suffix: string;
+  phone: string;
+  role: string;
+  birth_date: string;
+}
+
+/**
  * 회기 변경 적용 요청 페이로드
  */
 export interface SeasonUpdatePayload {
-  sheets: Array<{
-    sheetName: string;
-    rows: Record<string, any>[];
-  }>;
-  timestamp: string;
+  data: SeasonMemberData[];
 }
 
 /**

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAutoSave, useSeasonData } from '../../../hooks';
 import { applySeasonUpdate, fetchAllUsers } from '../../../services/seasonUpdateService';
 import { SheetData } from '../../../types';
-import { convertExcelToJson, syncExcelDataWithUserData } from '../../../utils';
+import { convertExcelToJson, convertToSeasonUpdateData, syncExcelDataWithUserData } from '../../../utils';
 import { EditableDataTable, ExcelDownloadButton, FileUpload } from '../../ui';
 import ApplyModal from './ApplyModal';
 import CompletionModal from './CompletionModal';
@@ -153,11 +153,14 @@ const SeasonUpdate: React.FC = () => {
     setIsApplying(true);
 
     try {
+      // 엑셀 데이터를 API 형식으로 변환 (시트 이름 오름차순으로 정렬)
+      const memberData = convertToSeasonUpdateData(excelData);
+
       const payload = {
-        sheets: excelData,
-        timestamp: new Date().toISOString(),
+        data: memberData,
       };
 
+      // API 요청
       await applySeasonUpdate(payload);
 
       // 로딩 모달 닫고 완료 모달 표시

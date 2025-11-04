@@ -3,7 +3,7 @@
  * API 데이터와 엑셀 데이터 간의 변환 로직
  */
 import { SheetData } from '../../types';
-import { UserData } from '../../types/seasonUpdate';
+import { SeasonMemberData, UserData } from '../../types/seasonUpdate';
 import { EXCEL_TO_API_FIELD_MAPPING } from './excelFieldMapping';
 
 /**
@@ -134,4 +134,29 @@ function fillEmptyFields(row: Record<string, any>, userData: UserData): Record<s
   }
 
   return updatedRow;
+}
+
+/**
+ * 엑셀 데이터를 회기 변경 API 요청 형식으로 변환
+ * 시트 이름 오름차순으로 정렬하여 모든 데이터를 하나의 배열로 병합
+ * @param excelData 엑셀 데이터 (시트 배열)
+ * @returns API 요청용 회원 데이터 배열
+ */
+export function convertToSeasonUpdateData(excelData: SheetData[]): SeasonMemberData[] {
+  // 시트를 이름 기준 오름차순으로 정렬
+  const sortedSheets = [...excelData].sort((a, b) => {
+    return a.sheetName.localeCompare(b.sheetName, 'ko-KR', { numeric: true });
+  });
+
+  // 모든 시트의 데이터를 하나의 배열로 병합
+  const allMembers: SeasonMemberData[] = [];
+
+  sortedSheets.forEach(sheet => {
+    sheet.rows.forEach(row => {
+      const memberData = mapExcelRowToApiData(row) as SeasonMemberData;
+      allMembers.push(memberData);
+    });
+  });
+
+  return allMembers;
 }

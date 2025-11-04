@@ -25,10 +25,7 @@ export async function fetchAllUsers(): Promise<UserData[]> {
  */
 export async function applySeasonUpdate(payload: SeasonUpdatePayload): Promise<boolean> {
   try {
-    // TODO: 실제 API 호출
-    // 대용량 JSON 전송을 위한 설정
-    /*
-    const response = await axiosClient.post('/api/season/update', payload, {
+    const response = await axiosClient.post('/seasons', payload, {
       headers: {
         'Content-Type': 'application/json',
       },
@@ -37,13 +34,7 @@ export async function applySeasonUpdate(payload: SeasonUpdatePayload): Promise<b
       timeout: 60000, // 60초
     });
 
-    return response.status === 200;
-    */
-
-    // 임시: 성공 시뮬레이션
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    return true;
+    return response.status === 200 || response.status === 201;
   } catch (error) {
     console.error('회기 변경 적용 API 오류:', error);
     throw new Error('회기 변경 적용 중 오류가 발생했습니다.');
