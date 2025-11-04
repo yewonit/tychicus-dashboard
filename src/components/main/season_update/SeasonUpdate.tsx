@@ -4,11 +4,13 @@ import { useAutoSave, useSeasonData } from '../../../hooks';
 import { applySeasonUpdate, fetchAllUsers } from '../../../services/seasonUpdateService';
 import { SheetData } from '../../../types';
 import { convertExcelToJson, convertToSeasonUpdateData, syncExcelDataWithUserData } from '../../../utils';
-import { EditableDataTable, ExcelDownloadButton, FileUpload } from '../../ui';
+import { EditableDataTable, FileUpload } from '../../ui';
+import ActionButtons from './ActionButtons';
 import ApplyModal from './ApplyModal';
 import CompletionModal from './CompletionModal';
 import LoadingModal from './LoadingModal';
 import ProgressModal from './ProgressModal';
+import SeasonDataHeader from './SeasonDataHeader';
 import SyncModal from './SyncModal';
 
 const SeasonUpdate: React.FC = () => {
@@ -221,59 +223,20 @@ const SeasonUpdate: React.FC = () => {
           // 데이터가 있을 때: 편집 화면
           <>
             <div className='season-data-section'>
-              <div className='season-data-header'>
-                <div className='header-left'>
-                  {/* 저장 상태 표시 */}
-                  <div className='save-status'>
-                    {isSaving ? (
-                      <span className='status-saving'>💾 저장 중...</span>
-                    ) : hasUnsavedChanges ? (
-                      <span className='status-unsaved'>⚠️ 저장되지 않은 변경사항</span>
-                    ) : lastSavedTime ? (
-                      <span className='status-saved'>
-                        ✅ 마지막 저장:{' '}
-                        {lastSavedTime.toLocaleTimeString('ko-KR', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          second: '2-digit',
-                        })}
-                      </span>
-                    ) : null}
-                  </div>
-                </div>
-                <div className='header-right'>
-                  <button className='save-button' onClick={handleManualSave} disabled={isSaving || !hasUnsavedChanges}>
-                    💾 저장
-                  </button>
-                  <button className='reset-button' onClick={handleResetData}>
-                    ❌ 초기화
-                  </button>
-                </div>
-              </div>
+              <SeasonDataHeader
+                isSaving={isSaving}
+                hasUnsavedChanges={hasUnsavedChanges}
+                lastSavedTime={lastSavedTime}
+                onSave={handleManualSave}
+                onReset={handleResetData}
+              />
 
-              <div className='action-buttons-wrapper'>
-                <button className='sync-button' onClick={() => setIsSyncModalOpen(true)}>
-                  🔄 정보 동기화
-                </button>
-                <ExcelDownloadButton
-                  data={excelData}
-                  fileName='season-update-data'
-                  buttonText='📥 엑셀 다운로드'
-                  className='excel-download-button'
-                  onBeforeDownload={() => {
-                    // 저장되지 않은 변경사항이 있으면 먼저 저장
-                    if (hasUnsavedChanges) {
-                      try {
-                        saveNow();
-                      } catch (error) {
-                        alert('저장 중 오류가 발생했습니다.');
-                        return false;
-                      }
-                    }
-                    return window.confirm('현재 데이터를 엑셀 파일로 다운로드하시겠습니까?');
-                  }}
-                />
-              </div>
+              <ActionButtons
+                excelData={excelData}
+                hasUnsavedChanges={hasUnsavedChanges}
+                onSync={() => setIsSyncModalOpen(true)}
+                saveNow={saveNow}
+              />
 
               <EditableDataTable data={excelData} onChange={handleDataChange} errorRows={errorRows} />
             </div>
