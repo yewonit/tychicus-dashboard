@@ -135,3 +135,6 @@ git push origin main
    - 이미 `.gitignore` 파일이 생성되어 있습니다
    - `node_modules`, `build` 등은 자동으로 제외됩니다
 
+
+
+
