@@ -219,18 +219,17 @@ const ChangeAffiliationButton = styled.button`
     transform: translateY(-2px);
     box-shadow: var(--shadow-medium);
   }
-  
-  &:disabled {
-    background: #6c757d;
-    cursor: not-allowed;
-    transform: none;
-  }
 `;
 
 const Checkbox = styled.input.attrs({ type: 'checkbox' })`
   width: 16px;
   height: 16px;
   cursor: pointer;
+  
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+  }
 `;
 
 const Modal = styled.div`
@@ -312,6 +311,12 @@ const ModalSelect = styled.select`
     outline: none;
     border-color: #667eea;
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+  
+  &:disabled {
+    background: #f8f9fa;
+    cursor: not-allowed;
+    opacity: 0.6;
   }
 `;
 
@@ -426,6 +431,21 @@ const MembersManagement = () => {
   const groups = [...new Set(members.map(m => m.소속그룹))].sort();
   const teams = [...new Set(members.map(m => m.소속순))].sort();
 
+  // 모달에서 사용할 필터링된 목록
+  const getFilteredGroups = (selectedDept) => {
+    if (!selectedDept) return [];
+    return [...new Set(members
+      .filter(m => m.소속국 === selectedDept)
+      .map(m => m.소속그룹))].sort();
+  };
+
+  const getFilteredTeams = (selectedDept, selectedGroup) => {
+    if (!selectedDept || !selectedGroup) return [];
+    return [...new Set(members
+      .filter(m => m.소속국 === selectedDept && m.소속그룹 === selectedGroup)
+      .map(m => m.소속순))].sort();
+  };
+
   const filteredMembers = members.filter(member => {
     const matchesSearch = member.이름.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesDepartment = filterDepartment === '전체' || member.소속국 === filterDepartment;
@@ -446,14 +466,6 @@ const MembersManagement = () => {
   };
 
   // 체크박스 핸들러
-  const handleSelectAll = (e) => {
-    if (e.target.checked) {
-      setSelectedMembers(currentMembers.map(m => m.id));
-    } else {
-      setSelectedMembers([]);
-    }
-  };
-
   const handleSelectMember = (memberId) => {
     setSelectedMembers(prev => 
       prev.includes(memberId) 
@@ -461,8 +473,6 @@ const MembersManagement = () => {
         : [...prev, memberId]
     );
   };
-
-  const isAllSelected = selectedMembers.length === currentMembers.length && currentMembers.length > 0;
 
   // 소속 변경 모달 핸들러
   const handleOpenModal = () => {
@@ -478,6 +488,17 @@ const MembersManagement = () => {
     setNewDepartment('');
     setNewGroup('');
     setNewTeam('');
+  };
+
+  const handleDepartmentChange = (dept) => {
+    setNewDepartment(dept);
+    setNewGroup(''); // 소속국이 변경되면 그룹과 순 초기화
+    setNewTeam('');
+  };
+
+  const handleGroupChange = (group) => {
+    setNewGroup(group);
+    setNewTeam(''); // 소속그룹이 변경되면 순 초기화
   };
 
   const handleConfirmChange = () => {
@@ -580,7 +601,6 @@ const MembersManagement = () => {
           <AddButton>+ 새 구성원 추가</AddButton>
           <ChangeAffiliationButton 
             onClick={handleOpenModal}
-            disabled={selectedMembers.length === 0}
           >
             소속 변경
           </ChangeAffiliationButton>
@@ -591,12 +611,7 @@ const MembersManagement = () => {
         <Table>
           <thead>
             <tr>
-              <th style={{ width: '50px', textAlign: 'center' }}>
-                <Checkbox 
-                  checked={isAllSelected}
-                  onChange={handleSelectAll}
-                />
-              </th>
+              <th style={{ width: '50px', textAlign: 'center' }}></th>
               <th>이름</th>
               <th>기수</th>
               <th>소속 국</th>
@@ -612,6 +627,7 @@ const MembersManagement = () => {
                   <Checkbox 
                     checked={selectedMembers.includes(member.id)}
                     onChange={() => handleSelectMember(member.id)}
+                    disabled={selectedMembers.length > 0 && !selectedMembers.includes(member.id)}
                   />
                 </td>
                 <ClickableName onClick={() => handleMemberClick(member)}>
@@ -667,7 +683,7 @@ const MembersManagement = () => {
                 <label>소속 국</label>
                 <ModalSelect 
                   value={newDepartment} 
-                  onChange={(e) => setNewDepartment(e.target.value)}
+                  onChange={(e) => handleDepartmentChange(e.target.value)}
                 >
                   <option value="">선택하세요</option>
                   {departments.map(dept => (
@@ -679,10 +695,11 @@ const MembersManagement = () => {
                 <label>소속 그룹</label>
                 <ModalSelect 
                   value={newGroup} 
-                  onChange={(e) => setNewGroup(e.target.value)}
+                  onChange={(e) => handleGroupChange(e.target.value)}
+                  disabled={!newDepartment}
                 >
                   <option value="">선택하세요</option>
-                  {groups.map(group => (
+                  {getFilteredGroups(newDepartment).map(group => (
                     <option key={group} value={group}>{group}</option>
                   ))}
                 </ModalSelect>
@@ -692,9 +709,10 @@ const MembersManagement = () => {
                 <ModalSelect 
                   value={newTeam} 
                   onChange={(e) => setNewTeam(e.target.value)}
+                  disabled={!newGroup}
                 >
                   <option value="">선택하세요</option>
-                  {teams.map(team => (
+                  {getFilteredTeams(newDepartment, newGroup).map(team => (
                     <option key={team} value={team}>{team}</option>
                   ))}
                 </ModalSelect>
