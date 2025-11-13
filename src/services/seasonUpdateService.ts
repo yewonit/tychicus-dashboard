@@ -10,8 +10,8 @@ import axiosClient from '../utils/axiosClient';
  */
 export async function fetchAllUsers(): Promise<UserData[]> {
   try {
-    const response = await axiosClient.get<UserData[]>('/users');
-    return response.data;
+    const response = await axiosClient.get('/users');
+    return response.data.data as UserData[];
   } catch (error) {
     console.error('전체 유저 데이터 조회 오류:', error);
     throw new Error('전체 유저 데이터를 가져오는 중 오류가 발생했습니다.');

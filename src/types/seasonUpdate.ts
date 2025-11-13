@@ -16,7 +16,7 @@ export interface SyncIdentifier {
 export interface UserData {
   name: string; // 이름
   name_suffix?: string; // 구분 (A, B, C 등)
-  phone?: string; // 번호
+  phone_number?: string; // 번호 (서버 필드명: phone_number)
   birth_date?: string; // 생년월일 (YYYY-MM-DD 형식)
   [key: string]: any; // 추가 필드 허용
 }
@@ -60,7 +60,7 @@ export interface SeasonMemberData {
   soon: string;
   name: string;
   name_suffix: string;
-  phone: string;
+  phone_number: string; // 서버 필드명: phone_number
   role: string;
   birth_date: string;
 }

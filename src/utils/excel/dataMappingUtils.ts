@@ -123,9 +123,9 @@ function fillEmptyFields(row: Record<string, any>, userData: UserData): Record<s
     updatedRow['구분'] = userData.name_suffix;
   }
 
-  // '번호' (phone) - 빈칸인 경우만 채우기
-  if (!updatedRow['번호'] && userData.phone) {
-    updatedRow['번호'] = userData.phone;
+  // '번호' (phone_number) - 빈칸인 경우만 채우기
+  if (!updatedRow['번호'] && userData.phone_number) {
+    updatedRow['번호'] = userData.phone_number;
   }
 
   // '기수' (birth_date) - 빈칸인 경우만 연도 끝 두자리 채우기

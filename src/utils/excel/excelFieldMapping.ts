@@ -8,7 +8,7 @@ export const EXCEL_TO_API_FIELD_MAPPING: Record<string, string> = {
   순: 'soon',
   이름: 'name',
   구분: 'name_suffix',
-  번호: 'phone',
+  번호: 'phone_number', // 서버 필드명: phone_number
   직분: 'role',
   기수: 'birth_date',
 };
