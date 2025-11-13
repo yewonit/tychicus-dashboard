@@ -12,6 +12,9 @@ import LoadingModal from './LoadingModal';
 import ProgressModal from './ProgressModal';
 import SeasonDataHeader from './SeasonDataHeader';
 import SyncModal from './SyncModal';
+import UploadGuide from './UploadGuide';
+import UsageGuide from './UsageGuide';
+import WarningNotice from './WarningNotice';
 
 const SeasonUpdate: React.FC = () => {
   const navigate = useNavigate();
@@ -210,6 +213,11 @@ const SeasonUpdate: React.FC = () => {
         {!excelData ? (
           // 데이터가 없을 때: 엑셀 파일 업로드 화면
           <div className='season-change-section'>
+            <div className='guides-wrapper'>
+              <UsageGuide />
+              <UploadGuide />
+            </div>
+            <WarningNotice />
             <FileUpload onFileSelect={handleFileSelect} />
             {uploadedFile && (
               <div className='file-info'>
