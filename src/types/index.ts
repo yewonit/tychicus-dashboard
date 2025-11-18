@@ -286,3 +286,12 @@ export interface Group {
   name: string;
   gookId: number;
 }
+
+// 엑셀 데이터 관련 타입
+export interface SheetData {
+  sheetName: string;
+  rows: Record<string, any>[];
+}
+
+// 회기 변경 관리 관련 타입
+export * from './seasonUpdate';

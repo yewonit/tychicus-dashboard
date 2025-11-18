@@ -1,0 +1,47 @@
+# Node modules
+node_modules
+npm-debug.log*
+
+# Build output
+build
+dist
+
+# Environment files (로컬 환경변수만 제외)
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# .env, .env.development, .env.production은 포함됨
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Git
+.git
+.gitignore
+.github
+
+# Testing
+coverage
+
+# Misc
+.DS_Store
+*.log
+
+# Documentation
+README.md
+docs
+*.md
+
+# CI/CD
+.github
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose*.yml
