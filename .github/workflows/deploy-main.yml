@@ -33,7 +33,7 @@ jobs:
       - name: Deploy
         run: |
           DOCKER_IMAGE="${{ secrets.DOCKER_HUB_USERNAME }}/tychicus-dashboard:prod"
-          sshpass -p ${{ secrets.PROD_MACHINE_SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no -t ${{ secrets.PROD_MACHINE_SSH_USER }}@${{ secrets.PROD_MACHINE_SSH_HOST }} -p ${{ secrets.PROD_MACHINE_SSH_PORT }} "
+          sshpass -p ${{ secrets.DEV_MACHINE_SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no -t ${{ secrets.DEV_MACHINE_SSH_USER }}@${{ secrets.DEV_MACHINE_SSH_HOST }} -p ${{ secrets.DEV_MACHINE_SSH_PORT }} "
             docker rm -f tychicus-dashboard-prod || true
             docker rmi ${DOCKER_IMAGE} || true
             docker pull ${DOCKER_IMAGE}
