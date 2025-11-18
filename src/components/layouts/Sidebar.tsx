@@ -36,6 +36,7 @@ const Sidebar: React.FC<SidebarProps> = ({ dugigo = false }) => {
       items: [
         { path: '/main/member-management', icon: '👥', text: '구성원 관리' },
         { path: '/main/groups', icon: '🏠', text: '소그룹 관리' },
+        { path: '/main/season-update', icon: '🔄', text: '회기 변경 관리' },
       ],
     },
     {
@@ -164,10 +165,7 @@ const Sidebar: React.FC<SidebarProps> = ({ dugigo = false }) => {
               <ul className={getMenuListClassName()}>
                 {section.items.map((item, itemIndex) => (
                   <li key={itemIndex} className={getMenuItemClassName()}>
-                    <button
-                      className={getMenuButtonClassName(item.path)}
-                      onClick={() => handleMenuClick(item.path)}
-                    >
+                    <button className={getMenuButtonClassName(item.path)} onClick={() => handleMenuClick(item.path)}>
                       <span className={getMenuIconClassName()}>{item.icon}</span>
                       <span className={getMenuTextClassName()}>{item.text}</span>
                     </button>
