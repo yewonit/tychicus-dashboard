@@ -37,5 +37,5 @@ jobs:
             docker rm -f tychicus-dashboard-prod || true
             docker rmi ${DOCKER_IMAGE} || true
             docker pull ${DOCKER_IMAGE}
-            docker run -d -p 8080:80 --name tychicus-dashboard-prod --network hephai-bridge --restart unless-stopped ${DOCKER_IMAGE}
+            docker run -d -p 8180:80 --name tychicus-dashboard-prod --network hephai-bridge --restart unless-stopped ${DOCKER_IMAGE}
           "
