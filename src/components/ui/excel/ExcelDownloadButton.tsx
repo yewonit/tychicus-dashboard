@@ -1,6 +1,6 @@
 import React from 'react';
 import * as XLSX from 'xlsx';
-import { SheetData } from '../../types';
+import { SheetData } from '../../../types';
 
 interface ExcelDownloadButtonProps {
   /** 다운로드할 데이터 (sheets 배열) */
