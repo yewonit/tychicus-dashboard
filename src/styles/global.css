@@ -4787,6 +4787,13 @@ html {
   }
 }
 
+/* 빈 상태 스타일 */
+.members-empty-state {
+  color: var(--text-tertiary);
+  font-size: var(--font-size-base);
+  padding: var(--spacing-xl);
+}
+
 @media (max-width: 768px) {
   .members-controls {
     flex-direction: column;

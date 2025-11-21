@@ -35,6 +35,34 @@ const MembersManagement: React.FC = () => {
   // 구성원 데이터를 상태로 관리 (목업 데이터)
   const [members, setMembers] = useState<Member[]>(membersData);
 
+  // 사이드바 메뉴 클릭 시 화면 초기화
+  useEffect(() => {
+    const handleResetPage = () => {
+      setSearchTerm('');
+      setFilterDepartment('전체');
+      setFilterGroup('전체');
+      setFilterTeam('전체');
+      setCurrentPage(1);
+      setSelectedMembers([]);
+      setShowModal(false);
+      setShowAlert(false);
+      setNewDepartment('');
+      setNewGroup('');
+      setNewTeam('');
+    };
+
+    window.addEventListener('resetMembersPage', handleResetPage);
+
+    return () => {
+      window.removeEventListener('resetMembersPage', handleResetPage);
+    };
+  }, []);
+
+  // 페이지 변경 시 선택 해제 (다른 페이지의 구성원이 선택되어 있을 수 있음)
+  useEffect(() => {
+    setSelectedMembers([]);
+  }, [currentPage]);
+
   // 소속국, 그룹, 순 목록 생성
   const departments = [...new Set(members.map(m => m.소속국))].sort();
   const groups = [...new Set(members.map(m => m.소속그룹))].sort();
@@ -114,11 +142,23 @@ const MembersManagement: React.FC = () => {
       )
     );
 
+    // 소속 변경 이벤트 발생 (다른 컴포넌트에서 사용할 수 있도록)
+    window.dispatchEvent(
+      new CustomEvent('memberAffiliationChanged', {
+        detail: {
+          memberIds: selectedMembers,
+          newDepartment,
+          newGroup,
+          newTeam,
+        },
+      })
+    );
+
     // 알림 표시
     setShowAlert(true);
     setTimeout(() => {
       setShowAlert(false);
-    }, 3000);
+    }, 5000);
 
     handleCloseModal();
     setSelectedMembers([]);
@@ -226,26 +266,34 @@ const MembersManagement: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {currentMembers.map(member => (
-              <tr key={member.id}>
-                <td style={{ textAlign: 'center' }}>
-                  <input
-                    type='checkbox'
-                    className='members-checkbox'
-                    checked={selectedMembers.includes(member.id)}
-                    onChange={() => handleSelectMember(member.id)}
-                  />
+            {currentMembers.length === 0 ? (
+              <tr>
+                <td colSpan={7} style={{ textAlign: 'center', padding: '40px' }}>
+                  <div className='members-empty-state'>검색 결과가 없습니다.</div>
                 </td>
-                <td className='clickable-name' onClick={() => handleMemberClick(member)}>
-                  {member.이름}
-                </td>
-                <td>{member.생일연도 ? member.생일연도.slice(-2) : ''}</td>
-                <td>{member.소속국}</td>
-                <td>{member.소속그룹}</td>
-                <td>{member.소속순}</td>
-                <td>{member.휴대폰번호 ? member.휴대폰번호.slice(-4) : ''}</td>
               </tr>
-            ))}
+            ) : (
+              currentMembers.map(member => (
+                <tr key={member.id}>
+                  <td style={{ textAlign: 'center' }}>
+                    <input
+                      type='checkbox'
+                      className='members-checkbox'
+                      checked={selectedMembers.includes(member.id)}
+                      onChange={() => handleSelectMember(member.id)}
+                    />
+                  </td>
+                  <td className='clickable-name' onClick={() => handleMemberClick(member)}>
+                    {member.이름}
+                  </td>
+                  <td>{member.생일연도 ? member.생일연도.slice(-2) : ''}</td>
+                  <td>{member.소속국}</td>
+                  <td>{member.소속그룹}</td>
+                  <td>{member.소속순}</td>
+                  <td>{member.휴대폰번호 ? member.휴대폰번호.slice(-4) : ''}</td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
