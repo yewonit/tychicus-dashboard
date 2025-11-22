@@ -7,265 +7,186 @@ import {
   GetMemberDetailResponse,
   CreateMemberRequest,
   CreateMemberResponse,
+  UserDto,
+  UserListResponse,
+  FilterOptionsResponse,
+  OrganizationsResponse,
+  OrganizationDto,
 } from '../types/api';
-import { membersData as initialMembersData } from '../data/mockData';
+import axiosClient from '../utils/axiosClient';
 
-// Mock data state (in-memory storage for the session)
-let membersStore: Member[] = [...initialMembersData];
-
-// Mock visitations data
-const mockVisitations = [
-  {
-    id: 1,
-    대상자_이름: '김민수',
-    대상자_국: '1국',
-    대상자_그룹: '김민수 그룹',
-    대상자_순: '김민수 순',
-    대상자_생일연도: 1995,
-    심방날짜: '2024-01-20',
-    심방방법: '만남',
-    진행자_이름: '이지은',
-    심방내용: '최근 직장에서 스트레스가 많다고 하셨습니다. 기도생활이 소홀해진 것 같아 함께 기도하고 격려했습니다.',
-  },
-  {
-    id: 2,
-    대상자_이름: '김민수',
-    대상자_국: '1국',
-    대상자_그룹: '김민수 그룹',
-    대상자_순: '김민수 순',
-    대상자_생일연도: 1995,
-    심방날짜: '2024-01-15',
-    심방방법: '통화',
-    진행자_이름: '박서연',
-    심방내용: '가족 문제로 고민이 많다고 하셨습니다. 함께 기도하고 성경 말씀을 나누었습니다.',
-  },
-  {
-    id: 3,
-    대상자_이름: '김민수',
-    대상자_국: '1국',
-    대상자_그룹: '김민수 그룹',
-    대상자_순: '김민수 순',
-    대상자_생일연도: 1995,
-    심방날짜: '2024-01-10',
-    심방방법: '카카오톡',
-    진행자_이름: '최준호',
-    심방내용: '최근 시험 준비로 바쁘다고 하셨습니다. 기도생활을 잊지 말고 하나님께 의지하시라고 격려했습니다.',
-  },
-];
-
-// Mock history data
-const mockHistoryData = {
-  departmentHistory: [
-    {
-      year: '2023',
-      department: '청년부',
-      group: '김민수 그룹',
-      order: '김민수 순',
-    },
-    {
-      year: '2022',
-      department: '청년부',
-      group: '박준호 그룹',
-      order: '박준호 순',
-    },
-  ],
-  absenceHistory: [
-    {
-      date: '2024-01-14',
-      reason: '개인사정',
-      type: '주일청년예배',
-    },
-    {
-      date: '2024-01-10',
-      reason: '병가',
-      type: '수요예배',
-    },
-  ],
-  positionHistory: [
-    { year: '2023', position: '그룹장' },
-    { year: '2022', position: '부그룹장' },
-  ],
-  newFamilyHistory: [
-    {
-      date: '2023-03-15',
-      course: '새가족반 1기',
-      status: '수료',
-    },
-  ],
-  forumHistory: [
-    {
-      date: '2024-01-21',
-      content: '오늘 말씀을 통해 하나님의 사랑을 더 깊이 체험했습니다.',
-    },
-    {
-      date: '2024-01-14',
-      content: '예배를 통해 영적으로 새로워지는 시간이었습니다.',
-    },
-  ],
-  prayerHistory: [
-    {
-      date: '2024-01-17',
-      content: '교회와 성도들을 위해 기도하겠습니다.',
-    },
-    {
-      date: '2024-01-10',
-      content: '가족의 건강과 믿음의 성장을 위해 기도합니다.',
-    },
-  ],
+// Helper function to map UserDto to Member
+const mapUserToMember = (user: UserDto): Member => {
+  return {
+    id: user.id,
+    이름: user.name,
+    생일연도: user.birthYear || undefined,
+    소속국: user.affiliation?.department || '',
+    소속그룹: user.affiliation?.group || '',
+    소속순: user.affiliation?.team || '',
+    직분: user.role || '청년',
+    휴대폰번호: user.phoneNumber,
+    // 출석 정보는 현재 API에서 제공되지 않으므로 기본값 설정
+    주일청년예배출석일자: '-',
+    수요예배출석일자: '-',
+  };
 };
 
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
 export const memberService = {
+  // 조직 목록 캐싱 (메모리)
+  _cachedOrgs: null as OrganizationDto[] | null,
+
+  // 조직 목록 조회 (내부용)
+  async fetchOrganizations(): Promise<OrganizationDto[]> {
+    if (this._cachedOrgs) return this._cachedOrgs;
+
+    try {
+      // API 엔드포인트는 가정 (백엔드 팀과 확인 필요, 명세서에는 /api/organizations 언급됨)
+      const response = await axiosClient.get<OrganizationsResponse>('/api/organizations');
+      this._cachedOrgs = response.data.data;
+      return this._cachedOrgs;
+    } catch (error) {
+      console.error('Failed to fetch organizations:', error);
+      return [];
+    }
+  },
+
+  // 조직 ID 찾기 헬퍼
+  async findOrganizationId(department: string, group: string, team: string): Promise<number | null> {
+    const orgs = await this.fetchOrganizations();
+    // 백엔드 조직명 규칙에 따라 매칭 로직 구현
+    // 예: "1국_김민수그룹_이용걸순"
+    const orgName = `${department}_${group}_${team}`;
+    const org = orgs.find(o => o.name === orgName);
+    return org ? org.id : null;
+  },
+
   // 1. 구성원 목록 조회
   getMembers: async (request: GetMembersRequest): Promise<GetMembersResponse> => {
-    await delay(500); // Simulate network latency
+    const params = {
+      search: request.search,
+      department: request.department === '전체' ? undefined : request.department,
+      group: request.group === '전체' ? undefined : request.group,
+      team: request.team === '전체' ? undefined : request.team,
+      page: request.page || 1,
+      limit: request.limit || 10,
+    };
 
-    let filteredMembers = [...membersStore];
-
-    // Search
-    if (request.search) {
-      const searchLower = request.search.toLowerCase();
-      filteredMembers = filteredMembers.filter(member => member.이름.toLowerCase().includes(searchLower));
-    }
-
-    // Filters
-    if (request.department && request.department !== '전체') {
-      filteredMembers = filteredMembers.filter(member => member.소속국 === request.department);
-    }
-    if (request.group && request.group !== '전체') {
-      filteredMembers = filteredMembers.filter(member => member.소속그룹 === request.group);
-    }
-    if (request.team && request.team !== '전체') {
-      filteredMembers = filteredMembers.filter(member => member.소속순 === request.team);
-    }
-
-    // Pagination
-    const page = request.page || 1;
-    const limit = request.limit || 10;
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-    const paginatedMembers = filteredMembers.slice(startIndex, endIndex);
-
-    // Filter options (extract from current data)
-    const departments = [...new Set(membersStore.map(m => m.소속국))].sort();
-    const groups = [...new Set(membersStore.map(m => m.소속그룹))].sort();
-    const teams = [...new Set(membersStore.map(m => m.소속순))].sort();
+    const response = await axiosClient.get<UserListResponse>('/api/users/list', { params });
+    const { members, pagination } = response.data.data;
 
     return {
-      members: paginatedMembers,
+      members: members.map(mapUserToMember),
       pagination: {
-        currentPage: page,
-        totalPages: Math.ceil(filteredMembers.length / limit),
-        totalCount: filteredMembers.length,
-        limit,
-      },
-      filterOptions: {
-        departments,
-        groups,
-        teams,
+        currentPage: pagination.currentPage,
+        totalPages: pagination.totalPages,
+        totalCount: pagination.totalCount,
+        limit: pagination.limit,
       },
     };
+  },
+
+  // 1-1. 필터 옵션 조회
+  getFilterOptions: async () => {
+    const response = await axiosClient.get<FilterOptionsResponse>('/api/organizations/filter-options');
+    return response.data.data;
   },
 
   // 2. 구성원 소속 일괄 변경
   updateMembersAffiliation: async (
     request: UpdateMembersAffiliationRequest
   ): Promise<UpdateMembersAffiliationResponse> => {
-    await delay(500);
-
     const { memberIds, affiliation } = request;
-    let updatedCount = 0;
+    
+    // 조직 ID 조회
+    const orgId = await memberService.findOrganizationId(
+      affiliation.department,
+      affiliation.group,
+      affiliation.team
+    );
 
-    membersStore = membersStore.map(member => {
-      if (memberIds.includes(member.id)) {
-        updatedCount++;
-        return {
-          ...member,
-          소속국: affiliation.department,
-          소속그룹: affiliation.group,
-          소속순: affiliation.team,
-        };
-      }
-      return member;
+    if (!orgId) {
+      throw new Error('유효하지 않은 조직 정보입니다.');
+    }
+
+    // 직분 기본값 (순원) 설정 - 필요시 파라미터로 받도록 수정 가능
+    const roleName = "순원";
+
+    await axiosClient.patch('/api/users/bulk-change-organization', {
+      data: memberIds.map(id => ({
+        id,
+        organizationId: orgId,
+        roleName,
+      }))
     });
 
     return {
       success: true,
-      updatedCount,
+      updatedCount: memberIds.length,
       updatedMemberIds: memberIds,
-      message: `${updatedCount}명의 소속이 변경되었습니다.`,
+      message: '소속이 변경되었습니다.',
     };
   },
 
   // 3. 구성원 상세 정보 조회
   getMemberDetail: async (id: number): Promise<GetMemberDetailResponse> => {
-    await delay(300);
-
-    const member = membersStore.find(m => m.id === id);
-    if (!member) {
-      throw new Error('Member not found');
-    }
-
-    // Transform mock visitations to spiritual flow
-    const visitationFlow = mockVisitations
-      .filter(
-        v =>
-          v.대상자_이름 === member.이름 &&
-          v.대상자_국 === member.소속국 &&
-          v.대상자_그룹 === member.소속그룹 &&
-          v.대상자_순 === member.소속순 &&
-          v.대상자_생일연도 === parseInt(member.생일연도 || '0')
-      )
-      .map(v => ({
-        type: 'visitation' as const,
-        date: v.심방날짜,
-        content: `심방방법: ${v.심방방법}\n진행자: ${v.진행자_이름}\n${v.심방내용}`,
-      }));
-
-    // Transform mock forum/prayer to spiritual flow
-    const forumFlow = mockHistoryData.forumHistory.map(item => ({
-      type: 'forum' as const,
-      date: item.date,
-      content: item.content,
-    }));
-
-    const prayerFlow = mockHistoryData.prayerHistory.map(item => ({
-      type: 'prayer' as const,
-      date: item.date,
-      content: item.content,
-    }));
-
-    // Combine and sort spiritual flow
-    const spiritualFlow = [...visitationFlow, ...forumFlow, ...prayerFlow].sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-    );
+    // 현재 API는 기본 정보만 반환하므로 히스토리 등은 빈 값으로 처리
+    // 추후 백엔드 구현에 따라 수정 필요
+    const response = await axiosClient.get<{ data: UserDto }>(`/api/users/${id}`);
+    const userDto = response.data.data;
+    
+    const member = mapUserToMember(userDto);
 
     return {
       ...member,
-      히스토리: mockHistoryData,
-      spiritualFlow,
+      히스토리: {
+        departmentHistory: [],
+        absenceHistory: [],
+        positionHistory: [],
+        newFamilyHistory: [],
+      },
+      spiritualFlow: [],
     };
   },
 
   // 4. 새 구성원 추가
   createMember: async (request: CreateMemberRequest): Promise<CreateMemberResponse> => {
-    await delay(500);
+    // 조직 ID 조회
+    const orgId = await memberService.findOrganizationId(
+      request.소속국,
+      request.소속그룹,
+      request.소속순
+    );
 
-    const newMember: Member = {
-      id: Math.max(...membersStore.map(m => m.id), 0) + 1,
-      이름: request.이름,
-      생일연도: request.생일연도,
-      소속국: request.소속국,
-      소속그룹: request.소속그룹,
-      소속순: request.소속순,
-      직분: request.직분 || '청년',
-      휴대폰번호: request.휴대폰번호,
-      주일청년예배출석일자: '-',
-      수요예배출석일자: '-',
+    if (!orgId) {
+      throw new Error('유효하지 않은 조직 정보입니다.');
+    }
+
+    // 생년월일 변환 (YY -> YYYY-MM-DD)
+    const currentYear = new Date().getFullYear();
+    let birthDate = undefined;
+    if (request.생일연도) {
+        const year = parseInt(request.생일연도);
+        const fullYear = year + (year > (currentYear % 100) ? 1900 : 2000); // 대략적인 세기 추정
+        birthDate = `${fullYear}-01-01`; // 임시 월/일
+    }
+
+    const payload = {
+      userData: {
+        name: request.이름,
+        name_suffix: "A", // 기본값 (추후 입력받거나 백엔드에서 자동 생성 필요)
+        gender_type: "M", // 기본값 (입력 필드 추가 필요)
+        birth_date: birthDate,
+        phone_number: request.휴대폰번호,
+        church_registration_date: new Date().toISOString().split('T')[0],
+        is_new_member: true,
+      },
+      organizationId: orgId,
+      idOfCreatingUser: 1, // 현재 로그인한 사용자 ID (AuthContext 등에서 가져와야 함)
     };
 
-    membersStore = [newMember, ...membersStore];
+    const response = await axiosClient.post<UserDto>('/api/users', payload);
+    const newMember = mapUserToMember(response.data);
 
     return {
       success: true,
@@ -274,5 +195,3 @@ export const memberService = {
     };
   },
 };
-
-

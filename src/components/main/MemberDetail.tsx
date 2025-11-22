@@ -21,11 +21,11 @@ const MemberDetail: React.FC = () => {
       try {
         const data = await memberService.getMemberDetail(parseInt(id));
         setMember(data);
-        
+
         // 로컬 스토리지에서 사진 불러오기 (임시)
-        const savedPhoto = localStorage.getItem(`member_photo_${id}`);
-        if (savedPhoto) {
-          setPhoto(savedPhoto);
+    const savedPhoto = localStorage.getItem(`member_photo_${id}`);
+    if (savedPhoto) {
+      setPhoto(savedPhoto);
         } else if (data.프로필사진) {
           setPhoto(data.프로필사진);
         }
@@ -61,7 +61,7 @@ const MemberDetail: React.FC = () => {
         setPhoto(result);
         // 로컬 스토리지에 저장 (임시)
         if (id) {
-          localStorage.setItem(`member_photo_${id}`, result);
+        localStorage.setItem(`member_photo_${id}`, result);
         }
       };
       reader.readAsDataURL(file);
@@ -71,7 +71,7 @@ const MemberDetail: React.FC = () => {
   const handlePhotoRemove = () => {
     setPhoto(null);
     if (id) {
-      localStorage.removeItem(`member_photo_${id}`);
+    localStorage.removeItem(`member_photo_${id}`);
     }
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
