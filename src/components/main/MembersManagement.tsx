@@ -163,6 +163,10 @@ const MembersManagement: React.FC = () => {
       alert('이름을 입력해주세요.');
       return;
     }
+    if (!newMemberInfo.name_suffix || !newMemberInfo.name_suffix.trim()) {
+      alert('동명이인 구분자를 입력해주세요.');
+      return;
+    }
     if (!newMemberInfo.휴대폰번호) {
       alert('휴대폰 번호를 입력해주세요.');
       return;
@@ -539,13 +543,13 @@ const MembersManagement: React.FC = () => {
                 </small>
               </div>
               <div className='members-form-group'>
-                <label>생년월일 (YYYY-MM-DD)</label>
+                <label>생년월일</label>
                 <input
-                  type='text'
+                  type='date'
                   className='members-modal-input'
                   value={newMemberInfo.생일연도}
                   onChange={e => setNewMemberInfo({ ...newMemberInfo, 생일연도: e.target.value })}
-                  placeholder='예: 1995-03-15'
+                  max={new Date().toISOString().split('T')[0]} // 오늘 날짜까지만 선택 가능
                 />
               </div>
               <div className='members-form-group'>
