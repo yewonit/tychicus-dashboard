@@ -14,6 +14,7 @@ import {
   OrganizationDto,
 } from '../types/api';
 import axiosClient from '../utils/axiosClient';
+import { getUserData } from '../utils/authUtils';
 
 // Helper function to map UserDto to Member
 const mapUserToMember = (user: UserDto): Member => {
@@ -220,27 +221,39 @@ export const memberService = {
       throw new Error('유효하지 않은 조직 정보입니다.');
     }
 
-    // 생년월일 변환 (YY -> YYYY-MM-DD)
-    const currentYear = new Date().getFullYear();
+    // 현재 로그인한 사용자 ID 가져오기
+    const currentUser = getUserData();
+    if (!currentUser || !currentUser.id) {
+      throw new Error('로그인이 필요합니다.');
+    }
+
+    // 생년월일 변환 (YYYY-MM-DD 형식이면 그대로 사용, YY 형식이면 변환)
     let birthDate = undefined;
     if (request.생일연도) {
+      // YYYY-MM-DD 형식인지 확인
+      if (request.생일연도.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        birthDate = request.생일연도;
+      } else {
+        // YY 형식인 경우 변환
+        const currentYear = new Date().getFullYear();
         const year = parseInt(request.생일연도);
-        const fullYear = year + (year > (currentYear % 100) ? 1900 : 2000); // 대략적인 세기 추정
-        birthDate = `${fullYear}-01-01`; // 임시 월/일
+        const fullYear = year + (year > (currentYear % 100) ? 1900 : 2000);
+        birthDate = `${fullYear}-01-01`;
+      }
     }
 
     const payload = {
       userData: {
         name: request.이름,
-        name_suffix: "A", // 기본값 (추후 입력받거나 백엔드에서 자동 생성 필요)
-        gender_type: "M", // 기본값 (입력 필드 추가 필요)
+        name_suffix: request.name_suffix,
+        gender_type: request.gender_type || 'M',
         birth_date: birthDate,
         phone_number: request.휴대폰번호,
         church_registration_date: new Date().toISOString().split('T')[0],
-        is_new_member: true,
+        is_new_member: request.is_new_member || false,
       },
       organizationId: orgId,
-      idOfCreatingUser: 1, // 현재 로그인한 사용자 ID (AuthContext 등에서 가져와야 함)
+      idOfCreatingUser: currentUser.id,
     };
 
     const response = await axiosClient.post<UserDto>('/users', payload);

@@ -36,11 +36,14 @@ const MembersManagement: React.FC = () => {
   // 새 구성원 정보 상태
   const [newMemberInfo, setNewMemberInfo] = useState({
     이름: '',
+    name_suffix: 'A', // 동명이인 구분자 (기본값: A)
     생일연도: '',
     휴대폰번호: '',
+    gender_type: 'M' as 'M' | 'F', // 성별 (기본값: 남성)
     소속국: '',
     소속그룹: '',
     소속순: '',
+    is_new_member: false, // 새가족 여부 (기본값: false)
   });
 
   // Fetch filter options
@@ -106,11 +109,14 @@ const MembersManagement: React.FC = () => {
       setNewTeam('');
       setNewMemberInfo({
         이름: '',
+        name_suffix: 'A',
         생일연도: '',
         휴대폰번호: '',
+        gender_type: 'M',
         소속국: '',
         소속그룹: '',
         소속순: '',
+        is_new_member: false,
       });
       fetchFilterOptions(); // 옵션도 초기화 시 재조회
       fetchMembers();
@@ -140,11 +146,14 @@ const MembersManagement: React.FC = () => {
     setShowAddMemberModal(false);
     setNewMemberInfo({
       이름: '',
+      name_suffix: 'A',
       생일연도: '',
       휴대폰번호: '',
+      gender_type: 'M',
       소속국: '',
       소속그룹: '',
       소속순: '',
+      is_new_member: false,
     });
   };
 
@@ -152,6 +161,10 @@ const MembersManagement: React.FC = () => {
     // 유효성 검사
     if (!newMemberInfo.이름) {
       alert('이름을 입력해주세요.');
+      return;
+    }
+    if (!newMemberInfo.휴대폰번호) {
+      alert('휴대폰 번호를 입력해주세요.');
       return;
     }
     if (!newMemberInfo.소속국 || !newMemberInfo.소속그룹 || !newMemberInfo.소속순) {
@@ -162,11 +175,14 @@ const MembersManagement: React.FC = () => {
     try {
       const response = await memberService.createMember({
         이름: newMemberInfo.이름,
+        name_suffix: newMemberInfo.name_suffix,
         생일연도: newMemberInfo.생일연도 || undefined,
-        휴대폰번호: newMemberInfo.휴대폰번호 || undefined,
+        휴대폰번호: newMemberInfo.휴대폰번호,
+        gender_type: newMemberInfo.gender_type,
         소속국: newMemberInfo.소속국,
         소속그룹: newMemberInfo.소속그룹,
         소속순: newMemberInfo.소속순,
+        is_new_member: newMemberInfo.is_new_member,
       });
 
       if (response.success) {
@@ -507,6 +523,22 @@ const MembersManagement: React.FC = () => {
                 />
               </div>
               <div className='members-form-group'>
+                <label>
+                  동명이인 구분자 <span style={{ color: 'var(--error)' }}>*</span>
+                </label>
+                <input
+                  type='text'
+                  className='members-modal-input'
+                  value={newMemberInfo.name_suffix}
+                  onChange={e => setNewMemberInfo({ ...newMemberInfo, name_suffix: e.target.value })}
+                  placeholder='예: A, B, C'
+                  maxLength={10}
+                />
+                <small style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>
+                  동일한 이름이 있을 경우 구분하기 위한 문자 (예: 홍길동A의 "A")
+                </small>
+              </div>
+              <div className='members-form-group'>
                 <label>생년월일 (YYYY-MM-DD)</label>
                 <input
                   type='text'
@@ -517,7 +549,22 @@ const MembersManagement: React.FC = () => {
                 />
               </div>
               <div className='members-form-group'>
-                <label>휴대폰 번호</label>
+                <label>
+                  성별
+                </label>
+                <select
+                  className='members-modal-select'
+                  value={newMemberInfo.gender_type}
+                  onChange={e => setNewMemberInfo({ ...newMemberInfo, gender_type: e.target.value as 'M' | 'F' })}
+                >
+                  <option value='M'>남성</option>
+                  <option value='F'>여성</option>
+                </select>
+              </div>
+              <div className='members-form-group'>
+                <label>
+                  휴대폰 번호 <span style={{ color: 'var(--error)' }}>*</span>
+                </label>
                 <input
                   type='text'
                   className='members-modal-input'
@@ -525,6 +572,20 @@ const MembersManagement: React.FC = () => {
                   onChange={e => setNewMemberInfo({ ...newMemberInfo, 휴대폰번호: e.target.value })}
                   placeholder='예: 010-1234-5678'
                 />
+              </div>
+              <div className='members-form-group'>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                  <input
+                    type='checkbox'
+                    checked={newMemberInfo.is_new_member}
+                    onChange={e => setNewMemberInfo({ ...newMemberInfo, is_new_member: e.target.checked })}
+                    style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                  />
+                  <span>새가족 여부</span>
+                </label>
+                <small style={{ color: 'var(--text-secondary)', fontSize: '12px', marginLeft: '26px' }}>
+                  체크 시 새가족으로 등록됩니다
+                </small>
               </div>
               <div className='members-form-group'>
                 <label>

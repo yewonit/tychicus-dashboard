@@ -142,11 +142,14 @@ export interface GetMemberDetailResponse extends Member {
 // 4. 새 구성원 추가
 export interface CreateMemberRequest {
   이름: string;
+  name_suffix: string; // 동명이인 구분자 (필수)
   생일연도?: string;
-  휴대폰번호?: string;
+  휴대폰번호: string; // 필수
+  gender_type?: 'M' | 'F'; // 성별 (선택, 기본값: M)
   소속국: string;
   소속그룹: string;
   소속순: string;
+  is_new_member?: boolean; // 새가족 여부 (선택, 기본값: false)
   직분?: string;
 }
 
