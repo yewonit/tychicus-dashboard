@@ -73,32 +73,46 @@ export const memberService = {
       limit: request.limit || 10,
     };
 
-    // 백엔드 API 변경: /api/users/list → /api/users (쿼리스트링으로 필터링)
-    const response = await axiosClient.get<UserListResponse>('/users', { params });
-    
-    // 안전한 응답 처리
-    const data = response.data?.data;
-    if (!data) {
-      throw new Error('API 응답 형식이 올바르지 않습니다.');
+    try {
+      // 백엔드 API 변경: /api/users/list → /api/users (쿼리스트링으로 필터링)
+      const response = await axiosClient.get<UserListResponse>('/users', { params });
+      
+      // 안전한 응답 처리
+      const data = response.data?.data;
+      if (!data) {
+        throw new Error('API 응답 형식이 올바르지 않습니다.');
+      }
+
+      const members = data.members || [];
+      const pagination = data.pagination || {
+        currentPage: 1,
+        totalPages: 0,
+        totalCount: 0,
+        limit: 10,
+      };
+
+      return {
+        members: members.map(mapUserToMember),
+        pagination: {
+          currentPage: pagination.currentPage || 1,
+          totalPages: pagination.totalPages || 0,
+          totalCount: pagination.totalCount || 0,
+          limit: pagination.limit || 10,
+        },
+      };
+    } catch (error: any) {
+      // 에러 응답 상세 정보 로깅 (백엔드 디버깅용)
+      console.error('구성원 목록 조회 실패:', {
+        url: '/users',
+        params,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        errorMessage: error.response?.data?.message || error.message,
+        errorData: error.response?.data,
+        fullError: error,
+      });
+      throw error;
     }
-
-    const members = data.members || [];
-    const pagination = data.pagination || {
-      currentPage: 1,
-      totalPages: 0,
-      totalCount: 0,
-      limit: 10,
-    };
-
-    return {
-      members: members.map(mapUserToMember),
-      pagination: {
-        currentPage: pagination.currentPage || 1,
-        totalPages: pagination.totalPages || 0,
-        totalCount: pagination.totalCount || 0,
-        limit: pagination.limit || 10,
-      },
-    };
   },
 
   // 1-1. 필터 옵션 조회
