@@ -37,8 +37,16 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # 빌드된 React 앱을 Nginx 서빙 디렉토리로 복사
 COPY --from=builder /app/build /usr/share/nginx/html
 
+# Entrypoint 스크립트 복사 및 실행 권한 부여
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
 # 포트 노출
 EXPOSE 80
 
-# Nginx 시작 (foreground 모드)
-CMD ["nginx", "-g", "daemon off;"]
+# 환경 변수 기본값 설정
+ENV NODE_ENV=production
+ENV REACT_APP_ENV=production
+
+# Entrypoint 스크립트 실행 (런타임 환경 변수 주입)
+ENTRYPOINT ["/docker-entrypoint.sh"]

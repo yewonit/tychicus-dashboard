@@ -37,5 +37,5 @@ jobs:
             docker rm -f tychicus-dashboard-dev || true
             docker rmi ${DOCKER_IMAGE} || true
             docker pull ${DOCKER_IMAGE}
-            docker run -d -p 8181:80 --name tychicus-dashboard-dev --network hephai-bridge --restart unless-stopped ${DOCKER_IMAGE}
+            docker run -d -p 8181:80 --name tychicus-dashboard-dev --network hephai-bridge --restart unless-stopped -e NODE_ENV=development -e REACT_APP_ENV=development ${DOCKER_IMAGE}
           "
