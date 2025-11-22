@@ -48,11 +48,11 @@
 - **현재 상태**: 목업 데이터로 동작 중
 - **UI 요소**: 구성원 이름 클릭
 
-### 6. 새 구성원 추가 (준비 중)
-
+### 6. 새 구성원 추가
+    
 - **기능 설명**: 새 구성원을 추가하는 기능
-- **현재 상태**: 버튼만 존재, 기능 미구현
-- **UI 요소**: "새 구성원 추가" 버튼
+- **현재 상태**: 모달 UI 구현됨 (목업 데이터로 동작)
+- **UI 요소**: "새 구성원 추가" 버튼, 입력 모달 (이름, 생년월일, 휴대폰번호, 소속 정보)
 
 ---
 
@@ -257,7 +257,7 @@ interface GetMemberDetailResponse {
 
 ---
 
-### API 4: 새 구성원 추가 (향후 개발 예정)
+### API 4: 새 구성원 추가 (구현 완료)
 
 #### 요청 사항
 
@@ -268,14 +268,13 @@ interface GetMemberDetailResponse {
 
 ```typescript
 interface CreateMemberRequest {
-  이름: string;
-  생일연도?: string;
-  소속국: string;
-  소속그룹: string;
-  소속순: string;
-  직분?: string;
-  휴대폰번호?: string;
-  // 기타 필요한 필드
+  이름: string; // 필수
+  생일연도?: string; // 선택
+  휴대폰번호?: string; // 선택
+  소속국: string; // 필수
+  소속그룹: string; // 필수
+  소속순: string; // 필수
+  직분?: string; // 선택 (기본값: "청년")
 }
 ```
 

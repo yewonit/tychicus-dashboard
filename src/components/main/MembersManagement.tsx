@@ -27,10 +27,22 @@ const MembersManagement: React.FC = () => {
   // 체크박스 및 모달 상태
   const [selectedMembers, setSelectedMembers] = useState<number[]>([]);
   const [showModal, setShowModal] = useState(false);
+  const [showAddMemberModal, setShowAddMemberModal] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
   const [newDepartment, setNewDepartment] = useState('');
   const [newGroup, setNewGroup] = useState('');
   const [newTeam, setNewTeam] = useState('');
+
+  // 새 구성원 정보 상태
+  const [newMemberInfo, setNewMemberInfo] = useState({
+    이름: '',
+    생일연도: '',
+    휴대폰번호: '',
+    소속국: '',
+    소속그룹: '',
+    소속순: '',
+  });
 
   // 구성원 데이터를 상태로 관리 (목업 데이터)
   const [members, setMembers] = useState<Member[]>(membersData);
@@ -45,10 +57,19 @@ const MembersManagement: React.FC = () => {
       setCurrentPage(1);
       setSelectedMembers([]);
       setShowModal(false);
+      setShowAddMemberModal(false);
       setShowAlert(false);
       setNewDepartment('');
       setNewGroup('');
       setNewTeam('');
+      setNewMemberInfo({
+        이름: '',
+        생일연도: '',
+        휴대폰번호: '',
+        소속국: '',
+        소속그룹: '',
+        소속순: '',
+      });
     };
 
     window.addEventListener('resetMembersPage', handleResetPage);
@@ -87,8 +108,57 @@ const MembersManagement: React.FC = () => {
   };
 
   const handleAddMember = () => {
-    // 새 구성원 추가 로직 (목업 - 실제 API 연동 필요)
-    console.log('새 구성원 추가');
+    setShowAddMemberModal(true);
+  };
+
+  const handleCloseAddMemberModal = () => {
+    setShowAddMemberModal(false);
+    setNewMemberInfo({
+      이름: '',
+      생일연도: '',
+      휴대폰번호: '',
+      소속국: '',
+      소속그룹: '',
+      소속순: '',
+    });
+  };
+
+  const handleAddMemberSubmit = () => {
+    // 유효성 검사
+    if (!newMemberInfo.이름) {
+      alert('이름을 입력해주세요.');
+      return;
+    }
+    if (!newMemberInfo.소속국 || !newMemberInfo.소속그룹 || !newMemberInfo.소속순) {
+      alert('소속 정보를 모두 선택해주세요.');
+      return;
+    }
+
+    // 새 구성원 객체 생성
+    const newMember: Member = {
+      id: Math.max(...members.map(m => m.id)) + 1, // 임시 ID 생성
+      이름: newMemberInfo.이름,
+      생일연도: newMemberInfo.생일연도 || undefined,
+      휴대폰번호: newMemberInfo.휴대폰번호 || undefined,
+      소속국: newMemberInfo.소속국,
+      소속그룹: newMemberInfo.소속그룹,
+      소속순: newMemberInfo.소속순,
+      직분: '청년', // 기본값
+      주일청년예배출석일자: '-',
+      수요예배출석일자: '-',
+    };
+
+    // 상태 업데이트
+    setMembers(prev => [newMember, ...prev]);
+    
+    // 알림 표시
+    setAlertMessage('새 구성원이 추가되었습니다.');
+    setShowAlert(true);
+    setTimeout(() => {
+      setShowAlert(false);
+    }, 3000);
+
+    handleCloseAddMemberModal();
   };
 
   // 체크박스 핸들러
@@ -155,6 +225,7 @@ const MembersManagement: React.FC = () => {
     );
 
     // 알림 표시
+    setAlertMessage('소속이 변경되었습니다.');
     setShowAlert(true);
     setTimeout(() => {
       setShowAlert(false);
@@ -383,8 +454,115 @@ const MembersManagement: React.FC = () => {
         </div>
       )}
 
+      {/* 새 구성원 추가 모달 */}
+      {showAddMemberModal && (
+        <div className='members-modal-overlay' onClick={handleCloseAddMemberModal}>
+          <div className='members-modal-content' onClick={e => e.stopPropagation()}>
+            <div className='members-modal-header'>
+              <h3>새 구성원 추가</h3>
+              <button className='members-modal-close' onClick={handleCloseAddMemberModal}>
+                ×
+              </button>
+            </div>
+            <div className='members-modal-form'>
+              <div className='members-form-group'>
+                <label>
+                  이름 <span style={{ color: 'var(--error)' }}>*</span>
+                </label>
+                <input
+                  type='text'
+                  className='members-modal-input'
+                  value={newMemberInfo.이름}
+                  onChange={e => setNewMemberInfo({ ...newMemberInfo, 이름: e.target.value })}
+                  placeholder='이름을 입력하세요'
+                />
+              </div>
+              <div className='members-form-group'>
+                <label>생년월일 (YYYY-MM-DD)</label>
+                <input
+                  type='text'
+                  className='members-modal-input'
+                  value={newMemberInfo.생일연도}
+                  onChange={e => setNewMemberInfo({ ...newMemberInfo, 생일연도: e.target.value })}
+                  placeholder='예: 1995-03-15'
+                />
+              </div>
+              <div className='members-form-group'>
+                <label>휴대폰 번호</label>
+                <input
+                  type='text'
+                  className='members-modal-input'
+                  value={newMemberInfo.휴대폰번호}
+                  onChange={e => setNewMemberInfo({ ...newMemberInfo, 휴대폰번호: e.target.value })}
+                  placeholder='예: 010-1234-5678'
+                />
+              </div>
+              <div className='members-form-group'>
+                <label>
+                  소속 국 <span style={{ color: 'var(--error)' }}>*</span>
+                </label>
+                <select
+                  className='members-modal-select'
+                  value={newMemberInfo.소속국}
+                  onChange={e => setNewMemberInfo({ ...newMemberInfo, 소속국: e.target.value })}
+                >
+                  <option value=''>선택하세요</option>
+                  {departments.map(dept => (
+                    <option key={dept} value={dept}>
+                      {dept}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className='members-form-group'>
+                <label>
+                  소속 그룹 <span style={{ color: 'var(--error)' }}>*</span>
+                </label>
+                <select
+                  className='members-modal-select'
+                  value={newMemberInfo.소속그룹}
+                  onChange={e => setNewMemberInfo({ ...newMemberInfo, 소속그룹: e.target.value })}
+                >
+                  <option value=''>선택하세요</option>
+                  {groups.map(group => (
+                    <option key={group} value={group}>
+                      {group}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className='members-form-group'>
+                <label>
+                  소속 순 <span style={{ color: 'var(--error)' }}>*</span>
+                </label>
+                <select
+                  className='members-modal-select'
+                  value={newMemberInfo.소속순}
+                  onChange={e => setNewMemberInfo({ ...newMemberInfo, 소속순: e.target.value })}
+                >
+                  <option value=''>선택하세요</option>
+                  {teams.map(team => (
+                    <option key={team} value={team}>
+                      {team}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className='members-modal-buttons'>
+              <button className='members-modal-button secondary' onClick={handleCloseAddMemberModal}>
+                취소
+              </button>
+              <button className='members-modal-button primary' onClick={handleAddMemberSubmit}>
+                추가
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 성공 알림 */}
-      {showAlert && <div className='members-alert'>소속이 변경되었습니다.</div>}
+      {showAlert && <div className='members-alert'>{alertMessage}</div>}
     </div>
   );
 };
