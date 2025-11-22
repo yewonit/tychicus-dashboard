@@ -74,26 +74,65 @@ export const memberService = {
 
     // 백엔드 API 변경: /api/users/list → /api/users (쿼리스트링으로 필터링)
     const response = await axiosClient.get<UserListResponse>('/users', { params });
-    const { members, pagination } = response.data.data;
+    
+    // 안전한 응답 처리
+    const data = response.data?.data;
+    if (!data) {
+      throw new Error('API 응답 형식이 올바르지 않습니다.');
+    }
+
+    const members = data.members || [];
+    const pagination = data.pagination || {
+      currentPage: 1,
+      totalPages: 0,
+      totalCount: 0,
+      limit: 10,
+    };
 
     return {
       members: members.map(mapUserToMember),
       pagination: {
-        currentPage: pagination.currentPage,
-        totalPages: pagination.totalPages,
-        totalCount: pagination.totalCount,
-        limit: pagination.limit,
+        currentPage: pagination.currentPage || 1,
+        totalPages: pagination.totalPages || 0,
+        totalCount: pagination.totalCount || 0,
+        limit: pagination.limit || 10,
       },
     };
   },
 
   // 1-1. 필터 옵션 조회
   getFilterOptions: async () => {
-    // 백엔드 API 변경: /api/organizations/filter-options → /api/organizations?filter-options=true
-    const response = await axiosClient.get<FilterOptionsResponse>('/organizations', {
-      params: { 'filter-options': true }
-    });
-    return response.data.data;
+    try {
+      // 백엔드 API 변경: /api/organizations/filter-options → /api/organizations?filter-options=true
+      const response = await axiosClient.get<FilterOptionsResponse>('/organizations', {
+        params: { 'filter-options': true }
+      });
+      
+      // 안전한 응답 처리
+      const data = response.data?.data;
+      if (!data) {
+        console.warn('필터 옵션 API 응답 형식이 올바르지 않습니다. 기본값을 반환합니다.');
+        return {
+          departments: [],
+          groups: [],
+          teams: [],
+        };
+      }
+
+      return {
+        departments: data.departments || [],
+        groups: data.groups || [],
+        teams: data.teams || [],
+      };
+    } catch (error) {
+      console.error('필터 옵션 조회 실패:', error);
+      // 에러 발생 시 빈 배열 반환하여 앱이 크래시되지 않도록 함
+      return {
+        departments: [],
+        groups: [],
+        teams: [],
+      };
+    }
   },
 
   // 2. 구성원 소속 일괄 변경
