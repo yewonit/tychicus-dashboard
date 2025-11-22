@@ -64,10 +64,11 @@ export const memberService = {
   // 1. 구성원 목록 조회
   getMembers: async (request: GetMembersRequest): Promise<GetMembersResponse> => {
     const params = {
-      search: request.search,
-      department: request.department === '전체' ? undefined : request.department,
-      group: request.group === '전체' ? undefined : request.group,
-      team: request.team === '전체' ? undefined : request.team,
+      // 빈 문자열을 undefined로 변환하여 쿼리스트링에서 제외
+      search: request.search?.trim() || undefined,
+      department: request.department === '전체' || !request.department ? undefined : request.department,
+      group: request.group === '전체' || !request.group ? undefined : request.group,
+      team: request.team === '전체' || !request.team ? undefined : request.team,
       page: request.page || 1,
       limit: request.limit || 10,
     };
