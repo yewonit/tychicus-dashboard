@@ -42,7 +42,7 @@ export const memberService = {
 
     try {
       // API 엔드포인트는 가정 (백엔드 팀과 확인 필요, 명세서에는 /api/organizations 언급됨)
-      const response = await axiosClient.get<OrganizationsResponse>('/api/organizations');
+      const response = await axiosClient.get<OrganizationsResponse>('/organizations');
       this._cachedOrgs = response.data.data;
       return this._cachedOrgs;
     } catch (error) {
@@ -72,7 +72,7 @@ export const memberService = {
       limit: request.limit || 10,
     };
 
-    const response = await axiosClient.get<UserListResponse>('/api/users/list', { params });
+    const response = await axiosClient.get<UserListResponse>('/users/list', { params });
     const { members, pagination } = response.data.data;
 
     return {
@@ -88,7 +88,7 @@ export const memberService = {
 
   // 1-1. 필터 옵션 조회
   getFilterOptions: async () => {
-    const response = await axiosClient.get<FilterOptionsResponse>('/api/organizations/filter-options');
+    const response = await axiosClient.get<FilterOptionsResponse>('/organizations/filter-options');
     return response.data.data;
   },
 
@@ -112,7 +112,7 @@ export const memberService = {
     // 직분 기본값 (순원) 설정 - 필요시 파라미터로 받도록 수정 가능
     const roleName = "순원";
 
-    await axiosClient.patch('/api/users/bulk-change-organization', {
+    await axiosClient.patch('/users/bulk-change-organization', {
       data: memberIds.map(id => ({
         id,
         organizationId: orgId,
@@ -132,7 +132,7 @@ export const memberService = {
   getMemberDetail: async (id: number): Promise<GetMemberDetailResponse> => {
     // 현재 API는 기본 정보만 반환하므로 히스토리 등은 빈 값으로 처리
     // 추후 백엔드 구현에 따라 수정 필요
-    const response = await axiosClient.get<{ data: UserDto }>(`/api/users/${id}`);
+    const response = await axiosClient.get<{ data: UserDto }>(`/users/${id}`);
     const userDto = response.data.data;
     
     const member = mapUserToMember(userDto);
@@ -185,7 +185,7 @@ export const memberService = {
       idOfCreatingUser: 1, // 현재 로그인한 사용자 ID (AuthContext 등에서 가져와야 함)
     };
 
-    const response = await axiosClient.post<UserDto>('/api/users', payload);
+    const response = await axiosClient.post<UserDto>('/users', payload);
     const newMember = mapUserToMember(response.data);
 
     return {
