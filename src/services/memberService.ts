@@ -72,7 +72,8 @@ export const memberService = {
       limit: request.limit || 10,
     };
 
-    const response = await axiosClient.get<UserListResponse>('/users/list', { params });
+    // 백엔드 API 변경: /api/users/list → /api/users (쿼리스트링으로 필터링)
+    const response = await axiosClient.get<UserListResponse>('/users', { params });
     const { members, pagination } = response.data.data;
 
     return {
@@ -88,7 +89,10 @@ export const memberService = {
 
   // 1-1. 필터 옵션 조회
   getFilterOptions: async () => {
-    const response = await axiosClient.get<FilterOptionsResponse>('/organizations/filter-options');
+    // 백엔드 API 변경: /api/organizations/filter-options → /api/organizations?filter-options=true
+    const response = await axiosClient.get<FilterOptionsResponse>('/organizations', {
+      params: { 'filter-options': true }
+    });
     return response.data.data;
   },
 
