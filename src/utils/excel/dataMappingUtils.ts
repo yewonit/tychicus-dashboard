@@ -144,11 +144,35 @@ export function syncExcelDataWithUserData(
         return fillEmptyFields(row, userData);
       }
 
-      // 3. 여러 명을 찾은 경우: '구분'으로 추가 검색
+      // 3. 여러 명을 찾은 경우: 먼저 '이름 + 기수'로 검색
+      const rowBirthDate = row['기수'];
+
+      if (rowBirthDate) {
+        // 엑셀의 기수 값이 있으면 파싱 (이미 파싱된 값일 수도 있지만 안전하게)
+        const parsedBirthDate = parseBirthDate(rowBirthDate);
+
+        if (parsedBirthDate) {
+          // 서버의 birth_date에서 연도 뒤 두 자리 추출하여 비교
+          const birthDateMatch = matchedUsers.find(user => {
+            if (!user.birth_date) {
+              return false; // 서버에 기수 데이터가 없으면 건너뛰기
+            }
+            const serverYearSuffix = extractYearSuffix(user.birth_date);
+            return serverYearSuffix === parsedBirthDate;
+          });
+
+          if (birthDateMatch) {
+            // '이름 + 기수'로 정확히 한 명 찾음: 빈칸 채우기
+            return fillEmptyFields(row, birthDateMatch);
+          }
+        }
+      }
+
+      // 4. '이름 + 기수'로 매칭 실패 시 '이름 + 구분'으로 검색
       const rowNameSuffix = row['구분'];
 
       if (!rowNameSuffix) {
-        // 4. '구분'이 빈칸인 경우: 에러 행으로 표시
+        // 5. '구분'이 빈칸인 경우: 에러 행으로 표시
         errorRows.add(`${sheetIndex}-${rowIndex}`);
         return row;
       }
