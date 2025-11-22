@@ -1,66 +1,43 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { membersData } from '../../data/mockData';
-
-// 목업 심방 데이터 (실제로는 API에서 가져올 데이터)
-const mockVisitations = [
-  {
-    id: 1,
-    대상자_이름: '김민수',
-    대상자_국: '1국',
-    대상자_그룹: '김민수 그룹',
-    대상자_순: '김민수 순',
-    대상자_생일연도: 1995,
-    심방날짜: '2024-01-20',
-    심방방법: '만남',
-    진행자_이름: '이지은',
-    심방내용: '최근 직장에서 스트레스가 많다고 하셨습니다. 기도생활이 소홀해진 것 같아 함께 기도하고 격려했습니다.',
-  },
-  {
-    id: 2,
-    대상자_이름: '김민수',
-    대상자_국: '1국',
-    대상자_그룹: '김민수 그룹',
-    대상자_순: '김민수 순',
-    대상자_생일연도: 1995,
-    심방날짜: '2024-01-15',
-    심방방법: '통화',
-    진행자_이름: '박서연',
-    심방내용: '가족 문제로 고민이 많다고 하셨습니다. 함께 기도하고 성경 말씀을 나누었습니다.',
-  },
-  {
-    id: 3,
-    대상자_이름: '김민수',
-    대상자_국: '1국',
-    대상자_그룹: '김민수 그룹',
-    대상자_순: '김민수 순',
-    대상자_생일연도: 1995,
-    심방날짜: '2024-01-10',
-    심방방법: '카카오톡',
-    진행자_이름: '최준호',
-    심방내용: '최근 시험 준비로 바쁘다고 하셨습니다. 기도생활을 잊지 말고 하나님께 의지하시라고 격려했습니다.',
-  },
-];
+import { GetMemberDetailResponse } from '../../types/api';
+import { memberService } from '../../services/memberService';
 
 const MemberDetail: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [member, setMember] = useState(null);
-  const [photo, setPhoto] = useState(null);
+  const [member, setMember] = useState<GetMemberDetailResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [photo, setPhoto] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(false);
-  const [activeTab, setActiveTab] = useState('department'); // 기본 이력 탭
-  const [activeMainTab, setActiveMainTab] = useState('basic'); // 메인 탭 (기본이력/영적흐름)
-  const fileInputRef = useRef(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const foundMember = membersData.find(m => m.id === parseInt(id));
-    setMember(foundMember);
+    const fetchMemberDetail = async () => {
+      if (!id) return;
+      
+      setLoading(true);
+      try {
+        const data = await memberService.getMemberDetail(parseInt(id));
+        setMember(data);
+        
+        // 로컬 스토리지에서 사진 불러오기 (임시)
+        const savedPhoto = localStorage.getItem(`member_photo_${id}`);
+        if (savedPhoto) {
+          setPhoto(savedPhoto);
+        } else if (data.프로필사진) {
+          setPhoto(data.프로필사진);
+        }
+      } catch (err) {
+        console.error('Failed to fetch member detail:', err);
+        setError('구성원 정보를 불러오는데 실패했습니다.');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    // 로컬 스토리지에서 사진 불러오기
-    const savedPhoto = localStorage.getItem(`member_photo_${id}`);
-    if (savedPhoto) {
-      setPhoto(savedPhoto);
-    }
+    fetchMemberDetail();
   }, [id]);
 
   const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,8 +59,10 @@ const MemberDetail: React.FC = () => {
       reader.onload = e => {
         const result = e.target?.result as string;
         setPhoto(result);
-        // 로컬 스토리지에 저장
-        localStorage.setItem(`member_photo_${id}`, result);
+        // 로컬 스토리지에 저장 (임시)
+        if (id) {
+          localStorage.setItem(`member_photo_${id}`, result);
+        }
       };
       reader.readAsDataURL(file);
     }
@@ -91,7 +70,9 @@ const MemberDetail: React.FC = () => {
 
   const handlePhotoRemove = () => {
     setPhoto(null);
-    localStorage.removeItem(`member_photo_${id}`);
+    if (id) {
+      localStorage.removeItem(`member_photo_${id}`);
+    }
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -109,84 +90,24 @@ const MemberDetail: React.FC = () => {
     }
   };
 
-  if (!member) {
+  if (loading) {
     return (
       <div className='member-detail-container'>
-        <div>구성원을 찾을 수 없습니다.</div>
+        <div style={{ padding: '40px', textAlign: 'center' }}>로딩 중...</div>
       </div>
     );
   }
 
-  // 가상의 히스토리 데이터 (실제로는 API에서 가져올 데이터)
-  const historyData = {
-    departmentHistory: [
-      {
-        year: '2023',
-        department: '청년부',
-        group: '김민수 그룹',
-        order: '김민수 순',
-      },
-      {
-        year: '2022',
-        department: '청년부',
-        group: '박준호 그룹',
-        order: '박준호 순',
-      },
-    ],
-    absenceHistory: [
-      {
-        date: '2024-01-14',
-        reason: '개인사정',
-        type: '주일청년예배',
-      },
-      {
-        date: '2024-01-10',
-        reason: '병가',
-        type: '수요예배',
-      },
-    ],
-    positionHistory: [
-      { year: '2023', position: '그룹장' },
-      { year: '2022', position: '부그룹장' },
-    ],
-    newFamilyHistory: [
-      {
-        date: '2023-03-15',
-        course: '새가족반 1기',
-        status: '수료',
-      },
-    ],
-    forumHistory: [
-      {
-        date: '2024-01-21',
-        content: '오늘 말씀을 통해 하나님의 사랑을 더 깊이 체험했습니다.',
-      },
-      {
-        date: '2024-01-14',
-        content: '예배를 통해 영적으로 새로워지는 시간이었습니다.',
-      },
-    ],
-    prayerHistory: [
-      {
-        date: '2024-01-17',
-        content: '교회와 성도들을 위해 기도하겠습니다.',
-      },
-      {
-        date: '2024-01-10',
-        content: '가족의 건강과 믿음의 성장을 위해 기도합니다.',
-      },
-    ],
-  };
-
-  // 해당 구성원의 심방 내역 필터링
-  const memberVisitations = mockVisitations.filter(
-    visitation =>
-      visitation.대상자_이름 === member.이름 &&
-      visitation.대상자_국 === member.소속국 &&
-      visitation.대상자_그룹 === member.소속그룹 &&
-      visitation.대상자_순 === member.소속순 &&
-      visitation.대상자_생일연도 === parseInt(member.생일연도)
-  );
+  if (error || !member) {
+    return (
+      <div className='member-detail-container'>
+        <div className='members-empty-state'>{error || '구성원을 찾을 수 없습니다.'}</div>
+        <button className='member-detail-back-button' onClick={() => navigate('/main/member-management')} style={{ marginTop: '20px' }}>
+          ← 목록으로
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className='member-detail-container'>
@@ -254,11 +175,11 @@ const MemberDetail: React.FC = () => {
               </div>
               <div className='member-detail-info-item'>
                 <span className='member-detail-info-label'>생년월일</span>
-                <span className='member-detail-info-value'>1995-03-15</span>
+                <span className='member-detail-info-value'>{member.생일연도 ? `${member.생일연도}-03-15 (임시)` : '-'}</span>
               </div>
               <div className='member-detail-info-item'>
                 <span className='member-detail-info-label'>휴대폰 번호</span>
-                <span className='member-detail-info-value'>010-1234-5678</span>
+                <span className='member-detail-info-value'>{member.휴대폰번호 || '-'}</span>
               </div>
               <div className='member-detail-info-item'>
                 <span className='member-detail-info-label'>현재 소속</span>
@@ -268,25 +189,25 @@ const MemberDetail: React.FC = () => {
               </div>
               <div className='member-detail-info-item'>
                 <span className='member-detail-info-label'>현재 직분</span>
-                <span className='member-detail-info-value'>{member.직분}</span>
+                <span className='member-detail-info-value'>{member.직분 || '-'}</span>
               </div>
               <div className='member-detail-info-item'>
                 <span className='member-detail-info-label'>최초 등록일자</span>
-                <span className='member-detail-info-value'>2022-01-15</span>
+                <span className='member-detail-info-value'>{member.최초등록일자 || '2022-01-15'}</span>
               </div>
               <div className='member-detail-info-item'>
                 <span className='member-detail-info-label'>출석 구분</span>
                 <span className='member-detail-info-value'>
-                  <span className='member-detail-status-badge regular'>정기출석자</span>
+                  <span className='member-detail-status-badge regular'>{member.출석구분 || '정기출석자'}</span>
                 </span>
               </div>
               <div className='member-detail-info-item'>
                 <span className='member-detail-info-label'>최근 주일청년예배 출석일자</span>
-                <span className='member-detail-info-value'>{member.주일청년예배출석일자}</span>
+                <span className='member-detail-info-value'>{member.주일청년예배출석일자 || '-'}</span>
               </div>
               <div className='member-detail-info-item'>
                 <span className='member-detail-info-label'>최근 수요제자기도회 출석일자</span>
-                <span className='member-detail-info-value'>{member.수요예배출석일자}</span>
+                <span className='member-detail-info-value'>{member.수요예배출석일자 || '-'}</span>
               </div>
               <div className='member-detail-info-item'>
                 <span className='member-detail-info-label'>최근 두란노사역자모임 출석일자</span>

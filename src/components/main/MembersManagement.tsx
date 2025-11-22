@@ -1,19 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { membersData } from '../../data/mockData';
-
-interface Member {
-  id: number;
-  이름: string;
-  생일연도?: string;
-  소속국: string;
-  소속그룹: string;
-  소속순: string;
-  직분?: string;
-  주일청년예배출석일자?: string;
-  수요예배출석일자?: string;
-  휴대폰번호?: string;
-}
+import { Member } from '../../types/api';
+import { memberService } from '../../services/memberService';
+import { LoadingSpinner } from '../ui'; // Assuming LoadingSpinner exists in ui/index.ts, if not I'll use simple text
 
 const MembersManagement: React.FC = () => {
   const navigate = useNavigate();
@@ -23,6 +12,16 @@ const MembersManagement: React.FC = () => {
   const [filterTeam, setFilterTeam] = useState('전체');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  // Data states
+  const [members, setMembers] = useState<Member[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [totalPages, setTotalPages] = useState(0);
+  const [filterOptions, setFilterOptions] = useState<{
+    departments: string[];
+    groups: string[];
+    teams: string[];
+  }>({ departments: [], groups: [], teams: [] });
 
   // 체크박스 및 모달 상태
   const [selectedMembers, setSelectedMembers] = useState<number[]>([]);
@@ -44,8 +43,36 @@ const MembersManagement: React.FC = () => {
     소속순: '',
   });
 
-  // 구성원 데이터를 상태로 관리 (목업 데이터)
-  const [members, setMembers] = useState<Member[]>(membersData);
+  // Fetch members
+  const fetchMembers = async () => {
+    setLoading(true);
+    try {
+      const response = await memberService.getMembers({
+        search: searchTerm,
+        department: filterDepartment,
+        group: filterGroup,
+        team: filterTeam,
+        page: currentPage,
+        limit: itemsPerPage,
+      });
+
+      setMembers(response.members);
+      setTotalPages(response.pagination.totalPages);
+      
+      if (response.filterOptions) {
+        setFilterOptions(response.filterOptions);
+      }
+    } catch (error) {
+      console.error('Failed to fetch members:', error);
+      alert('구성원 목록을 불러오는데 실패했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMembers();
+  }, [searchTerm, filterDepartment, filterGroup, filterTeam, currentPage]);
 
   // 사이드바 메뉴 클릭 시 화면 초기화
   useEffect(() => {
@@ -79,29 +106,10 @@ const MembersManagement: React.FC = () => {
     };
   }, []);
 
-  // 페이지 변경 시 선택 해제 (다른 페이지의 구성원이 선택되어 있을 수 있음)
+  // 페이지 변경 시 선택 해제
   useEffect(() => {
     setSelectedMembers([]);
   }, [currentPage]);
-
-  // 소속국, 그룹, 순 목록 생성
-  const departments = [...new Set(members.map(m => m.소속국))].sort();
-  const groups = [...new Set(members.map(m => m.소속그룹))].sort();
-  const teams = [...new Set(members.map(m => m.소속순))].sort();
-
-  const filteredMembers = members.filter(member => {
-    const matchesSearch = member.이름.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesDepartment = filterDepartment === '전체' || member.소속국 === filterDepartment;
-    const matchesGroup = filterGroup === '전체' || member.소속그룹 === filterGroup;
-    const matchesTeam = filterTeam === '전체' || member.소속순 === filterTeam;
-
-    return matchesSearch && matchesDepartment && matchesGroup && matchesTeam;
-  });
-
-  const totalPages = Math.ceil(filteredMembers.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentMembers = filteredMembers.slice(startIndex, endIndex);
 
   const handleMemberClick = (member: Member) => {
     navigate(`/main/member-management/${member.id}`);
@@ -123,7 +131,7 @@ const MembersManagement: React.FC = () => {
     });
   };
 
-  const handleAddMemberSubmit = () => {
+  const handleAddMemberSubmit = async () => {
     // 유효성 검사
     if (!newMemberInfo.이름) {
       alert('이름을 입력해주세요.');
@@ -134,37 +142,35 @@ const MembersManagement: React.FC = () => {
       return;
     }
 
-    // 새 구성원 객체 생성
-    const newMember: Member = {
-      id: Math.max(...members.map(m => m.id)) + 1, // 임시 ID 생성
-      이름: newMemberInfo.이름,
-      생일연도: newMemberInfo.생일연도 || undefined,
-      휴대폰번호: newMemberInfo.휴대폰번호 || undefined,
-      소속국: newMemberInfo.소속국,
-      소속그룹: newMemberInfo.소속그룹,
-      소속순: newMemberInfo.소속순,
-      직분: '청년', // 기본값
-      주일청년예배출석일자: '-',
-      수요예배출석일자: '-',
-    };
+    try {
+      const response = await memberService.createMember({
+        이름: newMemberInfo.이름,
+        생일연도: newMemberInfo.생일연도 || undefined,
+        휴대폰번호: newMemberInfo.휴대폰번호 || undefined,
+        소속국: newMemberInfo.소속국,
+        소속그룹: newMemberInfo.소속그룹,
+        소속순: newMemberInfo.소속순,
+      });
 
-    // 상태 업데이트
-    setMembers(prev => [newMember, ...prev]);
-    
-    // 알림 표시
-    setAlertMessage('새 구성원이 추가되었습니다.');
-    setShowAlert(true);
-    setTimeout(() => {
-      setShowAlert(false);
-    }, 3000);
-
-    handleCloseAddMemberModal();
+      if (response.success) {
+        setAlertMessage('새 구성원이 추가되었습니다.');
+        setShowAlert(true);
+        setTimeout(() => {
+          setShowAlert(false);
+        }, 3000);
+        handleCloseAddMemberModal();
+        fetchMembers(); // Refresh list
+      }
+    } catch (error) {
+      console.error('Failed to create member:', error);
+      alert('구성원 추가에 실패했습니다.');
+    }
   };
 
   // 체크박스 핸들러
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
-      setSelectedMembers(currentMembers.map(m => m.id));
+      setSelectedMembers(members.map(m => m.id));
     } else {
       setSelectedMembers([]);
     }
@@ -174,7 +180,7 @@ const MembersManagement: React.FC = () => {
     setSelectedMembers(prev => (prev.includes(memberId) ? prev.filter(id => id !== memberId) : [...prev, memberId]));
   };
 
-  const isAllSelected = selectedMembers.length === currentMembers.length && currentMembers.length > 0;
+  const isAllSelected = selectedMembers.length === members.length && members.length > 0;
 
   // 소속 변경 모달 핸들러
   const handleOpenModal = () => {
@@ -192,47 +198,49 @@ const MembersManagement: React.FC = () => {
     setNewTeam('');
   };
 
-  const handleConfirmChange = () => {
+  const handleConfirmChange = async () => {
     if (!newDepartment || !newGroup || !newTeam) {
       alert('모든 소속 정보를 선택해주세요.');
       return;
     }
 
-    // 목업: 로컬 상태만 업데이트 (실제로는 API 호출 필요)
-    setMembers(prevMembers =>
-      prevMembers.map(member =>
-        selectedMembers.includes(member.id)
-          ? {
-              ...member,
-              소속국: newDepartment,
-              소속그룹: newGroup,
-              소속순: newTeam,
-            }
-          : member
-      )
-    );
-
-    // 소속 변경 이벤트 발생 (다른 컴포넌트에서 사용할 수 있도록)
-    window.dispatchEvent(
-      new CustomEvent('memberAffiliationChanged', {
-        detail: {
-          memberIds: selectedMembers,
-          newDepartment,
-          newGroup,
-          newTeam,
+    try {
+      const response = await memberService.updateMembersAffiliation({
+        memberIds: selectedMembers,
+        affiliation: {
+          department: newDepartment,
+          group: newGroup,
+          team: newTeam,
         },
-      })
-    );
+      });
 
-    // 알림 표시
-    setAlertMessage('소속이 변경되었습니다.');
-    setShowAlert(true);
-    setTimeout(() => {
-      setShowAlert(false);
-    }, 5000);
+      if (response.success) {
+        // 소속 변경 이벤트 발생
+        window.dispatchEvent(
+          new CustomEvent('memberAffiliationChanged', {
+            detail: {
+              memberIds: selectedMembers,
+              newDepartment,
+              newGroup,
+              newTeam,
+            },
+          })
+        );
 
-    handleCloseModal();
-    setSelectedMembers([]);
+        setAlertMessage(response.message || '소속이 변경되었습니다.');
+        setShowAlert(true);
+        setTimeout(() => {
+          setShowAlert(false);
+        }, 5000);
+
+        handleCloseModal();
+        setSelectedMembers([]);
+        fetchMembers(); // Refresh list
+      }
+    } catch (error) {
+      console.error('Failed to update affiliation:', error);
+      alert('소속 변경에 실패했습니다.');
+    }
   };
 
   return (
@@ -265,7 +273,7 @@ const MembersManagement: React.FC = () => {
             }}
           >
             <option value='전체'>소속국</option>
-            {departments.map(dept => (
+            {filterOptions.departments.map(dept => (
               <option key={dept} value={dept}>
                 {dept}
               </option>
@@ -280,7 +288,7 @@ const MembersManagement: React.FC = () => {
             }}
           >
             <option value='전체'>소속그룹</option>
-            {groups.map(group => (
+            {filterOptions.groups.map(group => (
               <option key={group} value={group}>
                 {group}
               </option>
@@ -295,7 +303,7 @@ const MembersManagement: React.FC = () => {
             }}
           >
             <option value='전체'>소속순</option>
-            {teams.map(team => (
+            {filterOptions.teams.map(team => (
               <option key={team} value={team}>
                 {team}
               </option>
@@ -317,56 +325,60 @@ const MembersManagement: React.FC = () => {
       </div>
 
       <div className='table-container'>
-        <table className='members-table'>
-          <thead>
-            <tr>
-              <th style={{ width: '50px', textAlign: 'center' }}>
-                <input
-                  type='checkbox'
-                  className='members-checkbox'
-                  checked={isAllSelected}
-                  onChange={handleSelectAll}
-                />
-              </th>
-              <th>이름</th>
-              <th>기수</th>
-              <th>소속 국</th>
-              <th>소속 그룹</th>
-              <th>소속 순</th>
-              <th>휴대폰번호</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentMembers.length === 0 ? (
+        {loading ? (
+          <div style={{ padding: '40px', textAlign: 'center' }}>로딩 중...</div>
+        ) : (
+          <table className='members-table'>
+            <thead>
               <tr>
-                <td colSpan={7} style={{ textAlign: 'center', padding: '40px' }}>
-                  <div className='members-empty-state'>검색 결과가 없습니다.</div>
-                </td>
+                <th style={{ width: '50px', textAlign: 'center' }}>
+                  <input
+                    type='checkbox'
+                    className='members-checkbox'
+                    checked={isAllSelected}
+                    onChange={handleSelectAll}
+                  />
+                </th>
+                <th>이름</th>
+                <th>기수</th>
+                <th>소속 국</th>
+                <th>소속 그룹</th>
+                <th>소속 순</th>
+                <th>휴대폰번호</th>
               </tr>
-            ) : (
-              currentMembers.map(member => (
-                <tr key={member.id}>
-                  <td style={{ textAlign: 'center' }}>
-                    <input
-                      type='checkbox'
-                      className='members-checkbox'
-                      checked={selectedMembers.includes(member.id)}
-                      onChange={() => handleSelectMember(member.id)}
-                    />
+            </thead>
+            <tbody>
+              {members.length === 0 ? (
+                <tr>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '40px' }}>
+                    <div className='members-empty-state'>검색 결과가 없습니다.</div>
                   </td>
-                  <td className='clickable-name' onClick={() => handleMemberClick(member)}>
-                    {member.이름}
-                  </td>
-                  <td>{member.생일연도 ? member.생일연도.slice(-2) : ''}</td>
-                  <td>{member.소속국}</td>
-                  <td>{member.소속그룹}</td>
-                  <td>{member.소속순}</td>
-                  <td>{member.휴대폰번호 ? member.휴대폰번호.slice(-4) : ''}</td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                members.map(member => (
+                  <tr key={member.id}>
+                    <td style={{ textAlign: 'center' }}>
+                      <input
+                        type='checkbox'
+                        className='members-checkbox'
+                        checked={selectedMembers.includes(member.id)}
+                        onChange={() => handleSelectMember(member.id)}
+                      />
+                    </td>
+                    <td className='clickable-name' onClick={() => handleMemberClick(member)}>
+                      {member.이름}
+                    </td>
+                    <td>{member.생일연도 ? member.생일연도.slice(-2) : ''}</td>
+                    <td>{member.소속국}</td>
+                    <td>{member.소속그룹}</td>
+                    <td>{member.소속순}</td>
+                    <td>{member.휴대폰번호 ? member.휴대폰번호.slice(-4) : ''}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
 
       <div className='pagination'>
@@ -387,7 +399,7 @@ const MembersManagement: React.FC = () => {
         <button
           className='page-button'
           onClick={() => setCurrentPage(currentPage + 1)}
-          disabled={currentPage === totalPages}
+          disabled={currentPage === totalPages || totalPages === 0}
         >
           다음
         </button>
@@ -412,7 +424,7 @@ const MembersManagement: React.FC = () => {
                   onChange={e => setNewDepartment(e.target.value)}
                 >
                   <option value=''>선택하세요</option>
-                  {departments.map(dept => (
+                  {filterOptions.departments.map(dept => (
                     <option key={dept} value={dept}>
                       {dept}
                     </option>
@@ -423,7 +435,7 @@ const MembersManagement: React.FC = () => {
                 <label>소속 그룹</label>
                 <select className='members-modal-select' value={newGroup} onChange={e => setNewGroup(e.target.value)}>
                   <option value=''>선택하세요</option>
-                  {groups.map(group => (
+                  {filterOptions.groups.map(group => (
                     <option key={group} value={group}>
                       {group}
                     </option>
@@ -434,7 +446,7 @@ const MembersManagement: React.FC = () => {
                 <label>소속 순</label>
                 <select className='members-modal-select' value={newTeam} onChange={e => setNewTeam(e.target.value)}>
                   <option value=''>선택하세요</option>
-                  {teams.map(team => (
+                  {filterOptions.teams.map(team => (
                     <option key={team} value={team}>
                       {team}
                     </option>
@@ -507,7 +519,7 @@ const MembersManagement: React.FC = () => {
                   onChange={e => setNewMemberInfo({ ...newMemberInfo, 소속국: e.target.value })}
                 >
                   <option value=''>선택하세요</option>
-                  {departments.map(dept => (
+                  {filterOptions.departments.map(dept => (
                     <option key={dept} value={dept}>
                       {dept}
                     </option>
@@ -524,7 +536,7 @@ const MembersManagement: React.FC = () => {
                   onChange={e => setNewMemberInfo({ ...newMemberInfo, 소속그룹: e.target.value })}
                 >
                   <option value=''>선택하세요</option>
-                  {groups.map(group => (
+                  {filterOptions.groups.map(group => (
                     <option key={group} value={group}>
                       {group}
                     </option>
@@ -541,7 +553,7 @@ const MembersManagement: React.FC = () => {
                   onChange={e => setNewMemberInfo({ ...newMemberInfo, 소속순: e.target.value })}
                 >
                   <option value=''>선택하세요</option>
-                  {teams.map(team => (
+                  {filterOptions.teams.map(team => (
                     <option key={team} value={team}>
                       {team}
                     </option>
