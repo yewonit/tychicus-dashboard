@@ -290,7 +290,7 @@ const MembersManagement: React.FC = () => {
             }}
           >
             <option value='전체'>소속국</option>
-            {filterOptions.departments.map(dept => (
+            {(filterOptions.departments || []).map(dept => (
               <option key={dept} value={dept}>
                 {dept}
               </option>
@@ -305,7 +305,7 @@ const MembersManagement: React.FC = () => {
             }}
           >
             <option value='전체'>소속그룹</option>
-            {filterOptions.groups.map(group => (
+            {(filterOptions.groups || []).map(group => (
               <option key={group} value={group}>
                 {group}
               </option>
@@ -320,7 +320,7 @@ const MembersManagement: React.FC = () => {
             }}
           >
             <option value='전체'>소속순</option>
-            {filterOptions.teams.map(team => (
+            {(filterOptions.teams || []).map(team => (
               <option key={team} value={team}>
                 {team}
               </option>
@@ -441,7 +441,7 @@ const MembersManagement: React.FC = () => {
                   onChange={e => setNewDepartment(e.target.value)}
                 >
                   <option value=''>선택하세요</option>
-                  {filterOptions.departments.map(dept => (
+                  {(filterOptions.departments || []).map(dept => (
                     <option key={dept} value={dept}>
                       {dept}
                     </option>
@@ -452,7 +452,7 @@ const MembersManagement: React.FC = () => {
                 <label>소속 그룹</label>
                 <select className='members-modal-select' value={newGroup} onChange={e => setNewGroup(e.target.value)}>
                   <option value=''>선택하세요</option>
-                  {filterOptions.groups.map(group => (
+                  {(filterOptions.groups || []).map(group => (
                     <option key={group} value={group}>
                       {group}
                     </option>
@@ -463,7 +463,7 @@ const MembersManagement: React.FC = () => {
                 <label>소속 순</label>
                 <select className='members-modal-select' value={newTeam} onChange={e => setNewTeam(e.target.value)}>
                   <option value=''>선택하세요</option>
-                  {filterOptions.teams.map(team => (
+                  {(filterOptions.teams || []).map(team => (
                     <option key={team} value={team}>
                       {team}
                     </option>
@@ -536,7 +536,7 @@ const MembersManagement: React.FC = () => {
                   onChange={e => setNewMemberInfo({ ...newMemberInfo, 소속국: e.target.value })}
                 >
                   <option value=''>선택하세요</option>
-                  {filterOptions.departments.map(dept => (
+                  {(filterOptions.departments || []).map(dept => (
                     <option key={dept} value={dept}>
                       {dept}
                     </option>
@@ -553,7 +553,7 @@ const MembersManagement: React.FC = () => {
                   onChange={e => setNewMemberInfo({ ...newMemberInfo, 소속그룹: e.target.value })}
                 >
                   <option value=''>선택하세요</option>
-                  {filterOptions.groups.map(group => (
+                  {(filterOptions.groups || []).map(group => (
                     <option key={group} value={group}>
                       {group}
                     </option>
@@ -570,7 +570,7 @@ const MembersManagement: React.FC = () => {
                   onChange={e => setNewMemberInfo({ ...newMemberInfo, 소속순: e.target.value })}
                 >
                   <option value=''>선택하세요</option>
-                  {filterOptions.teams.map(team => (
+                  {(filterOptions.teams || []).map(team => (
                     <option key={team} value={team}>
                       {team}
                     </option>
