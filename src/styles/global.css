@@ -29,26 +29,37 @@
   --caramel-essence: #e3af64;
 
   /* ========================
-     기존 변수를 DUGIGO 토큰으로 교체 (전체 적용)
+     모던 트렌디 색상 시스템 (#00B493 기반)
      ======================== */
-  /* 메인 색상 - DUGIGO 매핑 */
-  --primary: var(--royal-blue);
-  --primary-light: var(--dark-sky-blue);
-  --primary-dark: #1a2c6b;
-  --secondary: var(--dark-sky-blue);
-  --secondary-light: #b5c9e8;
-  --secondary-dark: #7a9bd1;
-  --accent: var(--caramel-essence);
+  /* 프라이머리 컬러 - 청록색 계열 */
+  --primary: #00B493;
+  --primary-light: #33E0C7;
+  --primary-lighter: #66EBD9;
+  --primary-dark: #008A73;
+  --primary-darker: #006B5A;
+  
+  /* 세컨더리 컬러 - 보라/핑크 계열 (트렌디한 조합) */
+  --secondary: #8B5CF6;
+  --secondary-light: #A78BFA;
+  --secondary-dark: #7C3AED;
+  --accent: #EC4899; /* 핑크 악센트 */
+  
+  /* 그라데이션 컬러 */
+  --gradient-primary-start: #00B493;
+  --gradient-primary-end: #00D9B8;
+  --gradient-secondary-start: #8B5CF6;
+  --gradient-secondary-end: #EC4899;
 
-  /* 시스템 색상 */
-  --success: #66bb6a;
-  --success-light: #10b981;
+  /* 시스템 색상 - 모던 트렌디 */
+  --success: #10b981; /* 에메랄드 그린 */
+  --success-light: #34d399;
   --success-bright: #22c55e;
-  --warning: #ffa726;
-  --warning-light: #f59e0b;
-  --error: #ef5350;
-  --error-light: #ef4444;
-  --info: #85c1e9;
+  --warning: #f59e0b; /* 앰버 */
+  --warning-light: #fbbf24;
+  --error: #ef4444; /* 레드 */
+  --error-light: #f87171;
+  --info: #3b82f6; /* 블루 */
+  --info-light: #60a5fa;
 
   /* DUGIGO 상태 컬러 */
   --state-success: #28a745;
@@ -72,16 +83,19 @@
   --gray-500: #b0b0b0;
   --gray-600: #909090;
 
-  /* DUGIGO 그라데이션 시스템 */
-  --gradient-primary-dugigo: linear-gradient(135deg, var(--royal-blue) 0%, var(--dark-sky-blue) 100%);
-  --gradient-background-dugigo: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  --gradient-text-dugigo: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --gradient-indigo: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-
-  /* 기존 그라데이션 (호환성) */
-  --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-  --gradient-secondary: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
-  --gradient-primary-hover: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary-dark) 100%);
+  /* 모던 그라데이션 시스템 */
+  --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--gradient-primary-end) 100%);
+  --gradient-primary-vibrant: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  --gradient-secondary: linear-gradient(135deg, var(--secondary) 0%, var(--accent) 100%);
+  --gradient-primary-hover: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+  --gradient-background: linear-gradient(135deg, #f0fdfa 0%, #e0f2fe 100%);
+  --gradient-text: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  
+  /* DUGIGO 호환성 (기존 코드 유지) */
+  --gradient-primary-dugigo: var(--gradient-primary);
+  --gradient-background-dugigo: var(--gradient-background);
+  --gradient-text-dugigo: var(--gradient-text);
+  --gradient-indigo: var(--gradient-secondary);
 
   /* 텍스트 색상 - DUGIGO 매핑 */
   --text-primary: var(--charleston-green);
@@ -95,11 +109,12 @@
   --bg-card: var(--bg-card-dugigo);
   --bg-elevated: var(--bg-card-dugigo);
 
-  /* 테두리 색상 - DUGIGO 매핑 */
+  /* 테두리 색상 - 모던 트렌디 */
   --border-light: var(--border-subtle);
   --border-medium: var(--border-neutral);
   --border-dark: rgba(0, 0, 0, 0.25);
   --border-focus: var(--primary);
+  --border-focus-glow: rgba(0, 180, 147, 0.3); /* 프라이머리 기반 글로우 */
   --border-card: var(--border-subtle);
 
   /* 그림자 - DUGIGO 매핑 */
@@ -755,7 +770,7 @@ html {
 
 .common-textfield .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.1);
+  box-shadow: 0 0 0 3px rgba(0, 180, 147, 0.1);
 }
 
 /* 공통 버튼 스타일 */
@@ -772,7 +787,7 @@ html {
 .common-button:hover {
   background: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary-dark) 100%);
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(78, 205, 196, 0.35);
+  box-shadow: 0 6px 16px rgba(0, 180, 147, 0.35);
 }
 
 /* 헤더 박스 */
@@ -1175,7 +1190,7 @@ html {
   align-items: center;
   justify-content: center;
   margin: 0 auto var(--spacing-md);
-  box-shadow: 0 4px 16px rgba(78, 205, 196, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 180, 147, 0.3);
 }
 
 .service-icon-container.primary {
@@ -1216,14 +1231,14 @@ html {
   border-radius: var(--radius-md);
   border: none;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(78, 205, 196, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 180, 147, 0.3);
   transition: all 0.3s ease;
 }
 
 .service-select-button:hover {
   background: var(--gradient-secondary);
   transform: translateY(-1px);
-  box-shadow: 0 6px 24px rgba(78, 205, 196, 0.4);
+  box-shadow: 0 6px 24px rgba(0, 180, 147, 0.4);
 }
 
 /* 모바일 반응형 */
@@ -1699,14 +1714,14 @@ html {
   color: white;
   border: none;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(78, 205, 196, 0.4);
+  box-shadow: 0 4px 16px rgba(0, 180, 147, 0.4);
   transition: all 0.3s ease;
 }
 
 .meeting-add-button:hover {
   background: var(--primary-dark);
   transform: scale(1.1);
-  box-shadow: 0 6px 24px rgba(78, 205, 196, 0.5);
+  box-shadow: 0 6px 24px rgba(0, 180, 147, 0.5);
 }
 
 /* 모바일 반응형 */
@@ -1836,7 +1851,7 @@ html {
 
 .form-field .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.1);
+  box-shadow: 0 0 0 3px rgba(0, 180, 147, 0.1);
 }
 
 .form-field .MuiInputLabel-root {
@@ -1872,7 +1887,7 @@ html {
 
 /* 날짜/시간 섹션 */
 .date-time-section {
-  background-color: rgba(78, 205, 196, 0.05);
+  background-color: rgba(0, 180, 147, 0.05);
   border-radius: var(--radius-md);
   padding: var(--spacing-md);
   border-left: 3px solid var(--primary);
@@ -1914,14 +1929,14 @@ html {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-bold);
   margin-top: var(--spacing-lg);
-  box-shadow: 0 4px 16px rgba(78, 205, 196, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 180, 147, 0.3);
   transition: all 0.3s ease;
 }
 
 .submit-button:hover {
   background: var(--gradient-secondary);
   transform: translateY(-1px);
-  box-shadow: 0 6px 24px rgba(78, 205, 196, 0.4);
+  box-shadow: 0 6px 24px rgba(0, 180, 147, 0.4);
 }
 
 .submit-button:disabled {
@@ -2401,7 +2416,7 @@ html {
 .filter-select:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.1);
+  box-shadow: 0 0 0 3px rgba(0, 180, 147, 0.1);
 }
 
 .quick-stats-grid {
@@ -3237,7 +3252,7 @@ html {
 .visitation-search-input:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.1);
+  box-shadow: 0 0 0 3px rgba(0, 180, 147, 0.1);
 }
 
 .visitation-filter-select {
@@ -3598,7 +3613,7 @@ html {
 .visitation-textarea:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.1);
+  box-shadow: 0 0 0 3px rgba(0, 180, 147, 0.1);
 }
 
 .visitation-textarea {
@@ -4190,7 +4205,7 @@ html {
 .filter-group input:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(78, 205, 196, 0.1);
+  box-shadow: 0 0 0 2px rgba(0, 180, 147, 0.1);
 }
 
 .search-button {
@@ -4207,7 +4222,7 @@ html {
 
 .search-button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(78, 205, 196, 0.25);
+  box-shadow: 0 4px 12px rgba(0, 180, 147, 0.25);
 }
 
 .search-button:active {
@@ -4443,7 +4458,7 @@ html {
 .search-box input:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.1);
+  box-shadow: 0 0 0 3px rgba(0, 180, 147, 0.1);
 }
 
 .search-icon {
@@ -4469,7 +4484,7 @@ html {
 
 .add-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(78, 205, 196, 0.25);
+  box-shadow: 0 4px 12px rgba(0, 180, 147, 0.3);
 }
 
 .table-container {
@@ -4576,7 +4591,7 @@ html {
 .members-filter-select:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.1);
+  box-shadow: 0 0 0 3px rgba(0, 180, 147, 0.1);
 }
 
 .members-action-buttons {
@@ -4586,7 +4601,7 @@ html {
 
 .change-affiliation-button {
   padding: 12px 24px;
-  background: linear-gradient(135deg, #28a745, #20c997);
+  background: var(--gradient-primary);
   color: white;
   border: none;
   border-radius: 8px;
@@ -4598,7 +4613,8 @@ html {
 
 .change-affiliation-button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 180, 147, 0.3);
+  background: var(--gradient-primary-hover);
 }
 
 .change-affiliation-button:disabled {
@@ -4745,7 +4761,7 @@ html {
 .members-modal-input:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.1);
+  box-shadow: 0 0 0 3px rgba(0, 180, 147, 0.1);
 }
 
 .members-modal-buttons {
@@ -4768,7 +4784,7 @@ html {
 }
 
 .members-modal-button.primary {
-  background: linear-gradient(135deg, #28a745, #20c997);
+  background: var(--gradient-primary);
   color: white;
 }
 
@@ -4791,7 +4807,7 @@ html {
   position: fixed;
   top: 20px;
   right: 20px;
-  background: linear-gradient(135deg, #28a745, #20c997);
+  background: var(--gradient-primary);
   color: white;
   padding: 16px 24px;
   border-radius: 12px;
@@ -4925,7 +4941,7 @@ html {
 
 .search-input:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(78, 205, 196, 0.1);
+  box-shadow: 0 0 0 2px rgba(0, 180, 147, 0.1);
 }
 
 .period-select {
@@ -5119,7 +5135,7 @@ html {
 
 .prayer-search-input:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(78, 205, 196, 0.1);
+  box-shadow: 0 0 0 2px rgba(0, 180, 147, 0.1);
 }
 
 .prayer-period-select {
@@ -5532,7 +5548,7 @@ html {
 .prayer-textarea:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(78, 205, 196, 0.1);
+  box-shadow: 0 0 0 2px rgba(0, 180, 147, 0.1);
 }
 
 .prayer-textarea::placeholder {
@@ -6092,7 +6108,7 @@ html {
 .visitation-detail-editable-textarea:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.1);
+  box-shadow: 0 0 0 3px rgba(0, 180, 147, 0.1);
 }
 
 .visitation-detail-editable-input {
@@ -6109,7 +6125,7 @@ html {
 .visitation-detail-editable-input:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.1);
+  box-shadow: 0 0 0 3px rgba(0, 180, 147, 0.1);
 }
 
 .visitation-detail-editable-select {
@@ -6569,7 +6585,7 @@ html {
 }
 
 .member-detail-timeline-type.visitation {
-  background: rgba(78, 205, 196, 0.2);
+  background: rgba(0, 180, 147, 0.2);
   color: var(--primary-dark);
 }
 
@@ -6746,7 +6762,7 @@ html {
 
 .common-textfield .MuiOutlinedInput-root.Mui-focused {
   background: var(--bg-elevated);
-  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.1);
+  box-shadow: 0 0 0 3px rgba(0, 180, 147, 0.1);
 }
 
 .common-textfield .MuiInputLabel-root {
@@ -6767,7 +6783,7 @@ html {
   font-weight: var(--font-weight-medium) !important;
   font-size: var(--font-size-base) !important;
   padding: var(--spacing-md) var(--spacing-xl) !important;
-  box-shadow: 0 8px 24px rgba(78, 205, 196, 0.3) !important;
+  box-shadow: 0 8px 24px rgba(0, 180, 147, 0.3) !important;
   transition: all 0.3s ease !important;
   text-transform: none !important;
 }
@@ -6775,7 +6791,7 @@ html {
 .common-button:hover {
   background: var(--gradient-primary-hover) !important;
   transform: translateY(-2px) !important;
-  box-shadow: 0 12px 32px rgba(78, 205, 196, 0.4) !important;
+  box-shadow: 0 12px 32px rgba(0, 180, 147, 0.4) !important;
 }
 
 .common-button:disabled {
