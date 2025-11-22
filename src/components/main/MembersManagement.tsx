@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Member } from '../../types/api';
 import { memberService } from '../../services/memberService';
-import { LoadingSpinner } from '../ui'; // Assuming LoadingSpinner exists in ui/index.ts, if not I'll use simple text
+import { LoadingSpinner } from '../ui'; // Assuming LoadingSpinner exists in ui/index.ts
 
 const MembersManagement: React.FC = () => {
   const navigate = useNavigate();
@@ -43,6 +43,16 @@ const MembersManagement: React.FC = () => {
     소속순: '',
   });
 
+  // Fetch filter options
+  const fetchFilterOptions = async () => {
+    try {
+      const options = await memberService.getFilterOptions();
+      setFilterOptions(options);
+    } catch (error) {
+      console.error('Failed to fetch filter options:', error);
+    }
+  };
+
   // Fetch members
   const fetchMembers = async () => {
     setLoading(true);
@@ -59,9 +69,8 @@ const MembersManagement: React.FC = () => {
       setMembers(response.members);
       setTotalPages(response.pagination.totalPages);
       
-      if (response.filterOptions) {
-        setFilterOptions(response.filterOptions);
-      }
+      // API에서 필터 옵션을 제공하지 않으므로 별도 호출 필요
+      // 하지만 초기 로딩 시에만 호출하면 됨
     } catch (error) {
       console.error('Failed to fetch members:', error);
       alert('구성원 목록을 불러오는데 실패했습니다.');
@@ -70,6 +79,12 @@ const MembersManagement: React.FC = () => {
     }
   };
 
+  // Initial Load: Filter Options
+  useEffect(() => {
+    fetchFilterOptions();
+  }, []);
+
+  // Search & Filter: Members List
   useEffect(() => {
     fetchMembers();
   }, [searchTerm, filterDepartment, filterGroup, filterTeam, currentPage]);
@@ -97,6 +112,8 @@ const MembersManagement: React.FC = () => {
         소속그룹: '',
         소속순: '',
       });
+      fetchFilterOptions(); // 옵션도 초기화 시 재조회
+      fetchMembers();
     };
 
     window.addEventListener('resetMembersPage', handleResetPage);
