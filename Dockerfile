@@ -7,8 +7,7 @@ FROM node:18-alpine AS builder
 WORKDIR /app
 
 # 빌드 인자로 환경 설정 받기
-ARG NODE_ENV=production
-ENV NODE_ENV=${NODE_ENV}
+ARG BUILD_MODE=production
 
 # package.json과 package-lock.json 복사
 COPY package*.json ./
@@ -23,10 +22,9 @@ RUN npm ci --ignore-scripts
 COPY . .
 
 # React 앱 빌드
-# NODE_ENV에 따라 다른 설정으로 빌드됨
-# 린트 에러 무시하고 빌드
-ENV DISABLE_ESLINT_PLUGIN=true
-RUN npm run build
+# --mode 인자를 통해 환경별 빌드
+# 예: npm run build -- --mode development
+RUN npm run build -- --mode ${BUILD_MODE}
 
 # ================================
 # Stage 2: Nginx Server

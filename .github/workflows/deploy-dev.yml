@@ -21,7 +21,7 @@ jobs:
 
       - name: Build Docker Image (development mode)
         run: |
-          docker buildx build --build-arg NODE_ENV=development -t ${{ secrets.DOCKER_HUB_USERNAME }}/tychicus-dashboard:dev --platform linux/amd64 .
+          docker buildx build --build-arg BUILD_MODE=development -t ${{ secrets.DOCKER_HUB_USERNAME }}/tychicus-dashboard:dev --platform linux/amd64 .
 
       - name: Push Docker Image to Docker Hub
         run: |
