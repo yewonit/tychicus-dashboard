@@ -19,6 +19,12 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
     <title>Tychicus React</title>
+    <!-- 런타임 환경 변수 주입 -->
+    <script>
+      // Docker 컨테이너 시작 시 환경 변수로 주입됨
+      // ENV_PLACEHOLDER는 docker-entrypoint.sh에서 교체됨
+      window.__ENV__ = { NODE_ENV: 'ENV_PLACEHOLDER_NODE_ENV', REACT_APP_ENV: 'ENV_PLACEHOLDER_REACT_APP_ENV' };
+    </script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
