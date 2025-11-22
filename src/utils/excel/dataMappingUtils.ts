@@ -25,8 +25,18 @@ export function mapExcelRowToApiData(excelRow: Record<string, any>): Record<stri
 
   Object.entries(excelRow).forEach(([excelColumn, value]) => {
     const apiField = excelColumnToApiField(excelColumn);
+
     if (apiField) {
-      apiData[apiField] = value;
+      // 특정 필드는 파싱 적용
+      if (excelColumn === '기수') {
+        // 기수 컬럼 파싱 적용
+        apiData[apiField] = parseBirthDate(value);
+      } else if (excelColumn === '번호') {
+        // 번호 컬럼 파싱 적용 (하이픈 제거)
+        apiData[apiField] = parsePhoneNumber(value);
+      } else {
+        apiData[apiField] = value;
+      }
     } else {
       // 매핑되지 않은 컬럼은 그대로 전달
       apiData[excelColumn] = value;
@@ -44,6 +54,61 @@ export function mapExcelRowToApiData(excelRow: Record<string, any>): Record<stri
 function extractYearSuffix(birthDate: string): string {
   const year = birthDate.split('-')[0];
   return year.slice(-2);
+}
+
+/**
+ * 기수 컬럼 값 파싱
+ * 규칙:
+ * 1. 모든 값은 문자열 값
+ * 2. 1996 과 같은 yyyy 포맷일 경우 뒤의 두자리만 남기기 (e.g. 96)
+ * 3. 2 와 같이 숫자 하나만 있을 경우 앞에 0 붙이기 (e.g. 02)
+ * 4. 02' 나 02" 나 - 와 같이 특수문자가 있을 경우 특수문자는 전부 삭제하기
+ * @param value 기수 값
+ * @returns 파싱된 기수 값 (문자열)
+ */
+function parseBirthDate(value: any): string {
+  if (value === null || value === undefined || value === '') {
+    return '';
+  }
+
+  // 1. 문자열로 변환
+  let strValue = String(value).trim();
+
+  // 4. 특수문자 제거 (숫자만 남기기)
+  strValue = strValue.replace(/[^0-9]/g, '');
+
+  // 빈 문자열이면 그대로 반환
+  if (!strValue) {
+    return '';
+  }
+
+  // 2. 4자리 숫자(년도)인 경우 뒤 두 자리만 남기기
+  if (strValue.length === 4) {
+    strValue = strValue.slice(-2);
+  }
+
+  // 3. 1자리 숫자인 경우 앞에 0 붙이기
+  if (strValue.length === 1) {
+    strValue = '0' + strValue;
+  }
+
+  return strValue;
+}
+
+/**
+ * 번호 컬럼 값 파싱
+ * 010-0000-0000 처럼 되어 있으면 모든 -와 띄어쓰기를 제거
+ * @param value 번호 값
+ * @returns 파싱된 번호 값
+ */
+function parsePhoneNumber(value: any): string {
+  if (value === null || value === undefined || value === '') {
+    return '';
+  }
+
+  // 문자열로 변환하고 하이픈과 띄어쓰기 제거
+  const strValue = String(value).trim();
+  return strValue.replace(/[-\s]/g, '');
 }
 
 /**
