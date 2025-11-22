@@ -1,6 +1,51 @@
 // 구성원 관리 관련 API 타입 정의
 
-// 기본 구성원 정보
+// 백엔드 API 응답 타입 (DTO)
+export interface UserDto {
+  id: number;
+  name: string;
+  birthYear: string;
+  phoneNumber: string;
+  affiliation: {
+    department: string;
+    group: string;
+    team: string;
+  } | null;
+  role: string | null;
+}
+
+export interface UserListResponse {
+  data: {
+    members: UserDto[];
+    pagination: {
+      currentPage: number;
+      totalPages: number;
+      totalCount: number;
+      limit: number;
+    };
+  };
+}
+
+export interface FilterOptionsResponse {
+  data: {
+    departments: string[];
+    groups: string[];
+    teams: string[];
+  };
+}
+
+export interface OrganizationDto {
+  id: number;
+  name: string; // 예: "1국_김민수그룹_이용걸순"
+  depth: number;
+  parentId: number | null;
+}
+
+export interface OrganizationsResponse {
+  data: OrganizationDto[];
+}
+
+// 프론트엔드 내부 사용 타입 (Member Interface)
 export interface Member {
   id: number;
   이름: string;
@@ -19,7 +64,7 @@ export interface Member {
   출석구분?: string;
 }
 
-// 1. 구성원 목록 조회 요청/응답
+// 1. 구성원 목록 조회 요청
 export interface GetMembersRequest {
   search?: string;
   department?: string;
@@ -29,6 +74,7 @@ export interface GetMembersRequest {
   limit?: number;
 }
 
+// 응답은 Member[]와 페이지네이션 정보를 포함한 객체로 변환됨
 export interface GetMembersResponse {
   members: Member[];
   pagination: {
@@ -37,6 +83,7 @@ export interface GetMembersResponse {
     totalCount: number;
     limit: number;
   };
+  // 필터 옵션은 별도 API로 조회하므로 여기서는 선택적
   filterOptions?: {
     departments: string[];
     groups: string[];
@@ -44,7 +91,7 @@ export interface GetMembersResponse {
   };
 }
 
-// 2. 구성원 소속 일괄 변경 요청/응답
+// 2. 구성원 소속 일괄 변경
 export interface UpdateMembersAffiliationRequest {
   memberIds: number[];
   affiliation: {
@@ -61,8 +108,7 @@ export interface UpdateMembersAffiliationResponse {
   message?: string;
 }
 
-// 3. 구성원 상세 정보 조회 응답
-// (기본 Member 인터페이스를 확장하거나 포함)
+// 3. 구성원 상세 정보 조회
 export interface GetMemberDetailResponse extends Member {
   히스토리?: {
     departmentHistory?: Array<{
@@ -93,7 +139,7 @@ export interface GetMemberDetailResponse extends Member {
   }>;
 }
 
-// 4. 새 구성원 추가 요청/응답
+// 4. 새 구성원 추가
 export interface CreateMemberRequest {
   이름: string;
   생일연도?: string;
@@ -109,5 +155,3 @@ export interface CreateMemberResponse {
   member: Member;
   message?: string;
 }
-
-
