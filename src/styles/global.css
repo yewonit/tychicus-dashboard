@@ -4693,8 +4693,27 @@ html {
   margin-bottom: 25px;
 }
 
+.members-modal-form-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.members-modal-form-column {
+  display: flex;
+  flex-direction: column;
+}
+
 .members-form-group {
   margin-bottom: 20px;
+}
+
+/* 모바일 반응형: 2단을 1단으로 변경 */
+@media (max-width: 768px) {
+  .members-modal-form-columns {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
 }
 
 .members-form-group label {

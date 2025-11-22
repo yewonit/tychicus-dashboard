@@ -514,133 +514,141 @@ const MembersManagement: React.FC = () => {
               </button>
             </div>
             <div className='members-modal-form'>
-              <div className='members-form-group'>
-                <label>
-                  이름 <span style={{ color: 'var(--error)' }}>*</span>
-                </label>
-                <input
-                  type='text'
-                  className='members-modal-input'
-                  value={newMemberInfo.이름}
-                  onChange={e => setNewMemberInfo({ ...newMemberInfo, 이름: e.target.value })}
-                  placeholder='이름을 입력하세요'
-                />
-              </div>
-              <div className='members-form-group'>
-                <label>
-                  동명이인 구분자 <span style={{ color: 'var(--error)' }}>*</span>
-                </label>
-                <input
-                  type='text'
-                  className='members-modal-input'
-                  value={newMemberInfo.name_suffix}
-                  onChange={e => setNewMemberInfo({ ...newMemberInfo, name_suffix: e.target.value })}
-                  placeholder='예: A, B, C'
-                  maxLength={10}
-                />
-                <small style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>
-                  동일한 이름이 있을 경우 구분하기 위한 문자 (예: 홍길동A의 "A")
-                </small>
-              </div>
-              <div className='members-form-group'>
-                <label>생년월일</label>
-                <input
-                  type='date'
-                  className='members-modal-input'
-                  value={newMemberInfo.생일연도}
-                  onChange={e => setNewMemberInfo({ ...newMemberInfo, 생일연도: e.target.value })}
-                  max={new Date().toISOString().split('T')[0]} // 오늘 날짜까지만 선택 가능
-                />
-              </div>
-              <div className='members-form-group'>
-                <label>
-                  성별
-                </label>
-                <select
-                  className='members-modal-select'
-                  value={newMemberInfo.gender_type}
-                  onChange={e => setNewMemberInfo({ ...newMemberInfo, gender_type: e.target.value as 'M' | 'F' })}
-                >
-                  <option value='M'>남성</option>
-                  <option value='F'>여성</option>
-                </select>
-              </div>
-              <div className='members-form-group'>
-                <label>
-                  휴대폰 번호 <span style={{ color: 'var(--error)' }}>*</span>
-                </label>
-                <input
-                  type='text'
-                  className='members-modal-input'
-                  value={newMemberInfo.휴대폰번호}
-                  onChange={e => setNewMemberInfo({ ...newMemberInfo, 휴대폰번호: e.target.value })}
-                  placeholder='예: 010-1234-5678'
-                />
-              </div>
-              <div className='members-form-group'>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                  <input
-                    type='checkbox'
-                    checked={newMemberInfo.is_new_member}
-                    onChange={e => setNewMemberInfo({ ...newMemberInfo, is_new_member: e.target.checked })}
-                    style={{ width: '18px', height: '18px', cursor: 'pointer' }}
-                  />
-                  <span>새가족 여부</span>
-                </label>
-                <small style={{ color: 'var(--text-secondary)', fontSize: '12px', marginLeft: '26px' }}>
-                  체크 시 새가족으로 등록됩니다
-                </small>
-              </div>
-              <div className='members-form-group'>
-                <label>
-                  소속 국 <span style={{ color: 'var(--error)' }}>*</span>
-                </label>
-                <select
-                  className='members-modal-select'
-                  value={newMemberInfo.소속국}
-                  onChange={e => setNewMemberInfo({ ...newMemberInfo, 소속국: e.target.value })}
-                >
-                  <option value=''>선택하세요</option>
-                  {(filterOptions.departments || []).map(dept => (
-                    <option key={dept} value={dept}>
-                      {dept}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className='members-form-group'>
-                <label>
-                  소속 그룹 <span style={{ color: 'var(--error)' }}>*</span>
-                </label>
-                <select
-                  className='members-modal-select'
-                  value={newMemberInfo.소속그룹}
-                  onChange={e => setNewMemberInfo({ ...newMemberInfo, 소속그룹: e.target.value })}
-                >
-                  <option value=''>선택하세요</option>
-                  {(filterOptions.groups || []).map(group => (
-                    <option key={group} value={group}>
-                      {group}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className='members-form-group'>
-                <label>
-                  소속 순 <span style={{ color: 'var(--error)' }}>*</span>
-                </label>
-                <select
-                  className='members-modal-select'
-                  value={newMemberInfo.소속순}
-                  onChange={e => setNewMemberInfo({ ...newMemberInfo, 소속순: e.target.value })}
-                >
-                  <option value=''>선택하세요</option>
-                  {(filterOptions.teams || []).map(team => (
-                    <option key={team} value={team}>
-                      {team}
-                    </option>
-                  ))}
-                </select>
+              {/* 2단 레이아웃 */}
+              <div className='members-modal-form-columns'>
+                {/* 왼쪽 열: 기본 정보 */}
+                <div className='members-modal-form-column'>
+                  <div className='members-form-group'>
+                    <label>
+                      이름 <span style={{ color: 'var(--error)' }}>*</span>
+                    </label>
+                    <input
+                      type='text'
+                      className='members-modal-input'
+                      value={newMemberInfo.이름}
+                      onChange={e => setNewMemberInfo({ ...newMemberInfo, 이름: e.target.value })}
+                      placeholder='이름을 입력하세요'
+                    />
+                  </div>
+                  <div className='members-form-group'>
+                    <label>
+                      동명이인 구분자 <span style={{ color: 'var(--error)' }}>*</span>
+                    </label>
+                    <input
+                      type='text'
+                      className='members-modal-input'
+                      value={newMemberInfo.name_suffix}
+                      onChange={e => setNewMemberInfo({ ...newMemberInfo, name_suffix: e.target.value })}
+                      placeholder='예: A, B, C'
+                      maxLength={10}
+                    />
+                    <small style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>
+                      동일한 이름이 있을 경우 구분하기 위한 문자 (예: 홍길동A의 "A")
+                    </small>
+                  </div>
+                  <div className='members-form-group'>
+                    <label>생년월일</label>
+                    <input
+                      type='date'
+                      className='members-modal-input'
+                      value={newMemberInfo.생일연도}
+                      onChange={e => setNewMemberInfo({ ...newMemberInfo, 생일연도: e.target.value })}
+                      max={new Date().toISOString().split('T')[0]}
+                    />
+                  </div>
+                  <div className='members-form-group'>
+                    <label>성별</label>
+                    <select
+                      className='members-modal-select'
+                      value={newMemberInfo.gender_type}
+                      onChange={e => setNewMemberInfo({ ...newMemberInfo, gender_type: e.target.value as 'M' | 'F' })}
+                    >
+                      <option value='M'>남성</option>
+                      <option value='F'>여성</option>
+                    </select>
+                  </div>
+                  <div className='members-form-group'>
+                    <label>
+                      휴대폰 번호 <span style={{ color: 'var(--error)' }}>*</span>
+                    </label>
+                    <input
+                      type='text'
+                      className='members-modal-input'
+                      value={newMemberInfo.휴대폰번호}
+                      onChange={e => setNewMemberInfo({ ...newMemberInfo, 휴대폰번호: e.target.value })}
+                      placeholder='예: 010-1234-5678'
+                    />
+                  </div>
+                  <div className='members-form-group'>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                      <input
+                        type='checkbox'
+                        checked={newMemberInfo.is_new_member}
+                        onChange={e => setNewMemberInfo({ ...newMemberInfo, is_new_member: e.target.checked })}
+                        style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                      />
+                      <span>새가족 여부</span>
+                    </label>
+                    <small style={{ color: 'var(--text-secondary)', fontSize: '12px', marginLeft: '26px' }}>
+                      체크 시 새가족으로 등록됩니다
+                    </small>
+                  </div>
+                </div>
+
+                {/* 오른쪽 열: 소속 정보 */}
+                <div className='members-modal-form-column'>
+                  <div className='members-form-group'>
+                    <label>
+                      소속 국 <span style={{ color: 'var(--error)' }}>*</span>
+                    </label>
+                    <select
+                      className='members-modal-select'
+                      value={newMemberInfo.소속국}
+                      onChange={e => setNewMemberInfo({ ...newMemberInfo, 소속국: e.target.value })}
+                    >
+                      <option value=''>선택하세요</option>
+                      {(filterOptions.departments || []).map(dept => (
+                        <option key={dept} value={dept}>
+                          {dept}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className='members-form-group'>
+                    <label>
+                      소속 그룹 <span style={{ color: 'var(--error)' }}>*</span>
+                    </label>
+                    <select
+                      className='members-modal-select'
+                      value={newMemberInfo.소속그룹}
+                      onChange={e => setNewMemberInfo({ ...newMemberInfo, 소속그룹: e.target.value })}
+                    >
+                      <option value=''>선택하세요</option>
+                      {(filterOptions.groups || []).map(group => (
+                        <option key={group} value={group}>
+                          {group}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className='members-form-group'>
+                    <label>
+                      소속 순 <span style={{ color: 'var(--error)' }}>*</span>
+                    </label>
+                    <select
+                      className='members-modal-select'
+                      value={newMemberInfo.소속순}
+                      onChange={e => setNewMemberInfo({ ...newMemberInfo, 소속순: e.target.value })}
+                    >
+                      <option value=''>선택하세요</option>
+                      {(filterOptions.teams || []).map(team => (
+                        <option key={team} value={team}>
+                          {team}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
               </div>
             </div>
             <div className='members-modal-buttons'>
