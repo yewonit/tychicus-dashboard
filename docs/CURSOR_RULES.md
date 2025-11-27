@@ -65,8 +65,7 @@ const theme = createTheme({
     },
   },
   typography: {
-    fontFamily:
-      '"Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    fontFamily: '"Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     h1: { fontSize: '2.5rem', fontWeight: 700 },
     h2: { fontSize: '2rem', fontWeight: 700 },
     h3: { fontSize: '1.75rem', fontWeight: 600 },
@@ -200,13 +199,10 @@ Redux Toolkit + React Query 조합:
 // Redux Toolkit Slice
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
-export const fetchAttendance = createAsyncThunk(
-  'attendance/fetch',
-  async (params: AttendanceParams) => {
-    const response = await attendanceAPI.getList(params);
-    return response.data;
-  }
-);
+export const fetchAttendance = createAsyncThunk('attendance/fetch', async (params: AttendanceParams) => {
+  const response = await attendanceAPI.getList(params);
+  return response.data;
+});
 
 const attendanceSlice = createSlice({
   name: 'attendance',
@@ -381,8 +377,8 @@ const env = {
     AUTH_BASE_URL: 'https://attendance-dev.icoramdeo.com/auth',
   },
   local: {
-    API_BASE_URL: 'http://localhost:3000/api',
-    AUTH_BASE_URL: 'http://localhost:3000/auth',
+    API_BASE_URL: 'http://localhost:3001/api',
+    AUTH_BASE_URL: 'http://localhost:3001/auth',
   },
 };
 ```

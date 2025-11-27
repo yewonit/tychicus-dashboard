@@ -120,3 +120,6 @@ export interface Member {
 -   **직분 매핑**: 프론트엔드 "청년" -> 백엔드 "순원" 매핑 로직 추가
 -   **인증**: API 호출 시 토큰(Bearer) 자동 포함 여부 확인 (`axiosClient` 설정 확인)
 
+
+
+
