@@ -57,7 +57,36 @@ export const memberService = {
     // 백엔드 조직명 규칙에 따라 매칭 로직 구현
     // 예: "1국_김민수그룹_이용걸순"
     const orgName = `${department}_${group}_${team}`;
+
+    // 디버깅: 찾으려는 조직명과 실제 조직 목록 로깅
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    if (isDevelopment) {
+      console.log('🔍 조직 ID 찾기:', {
+        찾는조직명: orgName,
+        부서: department,
+        그룹: group,
+        순: team,
+        전체조직수: orgs.length,
+        일치하는조직: orgs.find(o => o.name === orgName),
+        유사한조직들: orgs
+          .filter(o => o.name.includes(department) || o.name.includes(group) || o.name.includes(team))
+          .slice(0, 5)
+          .map(o => o.name),
+      });
+    }
+
     const org = orgs.find(o => o.name === orgName);
+
+    if (!org && isDevelopment) {
+      console.warn('⚠️ 조직을 찾을 수 없습니다:', {
+        찾는조직명: orgName,
+        가능한조직들: orgs
+          .filter(o => o.name.startsWith(department + '_'))
+          .slice(0, 10)
+          .map(o => ({ name: o.name, id: o.id })),
+      });
+    }
+
     return org ? org.id : null;
   },
 
@@ -325,7 +354,20 @@ export const memberService = {
     const orgId = await memberService.findOrganizationId(request.소속국, request.소속그룹, request.소속순);
 
     if (!orgId) {
-      throw new Error('유효하지 않은 조직 정보입니다.');
+      // 더 상세한 에러 메시지 제공
+      const orgs = await memberService.fetchOrganizations();
+      const attemptedOrgName = `${request.소속국}_${request.소속그룹}_${request.소속순}`;
+      const similarOrgs = orgs
+        .filter(o => o.name.includes(request.소속국) || o.name.includes(request.소속그룹))
+        .slice(0, 5)
+        .map(o => o.name);
+
+      // alert()에서 개행이 제대로 표시되지 않으므로 단일 라인으로 변경
+      const errorMessage =
+        `유효하지 않은 조직 정보입니다. 선택한 조직: ${attemptedOrgName}. ` +
+        `유사한 조직: ${similarOrgs.join(', ') || '없음'}`;
+
+      throw new Error(errorMessage);
     }
 
     // 현재 로그인한 사용자 ID 가져오기

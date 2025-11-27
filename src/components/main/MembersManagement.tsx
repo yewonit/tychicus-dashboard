@@ -4,6 +4,19 @@ import { useInfiniteScroll } from '../../hooks';
 import { memberService } from '../../services/memberService';
 import { Member, OrganizationDto } from '../../types/api';
 
+// 타입 정의
+interface HierarchicalFilterOptions {
+  departments: string[];
+  groups: string[];
+  teams: string[];
+}
+
+interface ParsedOrganizationName {
+  department?: string;
+  group?: string;
+  team?: string;
+}
+
 // 상수 정의
 const INITIAL_MEMBER_INFO = {
   이름: '',
@@ -78,43 +91,74 @@ const MembersManagement: React.FC = () => {
     }
   };
 
-  // 계층적 필터 옵션 계산 (useMemo로 최적화)
-  const filteredOptions = useMemo(() => {
-    let filteredGroups = filterOptions.groups || [];
-    let filteredTeams = filterOptions.teams || [];
+  // 조직명 파싱 헬퍼 함수
+  const parseOrganizationName = useCallback((orgName: string): ParsedOrganizationName => {
+    const parts = orgName.split('_');
+    return {
+      department: parts.length >= 1 && parts[0] ? parts[0] : undefined,
+      group: parts.length >= 2 && parts[1] ? parts[1] : undefined,
+      team: parts.length >= 3 && parts[2] ? parts[2] : undefined,
+    };
+  }, []);
 
-    // 소속국이 선택된 경우, 해당 소속국에 속한 그룹만 필터링
-    if (filterDepartment !== DEFAULT_FILTER && allOrganizations.length > 0) {
-      const deptOrgs = allOrganizations.filter(org => org.name.startsWith(`${filterDepartment}_`));
-      const deptGroups = new Set<string>();
-      deptOrgs.forEach(org => {
-        const parts = org.name.split('_');
-        if (parts.length >= 2 && parts[1]) {
-          deptGroups.add(parts[1]);
-        }
-      });
-      filteredGroups = Array.from(deptGroups).sort();
+  // 계층적 필터 옵션 계산 헬퍼 함수
+  const getHierarchicalOptions = useCallback(
+    (dept: string, group: string): HierarchicalFilterOptions => {
+      let filteredGroups = filterOptions.groups || [];
+      let filteredTeams = filterOptions.teams || [];
 
-      // 소속그룹도 선택된 경우, 해당 그룹에 속한 순만 필터링
-      if (filterGroup !== DEFAULT_FILTER) {
-        const groupOrgs = deptOrgs.filter(org => org.name.includes(`_${filterGroup}_`));
-        const groupTeams = new Set<string>();
-        groupOrgs.forEach(org => {
-          const parts = org.name.split('_');
-          if (parts.length >= 3 && parts[2]) {
-            groupTeams.add(parts[2]);
+      // 소속국이 선택된 경우, 해당 소속국에 속한 그룹만 필터링
+      if (dept && dept !== DEFAULT_FILTER && allOrganizations.length > 0) {
+        const deptOrgs = allOrganizations.filter(org => org.name.startsWith(`${dept}_`));
+        const deptGroups = new Set<string>();
+        deptOrgs.forEach(org => {
+          const parsed = parseOrganizationName(org.name);
+          if (parsed.group) {
+            deptGroups.add(parsed.group);
           }
         });
-        filteredTeams = Array.from(groupTeams).sort();
-      }
-    }
+        filteredGroups = Array.from(deptGroups).sort();
 
-    return {
-      departments: filterOptions.departments || [],
-      groups: filteredGroups,
-      teams: filteredTeams,
-    };
-  }, [filterDepartment, filterGroup, filterOptions, allOrganizations]);
+        // 소속그룹도 선택된 경우, 해당 그룹에 속한 순만 필터링
+        if (group && group !== DEFAULT_FILTER) {
+          const groupOrgs = deptOrgs.filter(org => org.name.includes(`_${group}_`));
+          const groupTeams = new Set<string>();
+          groupOrgs.forEach(org => {
+            const parsed = parseOrganizationName(org.name);
+            if (parsed.team) {
+              groupTeams.add(parsed.team);
+            }
+          });
+          filteredTeams = Array.from(groupTeams).sort();
+        }
+      }
+
+      return {
+        departments: filterOptions.departments || [],
+        groups: filteredGroups,
+        teams: filteredTeams,
+      };
+    },
+    [filterOptions, allOrganizations, parseOrganizationName]
+  );
+
+  // 메인 필터용 계층적 옵션 (useMemo로 최적화)
+  const filteredOptions = useMemo(
+    () => getHierarchicalOptions(filterDepartment, filterGroup),
+    [filterDepartment, filterGroup, getHierarchicalOptions]
+  );
+
+  // 새 구성원 추가 모달용 계층적 옵션 (useMemo로 최적화)
+  const modalFilteredOptions = useMemo(
+    () => getHierarchicalOptions(newMemberInfo.소속국, newMemberInfo.소속그룹),
+    [newMemberInfo.소속국, newMemberInfo.소속그룹, getHierarchicalOptions]
+  );
+
+  // 소속 변경 모달용 계층적 옵션 (useMemo로 최적화)
+  const changeAffiliationFilteredOptions = useMemo(
+    () => getHierarchicalOptions(newDepartment, newGroup),
+    [newDepartment, newGroup, getHierarchicalOptions]
+  );
 
   // Fetch members (무한 스크롤 지원)
   const fetchMembers = useCallback(
@@ -349,6 +393,29 @@ const MembersManagement: React.FC = () => {
     setNewTeam('');
   };
 
+  // 공통: 소속국 변경 핸들러 (하위 필터 초기화)
+  const handleDepartmentChange = useCallback(
+    (newDept: string, onUpdate: (updates: { department: string; group: string; team: string }) => void) => {
+      onUpdate({
+        department: newDept,
+        group: '', // 소속국 변경 시 그룹 초기화
+        team: '', // 소속국 변경 시 순 초기화
+      });
+    },
+    []
+  );
+
+  // 공통: 소속그룹 변경 핸들러 (하위 필터 초기화)
+  const handleGroupChange = useCallback(
+    (newGroup: string, onUpdate: (updates: { group: string; team: string }) => void) => {
+      onUpdate({
+        group: newGroup,
+        team: '', // 소속그룹 변경 시 순 초기화
+      });
+    },
+    []
+  );
+
   const handleConfirmChange = async () => {
     if (!newDepartment || !newGroup || !newTeam) {
       alert('모든 소속 정보를 선택해주세요.');
@@ -580,10 +647,16 @@ const MembersManagement: React.FC = () => {
                 <select
                   className='members-modal-select'
                   value={newDepartment}
-                  onChange={e => setNewDepartment(e.target.value)}
+                  onChange={e =>
+                    handleDepartmentChange(e.target.value, ({ department, group, team }) => {
+                      setNewDepartment(department);
+                      setNewGroup(group);
+                      setNewTeam(team);
+                    })
+                  }
                 >
                   <option value=''>선택하세요</option>
-                  {(filterOptions.departments || []).map(dept => (
+                  {(changeAffiliationFilteredOptions.departments || []).map(dept => (
                     <option key={dept} value={dept}>
                       {dept}
                     </option>
@@ -592,9 +665,19 @@ const MembersManagement: React.FC = () => {
               </div>
               <div className='members-form-group'>
                 <label>소속 그룹</label>
-                <select className='members-modal-select' value={newGroup} onChange={e => setNewGroup(e.target.value)}>
+                <select
+                  className='members-modal-select'
+                  value={newGroup}
+                  onChange={e =>
+                    handleGroupChange(e.target.value, ({ group, team }) => {
+                      setNewGroup(group);
+                      setNewTeam(team);
+                    })
+                  }
+                  disabled={!newDepartment}
+                >
                   <option value=''>선택하세요</option>
-                  {(filterOptions.groups || []).map(group => (
+                  {(changeAffiliationFilteredOptions.groups || []).map(group => (
                     <option key={group} value={group}>
                       {group}
                     </option>
@@ -603,9 +686,14 @@ const MembersManagement: React.FC = () => {
               </div>
               <div className='members-form-group'>
                 <label>소속 순</label>
-                <select className='members-modal-select' value={newTeam} onChange={e => setNewTeam(e.target.value)}>
+                <select
+                  className='members-modal-select'
+                  value={newTeam}
+                  onChange={e => setNewTeam(e.target.value)}
+                  disabled={!newGroup}
+                >
                   <option value=''>선택하세요</option>
-                  {(filterOptions.teams || []).map(team => (
+                  {(changeAffiliationFilteredOptions.teams || []).map(team => (
                     <option key={team} value={team}>
                       {team}
                     </option>
@@ -702,18 +790,16 @@ const MembersManagement: React.FC = () => {
                     />
                   </div>
                   <div className='members-form-group'>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                    <label className='members-checkbox-label'>
                       <input
                         type='checkbox'
+                        className='members-checkbox-input'
                         checked={newMemberInfo.is_new_member}
                         onChange={e => setNewMemberInfo({ ...newMemberInfo, is_new_member: e.target.checked })}
-                        style={{ width: '18px', height: '18px', cursor: 'pointer' }}
                       />
                       <span>새가족 여부</span>
                     </label>
-                    <small style={{ color: 'var(--text-secondary)', fontSize: '12px', marginLeft: '26px' }}>
-                      체크 시 새가족으로 등록됩니다
-                    </small>
+                    <small className='members-checkbox-helper-text'>체크 시 새가족으로 등록됩니다</small>
                   </div>
                 </div>
 
@@ -726,10 +812,19 @@ const MembersManagement: React.FC = () => {
                     <select
                       className='members-modal-select'
                       value={newMemberInfo.소속국}
-                      onChange={e => setNewMemberInfo({ ...newMemberInfo, 소속국: e.target.value })}
+                      onChange={e =>
+                        handleDepartmentChange(e.target.value, ({ department, group, team }) => {
+                          setNewMemberInfo({
+                            ...newMemberInfo,
+                            소속국: department,
+                            소속그룹: group,
+                            소속순: team,
+                          });
+                        })
+                      }
                     >
                       <option value=''>선택하세요</option>
-                      {(filterOptions.departments || []).map(dept => (
+                      {(modalFilteredOptions.departments || []).map(dept => (
                         <option key={dept} value={dept}>
                           {dept}
                         </option>
@@ -743,10 +838,19 @@ const MembersManagement: React.FC = () => {
                     <select
                       className='members-modal-select'
                       value={newMemberInfo.소속그룹}
-                      onChange={e => setNewMemberInfo({ ...newMemberInfo, 소속그룹: e.target.value })}
+                      onChange={e =>
+                        handleGroupChange(e.target.value, ({ group, team }) => {
+                          setNewMemberInfo({
+                            ...newMemberInfo,
+                            소속그룹: group,
+                            소속순: team,
+                          });
+                        })
+                      }
+                      disabled={!newMemberInfo.소속국}
                     >
                       <option value=''>선택하세요</option>
-                      {(filterOptions.groups || []).map(group => (
+                      {(modalFilteredOptions.groups || []).map(group => (
                         <option key={group} value={group}>
                           {group}
                         </option>
@@ -761,9 +865,10 @@ const MembersManagement: React.FC = () => {
                       className='members-modal-select'
                       value={newMemberInfo.소속순}
                       onChange={e => setNewMemberInfo({ ...newMemberInfo, 소속순: e.target.value })}
+                      disabled={!newMemberInfo.소속그룹}
                     >
                       <option value=''>선택하세요</option>
-                      {(filterOptions.teams || []).map(team => (
+                      {(modalFilteredOptions.teams || []).map(team => (
                         <option key={team} value={team}>
                           {team}
                         </option>
