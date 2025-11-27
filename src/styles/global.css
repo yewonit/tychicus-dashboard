@@ -4574,20 +4574,40 @@ html {
 .infinite-scroll-loading {
   padding: 20px;
   text-align: center;
-  color: var(--text-secondary);
 }
 
-.infinite-scroll-loading > div {
+.infinite-scroll-loading-content {
   display: inline-flex;
   align-items: center;
   gap: 10px;
 }
 
+.infinite-scroll-spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid var(--border-light);
+  border-top: 3px solid var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.infinite-scroll-loading-text {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
 .infinite-scroll-end {
   padding: 20px;
   text-align: center;
+}
+
+.infinite-scroll-end-text {
   color: var(--text-tertiary);
   font-size: 0.9rem;
+}
+
+.infinite-scroll-trigger {
+  height: 20px;
 }
 
 /* 구성원 관리 필터링 및 체크박스 스타일 */
@@ -4855,6 +4875,13 @@ html {
   color: var(--text-tertiary);
   font-size: var(--font-size-base);
   padding: var(--spacing-xl);
+}
+
+.members-loading-state {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: var(--font-size-base);
 }
 
 @media (max-width: 768px) {

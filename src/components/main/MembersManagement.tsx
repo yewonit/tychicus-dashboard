@@ -1,17 +1,37 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useInfiniteScroll } from '../../hooks';
 import { memberService } from '../../services/memberService';
 import { Member, OrganizationDto } from '../../types/api';
 
+// 상수 정의
+const INITIAL_MEMBER_INFO = {
+  이름: '',
+  name_suffix: 'A',
+  생일연도: '',
+  휴대폰번호: '',
+  gender_type: 'M' as const,
+  소속국: '',
+  소속그룹: '',
+  소속순: '',
+  is_new_member: false,
+};
+
+const DEFAULT_FILTER = '전체';
+const ITEMS_PER_PAGE = 20;
+
+// 필터 키 생성 헬퍼 함수
+const createFilterKey = (search: string, dept: string, group: string, team: string): string => {
+  return `${search}_${dept}_${group}_${team}`;
+};
+
 const MembersManagement: React.FC = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterDepartment, setFilterDepartment] = useState('전체');
-  const [filterGroup, setFilterGroup] = useState('전체');
-  const [filterTeam, setFilterTeam] = useState('전체');
+  const [filterDepartment, setFilterDepartment] = useState(DEFAULT_FILTER);
+  const [filterGroup, setFilterGroup] = useState(DEFAULT_FILTER);
+  const [filterTeam, setFilterTeam] = useState(DEFAULT_FILTER);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 20; // 무한 스크롤을 위해 페이지당 항목 수 증가
 
   // Data states
   const [members, setMembers] = useState<Member[]>([]);
@@ -42,17 +62,7 @@ const MembersManagement: React.FC = () => {
   const [newTeam, setNewTeam] = useState('');
 
   // 새 구성원 정보 상태
-  const [newMemberInfo, setNewMemberInfo] = useState({
-    이름: '',
-    name_suffix: 'A', // 동명이인 구분자 (기본값: A)
-    생일연도: '',
-    휴대폰번호: '',
-    gender_type: 'M' as 'M' | 'F', // 성별 (기본값: 남성)
-    소속국: '',
-    소속그룹: '',
-    소속순: '',
-    is_new_member: false, // 새가족 여부 (기본값: false)
-  });
+  const [newMemberInfo, setNewMemberInfo] = useState(INITIAL_MEMBER_INFO);
 
   // Fetch filter options
   const fetchFilterOptions = async () => {
@@ -68,14 +78,14 @@ const MembersManagement: React.FC = () => {
     }
   };
 
-  // 계층적 필터 옵션 계산
-  const getFilteredOptions = () => {
+  // 계층적 필터 옵션 계산 (useMemo로 최적화)
+  const filteredOptions = useMemo(() => {
     let filteredGroups = filterOptions.groups || [];
     let filteredTeams = filterOptions.teams || [];
 
     // 소속국이 선택된 경우, 해당 소속국에 속한 그룹만 필터링
-    if (filterDepartment !== '전체' && allOrganizations.length > 0) {
-      const deptOrgs = allOrganizations.filter(org => org.name.startsWith(filterDepartment + '_'));
+    if (filterDepartment !== DEFAULT_FILTER && allOrganizations.length > 0) {
+      const deptOrgs = allOrganizations.filter(org => org.name.startsWith(`${filterDepartment}_`));
       const deptGroups = new Set<string>();
       deptOrgs.forEach(org => {
         const parts = org.name.split('_');
@@ -86,7 +96,7 @@ const MembersManagement: React.FC = () => {
       filteredGroups = Array.from(deptGroups).sort();
 
       // 소속그룹도 선택된 경우, 해당 그룹에 속한 순만 필터링
-      if (filterGroup !== '전체') {
+      if (filterGroup !== DEFAULT_FILTER) {
         const groupOrgs = deptOrgs.filter(org => org.name.includes(`_${filterGroup}_`));
         const groupTeams = new Set<string>();
         groupOrgs.forEach(org => {
@@ -104,15 +114,13 @@ const MembersManagement: React.FC = () => {
       groups: filteredGroups,
       teams: filteredTeams,
     };
-  };
-
-  const filteredOptions = getFilteredOptions();
+  }, [filterDepartment, filterGroup, filterOptions, allOrganizations]);
 
   // Fetch members (무한 스크롤 지원)
   const fetchMembers = useCallback(
     async (append = false) => {
       // 필터/검색이 변경된 경우 append 모드 비활성화
-      const currentFilterKey = `${searchTerm}_${filterDepartment}_${filterGroup}_${filterTeam}`;
+      const currentFilterKey = createFilterKey(searchTerm, filterDepartment, filterGroup, filterTeam);
       const isFilterChanged = filterKeyRef.current !== currentFilterKey;
 
       if (isFilterChanged) {
@@ -131,11 +139,11 @@ const MembersManagement: React.FC = () => {
       try {
         const response = await memberService.getMembers({
           search: searchTerm,
-          department: filterDepartment === '전체' ? undefined : filterDepartment,
-          group: filterGroup === '전체' ? undefined : filterGroup,
-          team: filterTeam === '전체' ? undefined : filterTeam,
+          department: filterDepartment === DEFAULT_FILTER ? undefined : filterDepartment,
+          group: filterGroup === DEFAULT_FILTER ? undefined : filterGroup,
+          team: filterTeam === DEFAULT_FILTER ? undefined : filterTeam,
           page: currentPage,
-          limit: itemsPerPage,
+          limit: ITEMS_PER_PAGE,
         });
 
         // 데이터 누적 또는 교체
@@ -158,7 +166,7 @@ const MembersManagement: React.FC = () => {
         setIsLoadingMore(false);
       }
     },
-    [searchTerm, filterDepartment, filterGroup, filterTeam, currentPage, itemsPerPage]
+    [searchTerm, filterDepartment, filterGroup, filterTeam, currentPage]
   );
 
   // 더 불러오기 함수
@@ -179,7 +187,7 @@ const MembersManagement: React.FC = () => {
     fetchFilterOptions();
     // 초기 데이터 로드 (currentPage가 1이고 필터 키가 비어있을 때)
     if (currentPage === 1 && filterKeyRef.current === '') {
-      filterKeyRef.current = `${searchTerm}_${filterDepartment}_${filterGroup}_${filterTeam}`;
+      filterKeyRef.current = createFilterKey(searchTerm, filterDepartment, filterGroup, filterTeam);
       fetchMembers(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -187,7 +195,7 @@ const MembersManagement: React.FC = () => {
 
   // 필터/검색 변경 시 초기화
   useEffect(() => {
-    const currentFilterKey = `${searchTerm}_${filterDepartment}_${filterGroup}_${filterTeam}`;
+    const currentFilterKey = createFilterKey(searchTerm, filterDepartment, filterGroup, filterTeam);
     const isFilterChanged = filterKeyRef.current !== currentFilterKey;
 
     if (isFilterChanged) {
@@ -203,7 +211,8 @@ const MembersManagement: React.FC = () => {
   // 페이지 변경 시 데이터 로드 (무한 스크롤)
   useEffect(() => {
     const isFirstPage = currentPage === 1;
-    const isFilterChanged = filterKeyRef.current !== `${searchTerm}_${filterDepartment}_${filterGroup}_${filterTeam}`;
+    const isFilterChanged =
+      filterKeyRef.current !== createFilterKey(searchTerm, filterDepartment, filterGroup, filterTeam);
 
     // 필터가 변경되었거나 첫 페이지인 경우 새로 로드
     if (isFirstPage || isFilterChanged) {
@@ -218,9 +227,9 @@ const MembersManagement: React.FC = () => {
   useEffect(() => {
     const handleResetPage = () => {
       setSearchTerm('');
-      setFilterDepartment('전체');
-      setFilterGroup('전체');
-      setFilterTeam('전체');
+      setFilterDepartment(DEFAULT_FILTER);
+      setFilterGroup(DEFAULT_FILTER);
+      setFilterTeam(DEFAULT_FILTER);
       setCurrentPage(1);
       setHasMore(true);
       setMembers([]);
@@ -231,17 +240,7 @@ const MembersManagement: React.FC = () => {
       setNewDepartment('');
       setNewGroup('');
       setNewTeam('');
-      setNewMemberInfo({
-        이름: '',
-        name_suffix: 'A',
-        생일연도: '',
-        휴대폰번호: '',
-        gender_type: 'M',
-        소속국: '',
-        소속그룹: '',
-        소속순: '',
-        is_new_member: false,
-      });
+      setNewMemberInfo(INITIAL_MEMBER_INFO);
       filterKeyRef.current = '';
       fetchFilterOptions(); // 옵션도 초기화 시 재조회
       // fetchMembers는 필터 변경 useEffect에서 자동 호출됨
@@ -269,17 +268,7 @@ const MembersManagement: React.FC = () => {
 
   const handleCloseAddMemberModal = () => {
     setShowAddMemberModal(false);
-    setNewMemberInfo({
-      이름: '',
-      name_suffix: 'A',
-      생일연도: '',
-      휴대폰번호: '',
-      gender_type: 'M',
-      소속국: '',
-      소속그룹: '',
-      소속순: '',
-      is_new_member: false,
-    });
+    setNewMemberInfo(INITIAL_MEMBER_INFO);
   };
 
   const handleAddMemberSubmit = async () => {
@@ -433,12 +422,12 @@ const MembersManagement: React.FC = () => {
               onChange={e => {
                 setFilterDepartment(e.target.value);
                 // 소속국 변경 시 하위 필터 초기화
-                setFilterGroup('전체');
-                setFilterTeam('전체');
+                setFilterGroup(DEFAULT_FILTER);
+                setFilterTeam(DEFAULT_FILTER);
                 setCurrentPage(1);
               }}
             >
-              <option value='전체'>소속국</option>
+              <option value={DEFAULT_FILTER}>소속국</option>
               {(filteredOptions.departments || []).map(dept => (
                 <option key={dept} value={dept}>
                   {dept}
@@ -451,12 +440,12 @@ const MembersManagement: React.FC = () => {
               onChange={e => {
                 setFilterGroup(e.target.value);
                 // 소속그룹 변경 시 소속순 초기화
-                setFilterTeam('전체');
+                setFilterTeam(DEFAULT_FILTER);
                 setCurrentPage(1);
               }}
-              disabled={filterDepartment === '전체'}
+              disabled={filterDepartment === DEFAULT_FILTER}
             >
-              <option value='전체'>소속그룹</option>
+              <option value={DEFAULT_FILTER}>소속그룹</option>
               {(filteredOptions.groups || []).map(group => (
                 <option key={group} value={group}>
                   {group}
@@ -470,9 +459,9 @@ const MembersManagement: React.FC = () => {
                 setFilterTeam(e.target.value);
                 setCurrentPage(1);
               }}
-              disabled={filterGroup === '전체'}
+              disabled={filterGroup === DEFAULT_FILTER}
             >
-              <option value='전체'>소속순</option>
+              <option value={DEFAULT_FILTER}>소속순</option>
               {(filteredOptions.teams || []).map(team => (
                 <option key={team} value={team}>
                   {team}
@@ -497,7 +486,7 @@ const MembersManagement: React.FC = () => {
 
       <div className='table-container'>
         {loading ? (
-          <div style={{ padding: '40px', textAlign: 'center' }}>로딩 중...</div>
+          <div className='members-loading-state'>로딩 중...</div>
         ) : (
           <table className='members-table'>
             <thead>
@@ -555,35 +544,22 @@ const MembersManagement: React.FC = () => {
         {!loading && members.length > 0 && (
           <>
             {isLoadingMore && (
-              <div className='infinite-scroll-loading' style={{ padding: '20px', textAlign: 'center' }}>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px' }}>
-                  <div
-                    style={{
-                      width: '20px',
-                      height: '20px',
-                      border: '3px solid var(--border-light)',
-                      borderTop: '3px solid var(--primary)',
-                      borderRadius: '50%',
-                      animation: 'spin 1s linear infinite',
-                    }}
-                  />
-                  <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                    더 많은 구성원을 불러오는 중...
-                  </span>
+              <div className='infinite-scroll-loading'>
+                <div className='infinite-scroll-loading-content'>
+                  <div className='infinite-scroll-spinner' />
+                  <span className='infinite-scroll-loading-text'>더 많은 구성원을 불러오는 중...</span>
                 </div>
               </div>
             )}
 
             {!hasMore && members.length > 0 && (
-              <div className='infinite-scroll-end' style={{ padding: '20px', textAlign: 'center' }}>
-                <span style={{ color: 'var(--text-tertiary)', fontSize: '0.9rem' }}>
-                  모든 구성원을 불러왔습니다 ({members.length}명)
-                </span>
+              <div className='infinite-scroll-end'>
+                <span className='infinite-scroll-end-text'>모든 구성원을 불러왔습니다 ({members.length}명)</span>
               </div>
             )}
 
             {/* Intersection Observer 감지용 요소 */}
-            {hasMore && <div ref={observerRef} style={{ height: '20px' }} />}
+            {hasMore && <div ref={observerRef} className='infinite-scroll-trigger' />}
           </>
         )}
       </div>

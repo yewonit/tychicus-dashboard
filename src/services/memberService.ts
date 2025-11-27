@@ -73,7 +73,8 @@ export const memberService = {
       limit: request.limit || 10,
     };
 
-    // 요청 정보 로깅
+    // 요청 정보 로깅 (개발 환경에서만)
+    const isDevelopment = process.env.NODE_ENV === 'development';
     const fullUrl = `${axiosClient.defaults.baseURL}/users`;
     const queryString = new URLSearchParams(
       Object.entries(params).reduce(
@@ -88,12 +89,14 @@ export const memberService = {
     ).toString();
     const requestUrl = queryString ? `${fullUrl}?${queryString}` : fullUrl;
 
-    console.log('📤 GET /api/users 요청 시작:', {
-      url: '/users',
-      fullUrl: requestUrl,
-      params,
-      timestamp: new Date().toISOString(),
-    });
+    if (isDevelopment) {
+      console.log('📤 GET /api/users 요청 시작:', {
+        url: '/users',
+        fullUrl: requestUrl,
+        params,
+        timestamp: new Date().toISOString(),
+      });
+    }
 
     try {
       const requestStartTime = Date.now();
@@ -115,25 +118,27 @@ export const memberService = {
         limit: 10,
       };
 
-      // 성공 응답 로깅
-      console.log('✅ GET /api/users 요청 성공:', {
-        url: '/users',
-        fullUrl: requestUrl,
-        status: response.status,
-        statusText: response.statusText,
-        duration: `${requestDuration}ms`,
-        응답데이터: {
-          구성원수: members.length,
-          페이지네이션: {
-            현재페이지: pagination.currentPage,
-            전체페이지: pagination.totalPages,
-            전체개수: pagination.totalCount,
-            페이지당개수: pagination.limit,
+      // 성공 응답 로깅 (개발 환경에서만)
+      if (isDevelopment) {
+        console.log('✅ GET /api/users 요청 성공:', {
+          url: '/users',
+          fullUrl: requestUrl,
+          status: response.status,
+          statusText: response.statusText,
+          duration: `${requestDuration}ms`,
+          응답데이터: {
+            구성원수: members.length,
+            페이지네이션: {
+              현재페이지: pagination.currentPage,
+              전체페이지: pagination.totalPages,
+              전체개수: pagination.totalCount,
+              페이지당개수: pagination.limit,
+            },
           },
-        },
-        원본응답: response.data,
-        timestamp: new Date().toISOString(),
-      });
+          원본응답: response.data,
+          timestamp: new Date().toISOString(),
+        });
+      }
 
       return {
         members: members.map(mapUserToMember),
@@ -162,12 +167,14 @@ export const memberService = {
         timestamp: new Date().toISOString(),
       };
 
+      // 에러 로깅 (개발 환경에서만 상세 로그)
+      const isDevelopment = process.env.NODE_ENV === 'development';
       console.error('❌ GET /api/users 요청 실패:', errorDetails);
 
-      // Sequelize 데이터베이스 에러인 경우 상세 정보 출력
+      // Sequelize 데이터베이스 에러인 경우 상세 정보 출력 (개발 환경에서만)
       if (
-        errorDetails.errorType === 'SequelizeDatabaseError' ||
-        errorDetails.errorMessage?.includes('Unknown column')
+        isDevelopment &&
+        (errorDetails.errorType === 'SequelizeDatabaseError' || errorDetails.errorMessage?.includes('Unknown column'))
       ) {
         console.error('🔴 백엔드 Sequelize 쿼리 에러 감지:', {
           문제: 'Sequelize가 잘못된 SQL 쿼리를 생성했습니다.',
