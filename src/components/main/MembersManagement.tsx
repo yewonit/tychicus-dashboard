@@ -1,8 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useInfiniteScroll } from '../../hooks';
+import { useDebounce, useInfiniteScroll } from '../../hooks';
 import { memberService } from '../../services/memberService';
 import { Member, OrganizationDto } from '../../types/api';
+import { extractNumbers, formatPhoneNumber, validatePhoneNumber } from '../../utils/phoneUtils';
+import { ComboBox } from '../ui/ComboBox';
+import { Toast } from '../ui/Toast';
 
 // 타입 정의
 interface HierarchicalFilterOptions {
@@ -23,7 +26,7 @@ const INITIAL_MEMBER_INFO = {
   name_suffix: 'A',
   생일연도: '',
   휴대폰번호: '',
-  gender_type: 'M' as const,
+  gender_type: 'M' as 'M' | 'F',
   소속국: '',
   소속그룹: '',
   소속순: '',
@@ -41,17 +44,27 @@ const createFilterKey = (search: string, dept: string, group: string, team: stri
 const MembersManagement: React.FC = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [filterDepartment, setFilterDepartment] = useState(DEFAULT_FILTER);
   const [filterGroup, setFilterGroup] = useState(DEFAULT_FILTER);
   const [filterTeam, setFilterTeam] = useState(DEFAULT_FILTER);
   const [currentPage, setCurrentPage] = useState(1);
+
+  // 정렬 상태
+  const [sortField, setSortField] = useState<string>('');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+
+  // Toast 상태
+  const [toast, setToast] = useState<{ message: string; type?: 'success' | 'error' | 'info' | 'warning' } | null>(null);
+
+  // 폼 에러 상태
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   // Data states
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const [totalPages, setTotalPages] = useState(0);
 
   // 필터/검색 변경 추적을 위한 ref
   const filterKeyRef = useRef<string>('');
@@ -68,8 +81,6 @@ const MembersManagement: React.FC = () => {
   const [selectedMembers, setSelectedMembers] = useState<number[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertMessage, setAlertMessage] = useState('');
   const [newDepartment, setNewDepartment] = useState('');
   const [newGroup, setNewGroup] = useState('');
   const [newTeam, setNewTeam] = useState('');
@@ -160,11 +171,59 @@ const MembersManagement: React.FC = () => {
     [newDepartment, newGroup, getHierarchicalOptions]
   );
 
+  // 정렬된 멤버 목록
+  const sortedMembers = useMemo(() => {
+    if (!sortField) return members;
+
+    return [...members].sort((a, b) => {
+      const aValue = (a as any)[sortField] || '';
+      const bValue = (b as any)[sortField] || '';
+
+      if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [members, sortField, sortOrder]);
+
+  // 정렬 핸들러
+  const handleSort = useCallback(
+    (field: string) => {
+      if (sortField === field) {
+        setSortOrder(prev => (prev === 'asc' ? 'desc' : 'asc'));
+      } else {
+        setSortField(field);
+        setSortOrder('asc');
+      }
+    },
+    [sortField]
+  );
+
+  // 필터 초기화
+  const handleResetFilters = useCallback(() => {
+    setSearchTerm('');
+    setFilterDepartment(DEFAULT_FILTER);
+    setFilterGroup(DEFAULT_FILTER);
+    setFilterTeam(DEFAULT_FILTER);
+    setCurrentPage(1);
+    setSortField('');
+    setSortOrder('asc');
+  }, []);
+
+  // 활성 필터 개수 계산
+  const activeFiltersCount = useMemo(() => {
+    let count = 0;
+    if (searchTerm) count++;
+    if (filterDepartment !== DEFAULT_FILTER) count++;
+    if (filterGroup !== DEFAULT_FILTER) count++;
+    if (filterTeam !== DEFAULT_FILTER) count++;
+    return count;
+  }, [searchTerm, filterDepartment, filterGroup, filterTeam]);
+
   // Fetch members (무한 스크롤 지원)
   const fetchMembers = useCallback(
     async (append = false) => {
       // 필터/검색이 변경된 경우 append 모드 비활성화
-      const currentFilterKey = createFilterKey(searchTerm, filterDepartment, filterGroup, filterTeam);
+      const currentFilterKey = createFilterKey(debouncedSearchTerm, filterDepartment, filterGroup, filterTeam);
       const isFilterChanged = filterKeyRef.current !== currentFilterKey;
 
       if (isFilterChanged) {
@@ -182,7 +241,7 @@ const MembersManagement: React.FC = () => {
 
       try {
         const response = await memberService.getMembers({
-          search: searchTerm,
+          search: debouncedSearchTerm,
           department: filterDepartment === DEFAULT_FILTER ? undefined : filterDepartment,
           group: filterGroup === DEFAULT_FILTER ? undefined : filterGroup,
           team: filterTeam === DEFAULT_FILTER ? undefined : filterTeam,
@@ -199,7 +258,6 @@ const MembersManagement: React.FC = () => {
 
         // 더 불러올 데이터가 있는지 확인
         setHasMore(currentPage < response.pagination.totalPages);
-        setTotalPages(response.pagination.totalPages);
       } catch (error) {
         console.error('Failed to fetch members:', error);
         if (!append) {
@@ -210,7 +268,7 @@ const MembersManagement: React.FC = () => {
         setIsLoadingMore(false);
       }
     },
-    [searchTerm, filterDepartment, filterGroup, filterTeam, currentPage]
+    [debouncedSearchTerm, filterDepartment, filterGroup, filterTeam, currentPage]
   );
 
   // 더 불러오기 함수
@@ -237,9 +295,9 @@ const MembersManagement: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // 필터/검색 변경 시 초기화
+  // 필터/검색 변경 시 초기화 (debouncedSearchTerm 사용)
   useEffect(() => {
-    const currentFilterKey = createFilterKey(searchTerm, filterDepartment, filterGroup, filterTeam);
+    const currentFilterKey = createFilterKey(debouncedSearchTerm, filterDepartment, filterGroup, filterTeam);
     const isFilterChanged = filterKeyRef.current !== currentFilterKey;
 
     if (isFilterChanged) {
@@ -248,15 +306,18 @@ const MembersManagement: React.FC = () => {
       setMembers([]); // 데이터 초기화
       filterKeyRef.current = currentFilterKey; // 필터 키 업데이트
       // 스크롤 위치를 맨 위로 이동
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      const mainContent = document.querySelector('.dugigo-main-content');
+      if (mainContent) {
+        mainContent.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     }
-  }, [searchTerm, filterDepartment, filterGroup, filterTeam]);
+  }, [debouncedSearchTerm, filterDepartment, filterGroup, filterTeam]);
 
   // 페이지 변경 시 데이터 로드 (무한 스크롤)
   useEffect(() => {
     const isFirstPage = currentPage === 1;
     const isFilterChanged =
-      filterKeyRef.current !== createFilterKey(searchTerm, filterDepartment, filterGroup, filterTeam);
+      filterKeyRef.current !== createFilterKey(debouncedSearchTerm, filterDepartment, filterGroup, filterTeam);
 
     // 필터가 변경되었거나 첫 페이지인 경우 새로 로드
     if (isFirstPage || isFilterChanged) {
@@ -265,7 +326,8 @@ const MembersManagement: React.FC = () => {
       // 이후 페이지는 누적 로드
       fetchMembers(true);
     }
-  }, [currentPage, fetchMembers, searchTerm, filterDepartment, filterGroup, filterTeam]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, fetchMembers, debouncedSearchTerm, filterDepartment, filterGroup, filterTeam]);
 
   // 사이드바 메뉴 클릭 시 화면 초기화
   useEffect(() => {
@@ -280,7 +342,6 @@ const MembersManagement: React.FC = () => {
       setSelectedMembers([]);
       setShowModal(false);
       setShowAddMemberModal(false);
-      setShowAlert(false);
       setNewDepartment('');
       setNewGroup('');
       setNewTeam('');
@@ -295,6 +356,7 @@ const MembersManagement: React.FC = () => {
     return () => {
       window.removeEventListener('resetMembersPage', handleResetPage);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // 페이지 변경 시 선택 해제
@@ -313,33 +375,46 @@ const MembersManagement: React.FC = () => {
   const handleCloseAddMemberModal = () => {
     setShowAddMemberModal(false);
     setNewMemberInfo(INITIAL_MEMBER_INFO);
+    setFormErrors({});
   };
 
   const handleAddMemberSubmit = async () => {
     // 유효성 검사
+    const errors: Record<string, string> = {};
+
     if (!newMemberInfo.이름) {
-      alert('이름을 입력해주세요.');
-      return;
+      errors.이름 = '이름을 입력해주세요.';
     }
     if (!newMemberInfo.name_suffix || !newMemberInfo.name_suffix.trim()) {
-      alert('동명이인 구분자를 입력해주세요.');
-      return;
+      errors.name_suffix = '동명이인 구분자를 입력해주세요.';
     }
-    if (!newMemberInfo.휴대폰번호) {
-      alert('휴대폰 번호를 입력해주세요.');
-      return;
+
+    const phoneValidation = validatePhoneNumber(newMemberInfo.휴대폰번호);
+    if (!phoneValidation.isValid) {
+      errors.휴대폰번호 = phoneValidation.error || '휴대폰 번호를 입력해주세요.';
     }
+
     if (!newMemberInfo.소속국 || !newMemberInfo.소속그룹 || !newMemberInfo.소속순) {
-      alert('소속 정보를 모두 선택해주세요.');
+      errors.소속 = '소속 정보를 모두 선택해주세요.';
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      setToast({ message: '입력 정보를 확인해주세요.', type: 'error' });
       return;
     }
 
+    setFormErrors({});
+
     try {
+      // 전화번호에서 숫자만 추출하여 전송
+      const phoneNumber = extractNumbers(newMemberInfo.휴대폰번호);
+
       const response = await memberService.createMember({
         이름: newMemberInfo.이름,
         name_suffix: newMemberInfo.name_suffix,
         생일연도: newMemberInfo.생일연도 || undefined,
-        휴대폰번호: newMemberInfo.휴대폰번호,
+        휴대폰번호: phoneNumber,
         gender_type: newMemberInfo.gender_type,
         소속국: newMemberInfo.소속국,
         소속그룹: newMemberInfo.소속그룹,
@@ -348,17 +423,14 @@ const MembersManagement: React.FC = () => {
       });
 
       if (response.success) {
-        setAlertMessage('새 구성원이 추가되었습니다.');
-        setShowAlert(true);
-        setTimeout(() => {
-          setShowAlert(false);
-        }, 3000);
+        setToast({ message: '새 구성원이 추가되었습니다.', type: 'success' });
         handleCloseAddMemberModal();
         fetchMembers(); // Refresh list
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to create member:', error);
-      alert('구성원 추가에 실패했습니다.');
+      const errorMessage = error?.response?.data?.message || error?.message || '구성원 추가에 실패했습니다.';
+      setToast({ message: errorMessage, type: 'error' });
     }
   };
 
@@ -380,8 +452,15 @@ const MembersManagement: React.FC = () => {
   // 소속 변경 모달 핸들러
   const handleOpenModal = () => {
     if (selectedMembers.length === 0) {
-      alert('변경할 구성원을 선택해주세요.');
+      setToast({ message: '변경할 구성원을 선택해주세요.', type: 'warning' });
       return;
+    }
+    // 선택된 구성원의 기존 소속 정보 가져오기
+    const selectedMember = members.find(m => selectedMembers.includes(m.id));
+    if (selectedMember) {
+      setNewDepartment(selectedMember.소속국 || '');
+      setNewGroup(selectedMember.소속그룹 || '');
+      setNewTeam(selectedMember.소속순 || '');
     }
     setShowModal(true);
   };
@@ -418,7 +497,7 @@ const MembersManagement: React.FC = () => {
 
   const handleConfirmChange = async () => {
     if (!newDepartment || !newGroup || !newTeam) {
-      alert('모든 소속 정보를 선택해주세요.');
+      setToast({ message: '모든 소속 정보를 선택해주세요.', type: 'warning' });
       return;
     }
 
@@ -445,19 +524,15 @@ const MembersManagement: React.FC = () => {
           })
         );
 
-        setAlertMessage(response.message || '소속이 변경되었습니다.');
-        setShowAlert(true);
-        setTimeout(() => {
-          setShowAlert(false);
-        }, 5000);
-
+        setToast({ message: response.message || '소속이 변경되었습니다.', type: 'success' });
         handleCloseModal();
         setSelectedMembers([]);
         fetchMembers(); // Refresh list
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to update affiliation:', error);
-      alert('소속 변경에 실패했습니다.');
+      const errorMessage = error?.response?.data?.message || error?.message || '소속 변경에 실패했습니다.';
+      setToast({ message: errorMessage, type: 'error' });
     }
   };
 
@@ -483,6 +558,14 @@ const MembersManagement: React.FC = () => {
               />
               <span className='search-icon'>🔍</span>
             </div>
+            {activeFiltersCount > 0 && (
+              <div className='filter-summary'>
+                <span className='filter-badge'>{activeFiltersCount}개 필터 적용 중</span>
+                <button className='filter-reset-button' onClick={handleResetFilters}>
+                  필터 초기화
+                </button>
+              </div>
+            )}
             <select
               className='members-filter-select'
               value={filterDepartment}
@@ -494,7 +577,7 @@ const MembersManagement: React.FC = () => {
                 setCurrentPage(1);
               }}
             >
-              <option value={DEFAULT_FILTER}>소속국</option>
+              <option value={DEFAULT_FILTER}>소속국 선택</option>
               {(filteredOptions.departments || []).map(dept => (
                 <option key={dept} value={dept}>
                   {dept}
@@ -512,7 +595,7 @@ const MembersManagement: React.FC = () => {
               }}
               disabled={filterDepartment === DEFAULT_FILTER}
             >
-              <option value={DEFAULT_FILTER}>소속그룹</option>
+              <option value={DEFAULT_FILTER}>소속그룹 선택</option>
               {(filteredOptions.groups || []).map(group => (
                 <option key={group} value={group}>
                   {group}
@@ -528,7 +611,7 @@ const MembersManagement: React.FC = () => {
               }}
               disabled={filterGroup === DEFAULT_FILTER}
             >
-              <option value={DEFAULT_FILTER}>소속순</option>
+              <option value={DEFAULT_FILTER}>소속순 선택</option>
               {(filteredOptions.teams || []).map(team => (
                 <option key={team} value={team}>
                   {team}
@@ -537,6 +620,14 @@ const MembersManagement: React.FC = () => {
             </select>
           </div>
           <div className='members-action-buttons'>
+            {selectedMembers.length > 0 && (
+              <div className='selection-info'>
+                <span className='selection-info-text'>{selectedMembers.length}개 선택됨</span>
+                <button className='selection-clear-button' onClick={() => setSelectedMembers([])}>
+                  선택 해제
+                </button>
+              </div>
+            )}
             <button className='add-button' onClick={handleAddMember}>
               + 새 구성원 추가
             </button>
@@ -566,23 +657,39 @@ const MembersManagement: React.FC = () => {
                     onChange={handleSelectAll}
                   />
                 </th>
-                <th>이름</th>
-                <th>기수</th>
-                <th>소속 국</th>
+                <th className='sortable-header' onClick={() => handleSort('이름')}>
+                  이름
+                  {sortField === '이름' && <span className='sort-icon active'>{sortOrder === 'asc' ? '↑' : '↓'}</span>}
+                  {sortField !== '이름' && <span className='sort-icon'>↕</span>}
+                </th>
+                <th className='sortable-header' onClick={() => handleSort('생일연도')}>
+                  기수
+                  {sortField === '생일연도' && (
+                    <span className='sort-icon active'>{sortOrder === 'asc' ? '↑' : '↓'}</span>
+                  )}
+                  {sortField !== '생일연도' && <span className='sort-icon'>↕</span>}
+                </th>
+                <th className='sortable-header' onClick={() => handleSort('소속국')}>
+                  소속 국
+                  {sortField === '소속국' && (
+                    <span className='sort-icon active'>{sortOrder === 'asc' ? '↑' : '↓'}</span>
+                  )}
+                  {sortField !== '소속국' && <span className='sort-icon'>↕</span>}
+                </th>
                 <th>소속 그룹</th>
                 <th>소속 순</th>
                 <th>휴대폰번호</th>
               </tr>
             </thead>
             <tbody>
-              {members.length === 0 ? (
+              {sortedMembers.length === 0 ? (
                 <tr>
                   <td colSpan={7} style={{ textAlign: 'center', padding: '40px' }}>
                     <div className='members-empty-state'>검색 결과가 없습니다.</div>
                   </td>
                 </tr>
               ) : (
-                members.map(member => (
+                sortedMembers.map(member => (
                   <tr key={member.id}>
                     <td style={{ textAlign: 'center' }}>
                       <input
@@ -642,63 +749,64 @@ const MembersManagement: React.FC = () => {
               </button>
             </div>
             <div className='members-modal-form'>
+              {/* 기존 소속 표시 */}
+              {selectedMembers.length > 0 &&
+                (() => {
+                  const selectedMember = members.find(m => selectedMembers.includes(m.id));
+                  if (selectedMember) {
+                    return (
+                      <div className='current-affiliation'>
+                        <div className='current-affiliation-label'>현재 소속</div>
+                        <div className='current-affiliation-value'>
+                          {selectedMember.소속국} / {selectedMember.소속그룹} / {selectedMember.소속순}
+                        </div>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
               <div className='members-form-group'>
                 <label>소속 국</label>
-                <select
-                  className='members-modal-select'
+                <ComboBox
+                  options={changeAffiliationFilteredOptions.departments || []}
                   value={newDepartment}
-                  onChange={e =>
-                    handleDepartmentChange(e.target.value, ({ department, group, team }) => {
+                  onChange={value =>
+                    handleDepartmentChange(value, ({ department, group, team }) => {
                       setNewDepartment(department);
                       setNewGroup(group);
                       setNewTeam(team);
                     })
                   }
-                >
-                  <option value=''>선택하세요</option>
-                  {(changeAffiliationFilteredOptions.departments || []).map(dept => (
-                    <option key={dept} value={dept}>
-                      {dept}
-                    </option>
-                  ))}
-                </select>
+                  placeholder='소속국을 선택하세요'
+                  className='members-modal-select'
+                />
               </div>
               <div className='members-form-group'>
                 <label>소속 그룹</label>
-                <select
-                  className='members-modal-select'
+                <ComboBox
+                  options={changeAffiliationFilteredOptions.groups || []}
                   value={newGroup}
-                  onChange={e =>
-                    handleGroupChange(e.target.value, ({ group, team }) => {
+                  onChange={value =>
+                    handleGroupChange(value, ({ group, team }) => {
                       setNewGroup(group);
                       setNewTeam(team);
                     })
                   }
+                  placeholder='소속그룹을 선택하세요'
                   disabled={!newDepartment}
-                >
-                  <option value=''>선택하세요</option>
-                  {(changeAffiliationFilteredOptions.groups || []).map(group => (
-                    <option key={group} value={group}>
-                      {group}
-                    </option>
-                  ))}
-                </select>
+                  className='members-modal-select'
+                />
               </div>
               <div className='members-form-group'>
                 <label>소속 순</label>
-                <select
-                  className='members-modal-select'
+                <ComboBox
+                  options={changeAffiliationFilteredOptions.teams || []}
                   value={newTeam}
-                  onChange={e => setNewTeam(e.target.value)}
+                  onChange={value => setNewTeam(value)}
+                  placeholder='소속순을 선택하세요'
                   disabled={!newGroup}
-                >
-                  <option value=''>선택하세요</option>
-                  {(changeAffiliationFilteredOptions.teams || []).map(team => (
-                    <option key={team} value={team}>
-                      {team}
-                    </option>
-                  ))}
-                </select>
+                  className='members-modal-select'
+                />
               </div>
             </div>
             <div className='members-modal-buttons'>
@@ -734,11 +842,19 @@ const MembersManagement: React.FC = () => {
                     </label>
                     <input
                       type='text'
-                      className='members-modal-input'
+                      className={`members-modal-input ${formErrors.이름 ? 'form-field-error' : ''}`}
                       value={newMemberInfo.이름}
-                      onChange={e => setNewMemberInfo({ ...newMemberInfo, 이름: e.target.value })}
+                      onChange={e => {
+                        setNewMemberInfo({ ...newMemberInfo, 이름: e.target.value });
+                        if (formErrors.이름) {
+                          const newErrors = { ...formErrors };
+                          delete newErrors.이름;
+                          setFormErrors(newErrors);
+                        }
+                      }}
                       placeholder='이름을 입력하세요'
                     />
+                    {formErrors.이름 && <span className='form-error-message'>{formErrors.이름}</span>}
                   </div>
                   <div className='members-form-group'>
                     <label>
@@ -746,12 +862,20 @@ const MembersManagement: React.FC = () => {
                     </label>
                     <input
                       type='text'
-                      className='members-modal-input'
+                      className={`members-modal-input ${formErrors.name_suffix ? 'form-field-error' : ''}`}
                       value={newMemberInfo.name_suffix}
-                      onChange={e => setNewMemberInfo({ ...newMemberInfo, name_suffix: e.target.value })}
+                      onChange={e => {
+                        setNewMemberInfo({ ...newMemberInfo, name_suffix: e.target.value });
+                        if (formErrors.name_suffix) {
+                          const newErrors = { ...formErrors };
+                          delete newErrors.name_suffix;
+                          setFormErrors(newErrors);
+                        }
+                      }}
                       placeholder='예: A, B, C'
                       maxLength={10}
                     />
+                    {formErrors.name_suffix && <span className='form-error-message'>{formErrors.name_suffix}</span>}
                     <small style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>
                       동일한 이름이 있을 경우 구분하기 위한 문자 (예: 홍길동A의 "A")
                     </small>
@@ -771,7 +895,12 @@ const MembersManagement: React.FC = () => {
                     <select
                       className='members-modal-select'
                       value={newMemberInfo.gender_type}
-                      onChange={e => setNewMemberInfo({ ...newMemberInfo, gender_type: e.target.value as 'M' | 'F' })}
+                      onChange={e =>
+                        setNewMemberInfo({
+                          ...newMemberInfo,
+                          gender_type: e.target.value as 'M' | 'F',
+                        })
+                      }
                     >
                       <option value='M'>남성</option>
                       <option value='F'>여성</option>
@@ -783,11 +912,31 @@ const MembersManagement: React.FC = () => {
                     </label>
                     <input
                       type='text'
-                      className='members-modal-input'
+                      className={`members-modal-input ${formErrors.휴대폰번호 ? 'form-field-error' : ''}`}
                       value={newMemberInfo.휴대폰번호}
-                      onChange={e => setNewMemberInfo({ ...newMemberInfo, 휴대폰번호: e.target.value })}
-                      placeholder='예: 010-1234-5678'
+                      onChange={e => {
+                        const formatted = formatPhoneNumber(e.target.value);
+                        setNewMemberInfo({ ...newMemberInfo, 휴대폰번호: formatted });
+                        // 실시간 검증
+                        if (formErrors.휴대폰번호) {
+                          const validation = validatePhoneNumber(formatted);
+                          if (validation.isValid) {
+                            const newErrors = { ...formErrors };
+                            delete newErrors.휴대폰번호;
+                            setFormErrors(newErrors);
+                          }
+                        }
+                      }}
+                      onBlur={() => {
+                        const validation = validatePhoneNumber(newMemberInfo.휴대폰번호);
+                        if (!validation.isValid) {
+                          setFormErrors(prev => ({ ...prev, 휴대폰번호: validation.error || '' }));
+                        }
+                      }}
+                      placeholder='예: 010-1234-5678 또는 01012345678'
+                      maxLength={13}
                     />
+                    {formErrors.휴대폰번호 && <span className='form-error-message'>{formErrors.휴대폰번호}</span>}
                   </div>
                   <div className='members-form-group'>
                     <label className='members-checkbox-label'>
@@ -805,41 +954,46 @@ const MembersManagement: React.FC = () => {
 
                 {/* 오른쪽 열: 소속 정보 */}
                 <div className='members-modal-form-column'>
+                  {formErrors.소속 && (
+                    <div className='form-error-message' style={{ marginBottom: '12px' }}>
+                      {formErrors.소속}
+                    </div>
+                  )}
                   <div className='members-form-group'>
                     <label>
                       소속 국 <span style={{ color: 'var(--error)' }}>*</span>
                     </label>
-                    <select
-                      className='members-modal-select'
+                    <ComboBox
+                      options={modalFilteredOptions.departments || []}
                       value={newMemberInfo.소속국}
-                      onChange={e =>
-                        handleDepartmentChange(e.target.value, ({ department, group, team }) => {
+                      onChange={value =>
+                        handleDepartmentChange(value, ({ department, group, team }) => {
                           setNewMemberInfo({
                             ...newMemberInfo,
                             소속국: department,
                             소속그룹: group,
                             소속순: team,
                           });
+                          if (formErrors.소속) {
+                            const newErrors = { ...formErrors };
+                            delete newErrors.소속;
+                            setFormErrors(newErrors);
+                          }
                         })
                       }
-                    >
-                      <option value=''>선택하세요</option>
-                      {(modalFilteredOptions.departments || []).map(dept => (
-                        <option key={dept} value={dept}>
-                          {dept}
-                        </option>
-                      ))}
-                    </select>
+                      placeholder='소속국을 선택하세요'
+                      className='members-modal-select'
+                    />
                   </div>
                   <div className='members-form-group'>
                     <label>
                       소속 그룹 <span style={{ color: 'var(--error)' }}>*</span>
                     </label>
-                    <select
-                      className='members-modal-select'
+                    <ComboBox
+                      options={modalFilteredOptions.groups || []}
                       value={newMemberInfo.소속그룹}
-                      onChange={e =>
-                        handleGroupChange(e.target.value, ({ group, team }) => {
+                      onChange={value =>
+                        handleGroupChange(value, ({ group, team }) => {
                           setNewMemberInfo({
                             ...newMemberInfo,
                             소속그룹: group,
@@ -847,33 +1001,23 @@ const MembersManagement: React.FC = () => {
                           });
                         })
                       }
+                      placeholder='소속그룹을 선택하세요'
                       disabled={!newMemberInfo.소속국}
-                    >
-                      <option value=''>선택하세요</option>
-                      {(modalFilteredOptions.groups || []).map(group => (
-                        <option key={group} value={group}>
-                          {group}
-                        </option>
-                      ))}
-                    </select>
+                      className='members-modal-select'
+                    />
                   </div>
                   <div className='members-form-group'>
                     <label>
                       소속 순 <span style={{ color: 'var(--error)' }}>*</span>
                     </label>
-                    <select
-                      className='members-modal-select'
+                    <ComboBox
+                      options={modalFilteredOptions.teams || []}
                       value={newMemberInfo.소속순}
-                      onChange={e => setNewMemberInfo({ ...newMemberInfo, 소속순: e.target.value })}
+                      onChange={value => setNewMemberInfo({ ...newMemberInfo, 소속순: value })}
+                      placeholder='소속순을 선택하세요'
                       disabled={!newMemberInfo.소속그룹}
-                    >
-                      <option value=''>선택하세요</option>
-                      {(modalFilteredOptions.teams || []).map(team => (
-                        <option key={team} value={team}>
-                          {team}
-                        </option>
-                      ))}
-                    </select>
+                      className='members-modal-select'
+                    />
                   </div>
                 </div>
               </div>
@@ -890,8 +1034,8 @@ const MembersManagement: React.FC = () => {
         </div>
       )}
 
-      {/* 성공 알림 */}
-      {showAlert && <div className='members-alert'>{alertMessage}</div>}
+      {/* Toast 알림 */}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   );
 };

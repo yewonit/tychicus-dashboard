@@ -9,4 +9,5 @@ export * from './excel/dataMappingUtils';
 export * from './excel/excelFieldMapping';
 export * from './excel/excelUtils';
 export * from './logger';
+export * from './phoneUtils';
 export * from './validation';
