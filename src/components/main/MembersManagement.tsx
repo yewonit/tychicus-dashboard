@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Member } from '../../types/api';
+import { useInfiniteScroll } from '../../hooks';
 import { memberService } from '../../services/memberService';
-import { LoadingSpinner } from '../ui'; // Assuming LoadingSpinner exists in ui/index.ts
+import { Member, OrganizationDto } from '../../types/api';
 
 const MembersManagement: React.FC = () => {
   const navigate = useNavigate();
@@ -11,17 +11,25 @@ const MembersManagement: React.FC = () => {
   const [filterGroup, setFilterGroup] = useState('전체');
   const [filterTeam, setFilterTeam] = useState('전체');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 20; // 무한 스크롤을 위해 페이지당 항목 수 증가
 
   // Data states
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const [totalPages, setTotalPages] = useState(0);
+
+  // 필터/검색 변경 추적을 위한 ref
+  const filterKeyRef = useRef<string>('');
   const [filterOptions, setFilterOptions] = useState<{
     departments: string[];
     groups: string[];
     teams: string[];
   }>({ departments: [], groups: [], teams: [] });
+
+  // 필터 옵션을 계층적으로 관리하기 위한 상태
+  const [allOrganizations, setAllOrganizations] = useState<OrganizationDto[]>([]);
 
   // 체크박스 및 모달 상태
   const [selectedMembers, setSelectedMembers] = useState<number[]>([]);
@@ -51,46 +59,160 @@ const MembersManagement: React.FC = () => {
     try {
       const options = await memberService.getFilterOptions();
       setFilterOptions(options);
+
+      // 조직 목록도 가져와서 계층적 필터링에 사용
+      const orgs = await memberService.fetchOrganizations();
+      setAllOrganizations(orgs);
     } catch (error) {
       console.error('Failed to fetch filter options:', error);
     }
   };
 
-  // Fetch members
-  const fetchMembers = async () => {
-    setLoading(true);
-    try {
-      const response = await memberService.getMembers({
-        search: searchTerm,
-        department: filterDepartment,
-        group: filterGroup,
-        team: filterTeam,
-        page: currentPage,
-        limit: itemsPerPage,
-      });
+  // 계층적 필터 옵션 계산
+  const getFilteredOptions = () => {
+    let filteredGroups = filterOptions.groups || [];
+    let filteredTeams = filterOptions.teams || [];
 
-      setMembers(response.members);
-      setTotalPages(response.pagination.totalPages);
-      
-      // API에서 필터 옵션을 제공하지 않으므로 별도 호출 필요
-      // 하지만 초기 로딩 시에만 호출하면 됨
-    } catch (error) {
-      console.error('Failed to fetch members:', error);
-      alert('구성원 목록을 불러오는데 실패했습니다.');
-    } finally {
-      setLoading(false);
+    // 소속국이 선택된 경우, 해당 소속국에 속한 그룹만 필터링
+    if (filterDepartment !== '전체' && allOrganizations.length > 0) {
+      const deptOrgs = allOrganizations.filter(org => org.name.startsWith(filterDepartment + '_'));
+      const deptGroups = new Set<string>();
+      deptOrgs.forEach(org => {
+        const parts = org.name.split('_');
+        if (parts.length >= 2 && parts[1]) {
+          deptGroups.add(parts[1]);
+        }
+      });
+      filteredGroups = Array.from(deptGroups).sort();
+
+      // 소속그룹도 선택된 경우, 해당 그룹에 속한 순만 필터링
+      if (filterGroup !== '전체') {
+        const groupOrgs = deptOrgs.filter(org => org.name.includes(`_${filterGroup}_`));
+        const groupTeams = new Set<string>();
+        groupOrgs.forEach(org => {
+          const parts = org.name.split('_');
+          if (parts.length >= 3 && parts[2]) {
+            groupTeams.add(parts[2]);
+          }
+        });
+        filteredTeams = Array.from(groupTeams).sort();
+      }
     }
+
+    return {
+      departments: filterOptions.departments || [],
+      groups: filteredGroups,
+      teams: filteredTeams,
+    };
   };
 
-  // Initial Load: Filter Options
+  const filteredOptions = getFilteredOptions();
+
+  // Fetch members (무한 스크롤 지원)
+  const fetchMembers = useCallback(
+    async (append = false) => {
+      // 필터/검색이 변경된 경우 append 모드 비활성화
+      const currentFilterKey = `${searchTerm}_${filterDepartment}_${filterGroup}_${filterTeam}`;
+      const isFilterChanged = filterKeyRef.current !== currentFilterKey;
+
+      if (isFilterChanged) {
+        filterKeyRef.current = currentFilterKey;
+        append = false; // 필터 변경 시 항상 새로 시작
+      }
+
+      // 로딩 상태 설정
+      if (append) {
+        setIsLoadingMore(true);
+      } else {
+        setLoading(true);
+        setMembers([]); // 필터 변경 시 기존 데이터 초기화
+      }
+
+      try {
+        const response = await memberService.getMembers({
+          search: searchTerm,
+          department: filterDepartment === '전체' ? undefined : filterDepartment,
+          group: filterGroup === '전체' ? undefined : filterGroup,
+          team: filterTeam === '전체' ? undefined : filterTeam,
+          page: currentPage,
+          limit: itemsPerPage,
+        });
+
+        // 데이터 누적 또는 교체
+        if (append) {
+          setMembers(prev => [...prev, ...response.members]);
+        } else {
+          setMembers(response.members);
+        }
+
+        // 더 불러올 데이터가 있는지 확인
+        setHasMore(currentPage < response.pagination.totalPages);
+        setTotalPages(response.pagination.totalPages);
+      } catch (error) {
+        console.error('Failed to fetch members:', error);
+        if (!append) {
+          alert('구성원 목록을 불러오는데 실패했습니다.');
+        }
+      } finally {
+        setLoading(false);
+        setIsLoadingMore(false);
+      }
+    },
+    [searchTerm, filterDepartment, filterGroup, filterTeam, currentPage, itemsPerPage]
+  );
+
+  // 더 불러오기 함수
+  const loadMore = useCallback(() => {
+    if (!hasMore || isLoadingMore || loading) return;
+    setCurrentPage(prev => prev + 1);
+  }, [hasMore, isLoadingMore, loading]);
+
+  // 무한 스크롤 Observer 설정
+  const observerRef = useInfiniteScroll({
+    hasMore,
+    isLoading: isLoadingMore || loading,
+    onLoadMore: loadMore,
+  });
+
+  // Initial Load: Filter Options & First Data Load
   useEffect(() => {
     fetchFilterOptions();
+    // 초기 데이터 로드 (currentPage가 1이고 필터 키가 비어있을 때)
+    if (currentPage === 1 && filterKeyRef.current === '') {
+      filterKeyRef.current = `${searchTerm}_${filterDepartment}_${filterGroup}_${filterTeam}`;
+      fetchMembers(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Search & Filter: Members List
+  // 필터/검색 변경 시 초기화
   useEffect(() => {
-    fetchMembers();
-  }, [searchTerm, filterDepartment, filterGroup, filterTeam, currentPage]);
+    const currentFilterKey = `${searchTerm}_${filterDepartment}_${filterGroup}_${filterTeam}`;
+    const isFilterChanged = filterKeyRef.current !== currentFilterKey;
+
+    if (isFilterChanged) {
+      setCurrentPage(1);
+      setHasMore(true);
+      setMembers([]); // 데이터 초기화
+      filterKeyRef.current = currentFilterKey; // 필터 키 업데이트
+      // 스크롤 위치를 맨 위로 이동
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [searchTerm, filterDepartment, filterGroup, filterTeam]);
+
+  // 페이지 변경 시 데이터 로드 (무한 스크롤)
+  useEffect(() => {
+    const isFirstPage = currentPage === 1;
+    const isFilterChanged = filterKeyRef.current !== `${searchTerm}_${filterDepartment}_${filterGroup}_${filterTeam}`;
+
+    // 필터가 변경되었거나 첫 페이지인 경우 새로 로드
+    if (isFirstPage || isFilterChanged) {
+      fetchMembers(false);
+    } else {
+      // 이후 페이지는 누적 로드
+      fetchMembers(true);
+    }
+  }, [currentPage, fetchMembers, searchTerm, filterDepartment, filterGroup, filterTeam]);
 
   // 사이드바 메뉴 클릭 시 화면 초기화
   useEffect(() => {
@@ -100,6 +222,8 @@ const MembersManagement: React.FC = () => {
       setFilterGroup('전체');
       setFilterTeam('전체');
       setCurrentPage(1);
+      setHasMore(true);
+      setMembers([]);
       setSelectedMembers([]);
       setShowModal(false);
       setShowAddMemberModal(false);
@@ -118,8 +242,9 @@ const MembersManagement: React.FC = () => {
         소속순: '',
         is_new_member: false,
       });
+      filterKeyRef.current = '';
       fetchFilterOptions(); // 옵션도 초기화 시 재조회
-      fetchMembers();
+      // fetchMembers는 필터 변경 useEffect에서 자동 호출됨
     };
 
     window.addEventListener('resetMembersPage', handleResetPage);
@@ -282,82 +407,91 @@ const MembersManagement: React.FC = () => {
 
   return (
     <div className='members-container'>
-      <div className='members-header'>
-        <h1>구성원 관리</h1>
-        <p>청년회 구성원 정보를 관리하세요</p>
-      </div>
+      <div className='members-sticky-header'>
+        <div className='members-header'>
+          <h1>구성원 관리</h1>
+          <p>청년회 구성원 정보를 관리하세요</p>
+        </div>
 
-      <div className='members-controls'>
-        <div className='members-search-bar'>
-          <div className='search-box'>
-            <input
-              type='text'
-              placeholder='이름으로 검색...'
-              value={searchTerm}
+        <div className='members-controls'>
+          <div className='members-search-bar'>
+            <div className='search-box'>
+              <input
+                type='text'
+                placeholder='이름으로 검색...'
+                value={searchTerm}
+                onChange={e => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1);
+                }}
+              />
+              <span className='search-icon'>🔍</span>
+            </div>
+            <select
+              className='members-filter-select'
+              value={filterDepartment}
               onChange={e => {
-                setSearchTerm(e.target.value);
+                setFilterDepartment(e.target.value);
+                // 소속국 변경 시 하위 필터 초기화
+                setFilterGroup('전체');
+                setFilterTeam('전체');
                 setCurrentPage(1);
               }}
-            />
-            <span className='search-icon'>🔍</span>
+            >
+              <option value='전체'>소속국</option>
+              {(filteredOptions.departments || []).map(dept => (
+                <option key={dept} value={dept}>
+                  {dept}
+                </option>
+              ))}
+            </select>
+            <select
+              className='members-filter-select'
+              value={filterGroup}
+              onChange={e => {
+                setFilterGroup(e.target.value);
+                // 소속그룹 변경 시 소속순 초기화
+                setFilterTeam('전체');
+                setCurrentPage(1);
+              }}
+              disabled={filterDepartment === '전체'}
+            >
+              <option value='전체'>소속그룹</option>
+              {(filteredOptions.groups || []).map(group => (
+                <option key={group} value={group}>
+                  {group}
+                </option>
+              ))}
+            </select>
+            <select
+              className='members-filter-select'
+              value={filterTeam}
+              onChange={e => {
+                setFilterTeam(e.target.value);
+                setCurrentPage(1);
+              }}
+              disabled={filterGroup === '전체'}
+            >
+              <option value='전체'>소속순</option>
+              {(filteredOptions.teams || []).map(team => (
+                <option key={team} value={team}>
+                  {team}
+                </option>
+              ))}
+            </select>
           </div>
-          <select
-            className='members-filter-select'
-            value={filterDepartment}
-            onChange={e => {
-              setFilterDepartment(e.target.value);
-              setCurrentPage(1);
-            }}
-          >
-            <option value='전체'>소속국</option>
-            {(filterOptions.departments || []).map(dept => (
-              <option key={dept} value={dept}>
-                {dept}
-              </option>
-            ))}
-          </select>
-          <select
-            className='members-filter-select'
-            value={filterGroup}
-            onChange={e => {
-              setFilterGroup(e.target.value);
-              setCurrentPage(1);
-            }}
-          >
-            <option value='전체'>소속그룹</option>
-            {(filterOptions.groups || []).map(group => (
-              <option key={group} value={group}>
-                {group}
-              </option>
-            ))}
-          </select>
-          <select
-            className='members-filter-select'
-            value={filterTeam}
-            onChange={e => {
-              setFilterTeam(e.target.value);
-              setCurrentPage(1);
-            }}
-          >
-            <option value='전체'>소속순</option>
-            {(filterOptions.teams || []).map(team => (
-              <option key={team} value={team}>
-                {team}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className='members-action-buttons'>
-          <button className='add-button' onClick={handleAddMember}>
-            + 새 구성원 추가
-          </button>
-          <button
-            className='change-affiliation-button'
-            onClick={handleOpenModal}
-            disabled={selectedMembers.length === 0}
-          >
-            소속 변경
-          </button>
+          <div className='members-action-buttons'>
+            <button className='add-button' onClick={handleAddMember}>
+              + 새 구성원 추가
+            </button>
+            <button
+              className='change-affiliation-button'
+              onClick={handleOpenModal}
+              disabled={selectedMembers.length === 0}
+            >
+              소속 변경
+            </button>
+          </div>
         </div>
       </div>
 
@@ -416,30 +550,42 @@ const MembersManagement: React.FC = () => {
             </tbody>
           </table>
         )}
-      </div>
 
-      <div className='pagination'>
-        <button className='page-button' onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>
-          이전
-        </button>
+        {/* 무한 스크롤: 하단 로딩 인디케이터 및 감지 요소 */}
+        {!loading && members.length > 0 && (
+          <>
+            {isLoadingMore && (
+              <div className='infinite-scroll-loading' style={{ padding: '20px', textAlign: 'center' }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px' }}>
+                  <div
+                    style={{
+                      width: '20px',
+                      height: '20px',
+                      border: '3px solid var(--border-light)',
+                      borderTop: '3px solid var(--primary)',
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite',
+                    }}
+                  />
+                  <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                    더 많은 구성원을 불러오는 중...
+                  </span>
+                </div>
+              </div>
+            )}
 
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-          <button
-            key={page}
-            className={`page-button ${page === currentPage ? 'active' : ''}`}
-            onClick={() => setCurrentPage(page)}
-          >
-            {page}
-          </button>
-        ))}
+            {!hasMore && members.length > 0 && (
+              <div className='infinite-scroll-end' style={{ padding: '20px', textAlign: 'center' }}>
+                <span style={{ color: 'var(--text-tertiary)', fontSize: '0.9rem' }}>
+                  모든 구성원을 불러왔습니다 ({members.length}명)
+                </span>
+              </div>
+            )}
 
-        <button
-          className='page-button'
-          onClick={() => setCurrentPage(currentPage + 1)}
-          disabled={currentPage === totalPages || totalPages === 0}
-        >
-          다음
-        </button>
+            {/* Intersection Observer 감지용 요소 */}
+            {hasMore && <div ref={observerRef} style={{ height: '20px' }} />}
+          </>
+        )}
       </div>
 
       {/* 소속 변경 모달 */}
