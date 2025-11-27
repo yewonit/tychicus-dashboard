@@ -3,6 +3,7 @@ export { useAuth } from './useAuth';
 export { useAutoSave } from './useAutoSave';
 export { useDebounce } from './useDebounce';
 export { useForm } from './useForm';
+export { useInfiniteScroll } from './useInfiniteScroll';
 export { useLocalStorage, useLocalStorageValue } from './useLocalStorage';
 export { useSeasonData } from './useSeasonData';
 export { useToggle } from './useToggle';
