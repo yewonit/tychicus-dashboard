@@ -1,20 +1,19 @@
 import {
-  Member,
-  GetMembersRequest,
-  GetMembersResponse,
-  UpdateMembersAffiliationRequest,
-  UpdateMembersAffiliationResponse,
-  GetMemberDetailResponse,
   CreateMemberRequest,
   CreateMemberResponse,
+  GetMemberDetailResponse,
+  GetMembersRequest,
+  GetMembersResponse,
+  Member,
+  OrganizationDto,
+  OrganizationsResponse,
+  UpdateMembersAffiliationRequest,
+  UpdateMembersAffiliationResponse,
   UserDto,
   UserListResponse,
-  FilterOptionsResponse,
-  OrganizationsResponse,
-  OrganizationDto,
 } from '../types/api';
-import axiosClient from '../utils/axiosClient';
 import { getUserData } from '../utils/authUtils';
+import axiosClient from '../utils/axiosClient';
 
 // Helper function to map UserDto to Member
 const mapUserToMember = (user: UserDto): Member => {
@@ -74,10 +73,34 @@ export const memberService = {
       limit: request.limit || 10,
     };
 
+    // 요청 정보 로깅
+    const fullUrl = `${axiosClient.defaults.baseURL}/users`;
+    const queryString = new URLSearchParams(
+      Object.entries(params).reduce(
+        (acc, [key, value]) => {
+          if (value !== undefined && value !== null) {
+            acc[key] = String(value);
+          }
+          return acc;
+        },
+        {} as Record<string, string>
+      )
+    ).toString();
+    const requestUrl = queryString ? `${fullUrl}?${queryString}` : fullUrl;
+
+    console.log('📤 GET /api/users 요청 시작:', {
+      url: '/users',
+      fullUrl: requestUrl,
+      params,
+      timestamp: new Date().toISOString(),
+    });
+
     try {
+      const requestStartTime = Date.now();
       // 백엔드 API 변경: /api/users/list → /api/users (쿼리스트링으로 필터링)
       const response = await axiosClient.get<UserListResponse>('/users', { params });
-      
+      const requestDuration = Date.now() - requestStartTime;
+
       // 안전한 응답 처리
       const data = response.data?.data;
       if (!data) {
@@ -92,6 +115,26 @@ export const memberService = {
         limit: 10,
       };
 
+      // 성공 응답 로깅
+      console.log('✅ GET /api/users 요청 성공:', {
+        url: '/users',
+        fullUrl: requestUrl,
+        status: response.status,
+        statusText: response.statusText,
+        duration: `${requestDuration}ms`,
+        응답데이터: {
+          구성원수: members.length,
+          페이지네이션: {
+            현재페이지: pagination.currentPage,
+            전체페이지: pagination.totalPages,
+            전체개수: pagination.totalCount,
+            페이지당개수: pagination.limit,
+          },
+        },
+        원본응답: response.data,
+        timestamp: new Date().toISOString(),
+      });
+
       return {
         members: members.map(mapUserToMember),
         pagination: {
@@ -103,15 +146,50 @@ export const memberService = {
       };
     } catch (error: any) {
       // 에러 응답 상세 정보 로깅 (백엔드 디버깅용)
-      console.error('구성원 목록 조회 실패:', {
+      const errorDetails = {
         url: '/users',
+        fullUrl: requestUrl,
         params,
         status: error.response?.status,
         statusText: error.response?.statusText,
-        errorMessage: error.response?.data?.message || error.message,
+        errorMessage: error.response?.data?.error?.message || error.response?.data?.message || error.message,
+        errorType: error.response?.data?.error?.name || 'Unknown',
         errorData: error.response?.data,
-        fullError: error,
-      });
+        requestConfig: {
+          method: 'GET',
+          headers: error.config?.headers,
+        },
+        timestamp: new Date().toISOString(),
+      };
+
+      console.error('❌ GET /api/users 요청 실패:', errorDetails);
+
+      // Sequelize 데이터베이스 에러인 경우 상세 정보 출력
+      if (
+        errorDetails.errorType === 'SequelizeDatabaseError' ||
+        errorDetails.errorMessage?.includes('Unknown column')
+      ) {
+        console.error('🔴 백엔드 Sequelize 쿼리 에러 감지:', {
+          문제: 'Sequelize가 잘못된 SQL 쿼리를 생성했습니다.',
+          에러메시지: errorDetails.errorMessage,
+          가능한원인: [
+            'User 모델의 association 설정 오류',
+            'include 옵션에서 잘못된 모델 참조',
+            '모델 alias 설정 문제',
+            '자기 자신과의 association 처리 오류',
+          ],
+          백엔드확인사항: [
+            'User 모델의 associations 설정 확인',
+            'GET /api/users 엔드포인트의 Sequelize 쿼리 확인',
+            'include 옵션에서 User 모델을 중복 참조하지 않는지 확인',
+          ],
+          요청정보: {
+            엔드포인트: errorDetails.fullUrl,
+            파라미터객체: errorDetails.params,
+          },
+        });
+      }
+
       throw error;
     }
   },
@@ -119,14 +197,12 @@ export const memberService = {
   // 1-1. 필터 옵션 조회
   getFilterOptions: async () => {
     try {
-      // 백엔드 API 변경: /api/organizations/filter-options → /api/organizations?filter-options=true
-      const response = await axiosClient.get<FilterOptionsResponse>('/organizations', {
-        params: { 'filter-options': true }
-      });
-      
+      // 백엔드 API: 조직 목록을 가져와서 필터 옵션 추출
+      const response = await axiosClient.get<OrganizationsResponse>('/organizations');
+
       // 안전한 응답 처리
-      const data = response.data?.data;
-      if (!data) {
+      const organizations = response.data?.data;
+      if (!organizations || !Array.isArray(organizations)) {
         console.warn('필터 옵션 API 응답 형식이 올바르지 않습니다. 기본값을 반환합니다.');
         return {
           departments: [],
@@ -135,10 +211,42 @@ export const memberService = {
         };
       }
 
+      // 조직명 파싱하여 필터 옵션 추출
+      // 조직명 형식: "1국_강병관그룹_강병관순" 또는 "1국", "1국_강병관그룹"
+      const departmentsSet = new Set<string>();
+      const groupsSet = new Set<string>();
+      const teamsSet = new Set<string>();
+
+      organizations.forEach(org => {
+        if (!org.name) return;
+
+        const parts = org.name.split('_');
+
+        // 국 (department)
+        if (parts.length >= 1 && parts[0]) {
+          departmentsSet.add(parts[0]);
+        }
+
+        // 그룹 (group)
+        if (parts.length >= 2 && parts[1]) {
+          groupsSet.add(parts[1]);
+        }
+
+        // 순 (team)
+        if (parts.length >= 3 && parts[2]) {
+          teamsSet.add(parts[2]);
+        }
+      });
+
+      // Set을 배열로 변환하고 정렬
+      const departments = Array.from(departmentsSet).sort();
+      const groups = Array.from(groupsSet).sort();
+      const teams = Array.from(teamsSet).sort();
+
       return {
-        departments: data.departments || [],
-        groups: data.groups || [],
-        teams: data.teams || [],
+        departments,
+        groups,
+        teams,
       };
     } catch (error) {
       console.error('필터 옵션 조회 실패:', error);
@@ -156,27 +264,23 @@ export const memberService = {
     request: UpdateMembersAffiliationRequest
   ): Promise<UpdateMembersAffiliationResponse> => {
     const { memberIds, affiliation } = request;
-    
+
     // 조직 ID 조회
-    const orgId = await memberService.findOrganizationId(
-      affiliation.department,
-      affiliation.group,
-      affiliation.team
-    );
+    const orgId = await memberService.findOrganizationId(affiliation.department, affiliation.group, affiliation.team);
 
     if (!orgId) {
       throw new Error('유효하지 않은 조직 정보입니다.');
     }
 
     // 직분 기본값 (순원) 설정 - 필요시 파라미터로 받도록 수정 가능
-    const roleName = "순원";
+    const roleName = '순원';
 
     await axiosClient.patch('/users/bulk-change-organization', {
       data: memberIds.map(id => ({
         id,
         organizationId: orgId,
         roleName,
-      }))
+      })),
     });
 
     return {
@@ -193,7 +297,7 @@ export const memberService = {
     // 추후 백엔드 구현에 따라 수정 필요
     const response = await axiosClient.get<{ data: UserDto }>(`/users/${id}`);
     const userDto = response.data.data;
-    
+
     const member = mapUserToMember(userDto);
 
     return {
@@ -211,11 +315,7 @@ export const memberService = {
   // 4. 새 구성원 추가
   createMember: async (request: CreateMemberRequest): Promise<CreateMemberResponse> => {
     // 조직 ID 조회
-    const orgId = await memberService.findOrganizationId(
-      request.소속국,
-      request.소속그룹,
-      request.소속순
-    );
+    const orgId = await memberService.findOrganizationId(request.소속국, request.소속그룹, request.소속순);
 
     if (!orgId) {
       throw new Error('유효하지 않은 조직 정보입니다.');
@@ -237,7 +337,7 @@ export const memberService = {
         // YY 형식인 경우 변환
         const currentYear = new Date().getFullYear();
         const year = parseInt(request.생일연도);
-        const fullYear = year + (year > (currentYear % 100) ? 1900 : 2000);
+        const fullYear = year + (year > currentYear % 100 ? 1900 : 2000);
         birthDate = `${fullYear}-01-01`;
       }
     }
