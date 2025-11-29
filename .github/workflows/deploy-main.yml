@@ -21,7 +21,7 @@ jobs:
 
       - name: Build Docker Image (production mode)
         run: |
-          docker buildx build --build-arg NODE_ENV=production -t ${{ secrets.DOCKER_HUB_USERNAME }}/tychicus-dashboard:prod --platform linux/amd64 .
+          docker buildx build --build-arg BUILD_MODE=production -t ${{ secrets.DOCKER_HUB_USERNAME }}/tychicus-dashboard:prod --platform linux/amd64 .
 
       - name: Push Docker Image to Docker Hub
         run: |
