@@ -253,14 +253,21 @@ export const memberService = {
       const groupsSet = new Set<string>();
       const teamsSet = new Set<string>();
 
+      // 제외할 조직명 패턴 (소속국 필터에서 제외)
+      const excludedDepartmentPatterns = ['예원교회', '청년선교회', '코람데오 청년선교회'];
+
       organizations.forEach(org => {
         if (!org.name) return;
 
         const parts = org.name.split('_');
 
-        // 국 (department)
+        // 국 (department) - 제외 패턴 필터링
         if (parts.length >= 1 && parts[0]) {
-          departmentsSet.add(parts[0]);
+          const department = parts[0];
+          // 제외 패턴에 해당하지 않는 경우만 추가
+          if (!excludedDepartmentPatterns.some(pattern => department.includes(pattern))) {
+            departmentsSet.add(department);
+          }
         }
 
         // 그룹 (group)

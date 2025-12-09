@@ -5106,6 +5106,14 @@ html {
   font-weight: 600;
 }
 
+.filter-error-notice {
+  padding: 8px 12px;
+  background: rgba(239, 83, 80, 0.1);
+  border-left: 3px solid var(--error);
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
 /* 선택된 항목 정보 */
 .selection-info {
   display: flex;

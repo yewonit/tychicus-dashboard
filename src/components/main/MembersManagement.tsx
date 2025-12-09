@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDebounce, useInfiniteScroll } from '../../hooks';
+import { useDebounce, useInfiniteScroll, useRetry } from '../../hooks';
 import { memberService } from '../../services/memberService';
 import { Member, OrganizationDto } from '../../types/api';
 import { extractNumbers, formatPhoneNumber, validatePhoneNumber } from '../../utils/phoneUtils';
+import { sanitizeName, sanitizeNameSuffix, sanitizeSearchTerm } from '../../utils/sanitization';
+import { commonValidators, validationRules } from '../../utils/validation';
 import { ComboBox } from '../ui/ComboBox';
 import { Toast } from '../ui/Toast';
 
@@ -45,6 +47,14 @@ const MembersManagement: React.FC = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
+
+  // 검색어 유효성 검증 및 sanitization (최소 2자 이상 또는 빈 문자열)
+  const validSearchTerm = useMemo(() => {
+    const sanitized = sanitizeSearchTerm(debouncedSearchTerm);
+    const trimmed = sanitized.trim();
+    // 최소 2자 이상이거나 빈 문자열만 허용
+    return trimmed.length >= 2 || trimmed.length === 0 ? trimmed : '';
+  }, [debouncedSearchTerm]);
   const [filterDepartment, setFilterDepartment] = useState(DEFAULT_FILTER);
   const [filterGroup, setFilterGroup] = useState(DEFAULT_FILTER);
   const [filterTeam, setFilterTeam] = useState(DEFAULT_FILTER);
@@ -88,19 +98,45 @@ const MembersManagement: React.FC = () => {
   // 새 구성원 정보 상태
   const [newMemberInfo, setNewMemberInfo] = useState(INITIAL_MEMBER_INFO);
 
-  // Fetch filter options
-  const fetchFilterOptions = async () => {
+  // 재시도 로직 훅
+  const { executeWithRetry } = useRetry();
+
+  // 필터 옵션 로딩 실패 상태
+  const [filterOptionsError, setFilterOptionsError] = useState<string | null>(null);
+
+  // Fetch filter options (재시도 로직 포함)
+  const fetchFilterOptions = useCallback(async () => {
     try {
-      const options = await memberService.getFilterOptions();
+      setFilterOptionsError(null);
+
+      const options = await executeWithRetry('filterOptions', () => memberService.getFilterOptions(), {
+        maxRetries: 3,
+        retryDelay: 1000,
+        onRetry: (attempt: number) => {
+          if (process.env.NODE_ENV === 'development') {
+            // eslint-disable-next-line no-console
+            console.log(`필터 옵션 로딩 재시도 중... (${attempt}/3)`);
+          }
+        },
+      });
       setFilterOptions(options);
 
       // 조직 목록도 가져와서 계층적 필터링에 사용
-      const orgs = await memberService.fetchOrganizations();
+      const orgs = await executeWithRetry('organizations', () => memberService.fetchOrganizations(), {
+        maxRetries: 3,
+        retryDelay: 1000,
+      });
       setAllOrganizations(orgs);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch filter options:', error);
+      const errorMessage = error?.response?.data?.message || error?.message || '필터 옵션을 불러오는데 실패했습니다.';
+      setFilterOptionsError(errorMessage);
+      setToast({
+        message: `${errorMessage} 페이지를 새로고침해주세요.`,
+        type: 'error',
+      });
     }
-  };
+  }, [executeWithRetry]);
 
   // 조직명 파싱 헬퍼 함수
   const parseOrganizationName = useCallback((orgName: string): ParsedOrganizationName => {
@@ -209,21 +245,21 @@ const MembersManagement: React.FC = () => {
     setSortOrder('asc');
   }, []);
 
-  // 활성 필터 개수 계산
+  // 활성 필터 개수 계산 (검색어는 제외)
   const activeFiltersCount = useMemo(() => {
     let count = 0;
-    if (searchTerm) count++;
+    // 검색어는 필터 개수에서 제외
     if (filterDepartment !== DEFAULT_FILTER) count++;
     if (filterGroup !== DEFAULT_FILTER) count++;
     if (filterTeam !== DEFAULT_FILTER) count++;
     return count;
-  }, [searchTerm, filterDepartment, filterGroup, filterTeam]);
+  }, [filterDepartment, filterGroup, filterTeam]);
 
   // Fetch members (무한 스크롤 지원)
   const fetchMembers = useCallback(
     async (append = false) => {
       // 필터/검색이 변경된 경우 append 모드 비활성화
-      const currentFilterKey = createFilterKey(debouncedSearchTerm, filterDepartment, filterGroup, filterTeam);
+      const currentFilterKey = createFilterKey(validSearchTerm, filterDepartment, filterGroup, filterTeam);
       const isFilterChanged = filterKeyRef.current !== currentFilterKey;
 
       if (isFilterChanged) {
@@ -240,14 +276,28 @@ const MembersManagement: React.FC = () => {
       }
 
       try {
-        const response = await memberService.getMembers({
-          search: debouncedSearchTerm,
-          department: filterDepartment === DEFAULT_FILTER ? undefined : filterDepartment,
-          group: filterGroup === DEFAULT_FILTER ? undefined : filterGroup,
-          team: filterTeam === DEFAULT_FILTER ? undefined : filterTeam,
-          page: currentPage,
-          limit: ITEMS_PER_PAGE,
-        });
+        const response = await executeWithRetry(
+          'members',
+          () =>
+            memberService.getMembers({
+              search: validSearchTerm || undefined,
+              department: filterDepartment === DEFAULT_FILTER ? undefined : filterDepartment,
+              group: filterGroup === DEFAULT_FILTER ? undefined : filterGroup,
+              team: filterTeam === DEFAULT_FILTER ? undefined : filterTeam,
+              page: currentPage,
+              limit: ITEMS_PER_PAGE,
+            }),
+          {
+            maxRetries: append ? 1 : 3, // append 모드에서는 재시도 최소화
+            retryDelay: 1000,
+            onRetry: (attempt: number) => {
+              if (!append && process.env.NODE_ENV === 'development') {
+                // eslint-disable-next-line no-console
+                console.log(`구성원 목록 로딩 재시도 중... (${attempt}/3)`);
+              }
+            },
+          }
+        );
 
         // 데이터 누적 또는 교체
         if (append) {
@@ -258,17 +308,19 @@ const MembersManagement: React.FC = () => {
 
         // 더 불러올 데이터가 있는지 확인
         setHasMore(currentPage < response.pagination.totalPages);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to fetch members:', error);
         if (!append) {
-          alert('구성원 목록을 불러오는데 실패했습니다.');
+          const errorMessage =
+            error?.response?.data?.message || error?.message || '구성원 목록을 불러오는데 실패했습니다.';
+          setToast({ message: `${errorMessage} 잠시 후 다시 시도해주세요.`, type: 'error' });
         }
       } finally {
         setLoading(false);
         setIsLoadingMore(false);
       }
     },
-    [debouncedSearchTerm, filterDepartment, filterGroup, filterTeam, currentPage]
+    [validSearchTerm, filterDepartment, filterGroup, filterTeam, currentPage, executeWithRetry]
   );
 
   // 더 불러오기 함수
@@ -289,15 +341,15 @@ const MembersManagement: React.FC = () => {
     fetchFilterOptions();
     // 초기 데이터 로드 (currentPage가 1이고 필터 키가 비어있을 때)
     if (currentPage === 1 && filterKeyRef.current === '') {
-      filterKeyRef.current = createFilterKey(searchTerm, filterDepartment, filterGroup, filterTeam);
+      filterKeyRef.current = createFilterKey(validSearchTerm, filterDepartment, filterGroup, filterTeam);
       fetchMembers(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // 필터/검색 변경 시 초기화 (debouncedSearchTerm 사용)
+  // 필터/검색 변경 시 초기화 (validSearchTerm 사용)
   useEffect(() => {
-    const currentFilterKey = createFilterKey(debouncedSearchTerm, filterDepartment, filterGroup, filterTeam);
+    const currentFilterKey = createFilterKey(validSearchTerm, filterDepartment, filterGroup, filterTeam);
     const isFilterChanged = filterKeyRef.current !== currentFilterKey;
 
     if (isFilterChanged) {
@@ -311,13 +363,13 @@ const MembersManagement: React.FC = () => {
         mainContent.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
-  }, [debouncedSearchTerm, filterDepartment, filterGroup, filterTeam]);
+  }, [validSearchTerm, filterDepartment, filterGroup, filterTeam]);
 
   // 페이지 변경 시 데이터 로드 (무한 스크롤)
   useEffect(() => {
     const isFirstPage = currentPage === 1;
     const isFilterChanged =
-      filterKeyRef.current !== createFilterKey(debouncedSearchTerm, filterDepartment, filterGroup, filterTeam);
+      filterKeyRef.current !== createFilterKey(validSearchTerm, filterDepartment, filterGroup, filterTeam);
 
     // 필터가 변경되었거나 첫 페이지인 경우 새로 로드
     if (isFirstPage || isFilterChanged) {
@@ -327,7 +379,7 @@ const MembersManagement: React.FC = () => {
       fetchMembers(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, fetchMembers, debouncedSearchTerm, filterDepartment, filterGroup, filterTeam]);
+  }, [currentPage, fetchMembers, validSearchTerm, filterDepartment, filterGroup, filterTeam]);
 
   // 사이드바 메뉴 클릭 시 화면 초기화
   useEffect(() => {
@@ -382,18 +434,33 @@ const MembersManagement: React.FC = () => {
     // 유효성 검사
     const errors: Record<string, string> = {};
 
-    if (!newMemberInfo.이름) {
-      errors.이름 = '이름을 입력해주세요.';
-    }
-    if (!newMemberInfo.name_suffix || !newMemberInfo.name_suffix.trim()) {
-      errors.name_suffix = '동명이인 구분자를 입력해주세요.';
+    // 이름 검증
+    const nameError = commonValidators.requiredNameWithEnglish(newMemberInfo.이름);
+    if (nameError) {
+      errors.이름 = nameError;
     }
 
+    // 동명이인 구분자 검증
+    const nameSuffixError = commonValidators.requiredNameSuffix(newMemberInfo.name_suffix);
+    if (nameSuffixError) {
+      errors.name_suffix = nameSuffixError;
+    }
+
+    // 전화번호 검증
     const phoneValidation = validatePhoneNumber(newMemberInfo.휴대폰번호);
     if (!phoneValidation.isValid) {
       errors.휴대폰번호 = phoneValidation.error || '휴대폰 번호를 입력해주세요.';
     }
 
+    // 생년월일 검증 (입력된 경우에만)
+    if (newMemberInfo.생일연도) {
+      const birthDateError = validationRules.birthDate(newMemberInfo.생일연도);
+      if (birthDateError) {
+        errors.생일연도 = birthDateError;
+      }
+    }
+
+    // 소속 정보 검증
     if (!newMemberInfo.소속국 || !newMemberInfo.소속그룹 || !newMemberInfo.소속순) {
       errors.소속 = '소속 정보를 모두 선택해주세요.';
     }
@@ -549,15 +616,23 @@ const MembersManagement: React.FC = () => {
             <div className='search-box'>
               <input
                 type='text'
-                placeholder='이름으로 검색...'
+                placeholder='이름으로 검색... (최소 2자 이상)'
                 value={searchTerm}
                 onChange={e => {
-                  setSearchTerm(e.target.value);
+                  // 검색어 sanitization
+                  const sanitized = sanitizeSearchTerm(e.target.value);
+                  setSearchTerm(sanitized);
                   setCurrentPage(1);
                 }}
+                maxLength={50}
               />
               <span className='search-icon'>🔍</span>
             </div>
+            {filterOptionsError && (
+              <div className='filter-error-notice'>
+                <span style={{ color: 'var(--error)', fontSize: '0.85rem' }}>⚠️ {filterOptionsError}</span>
+              </div>
+            )}
             {activeFiltersCount > 0 && (
               <div className='filter-summary'>
                 <span className='filter-badge'>{activeFiltersCount}개 필터 적용 중</span>
@@ -845,14 +920,23 @@ const MembersManagement: React.FC = () => {
                       className={`members-modal-input ${formErrors.이름 ? 'form-field-error' : ''}`}
                       value={newMemberInfo.이름}
                       onChange={e => {
-                        setNewMemberInfo({ ...newMemberInfo, 이름: e.target.value });
+                        // 입력값 sanitization
+                        const sanitized = sanitizeName(e.target.value);
+                        setNewMemberInfo({ ...newMemberInfo, 이름: sanitized });
                         if (formErrors.이름) {
                           const newErrors = { ...formErrors };
                           delete newErrors.이름;
                           setFormErrors(newErrors);
                         }
                       }}
-                      placeholder='이름을 입력하세요'
+                      onBlur={() => {
+                        const error = commonValidators.requiredNameWithEnglish(newMemberInfo.이름);
+                        if (error) {
+                          setFormErrors(prev => ({ ...prev, 이름: error }));
+                        }
+                      }}
+                      placeholder='이름을 입력하세요 (한글 또는 영문)'
+                      maxLength={20}
                     />
                     {formErrors.이름 && <span className='form-error-message'>{formErrors.이름}</span>}
                   </div>
@@ -865,14 +949,22 @@ const MembersManagement: React.FC = () => {
                       className={`members-modal-input ${formErrors.name_suffix ? 'form-field-error' : ''}`}
                       value={newMemberInfo.name_suffix}
                       onChange={e => {
-                        setNewMemberInfo({ ...newMemberInfo, name_suffix: e.target.value });
+                        // 입력값 sanitization (영문/숫자만 허용)
+                        const sanitized = sanitizeNameSuffix(e.target.value);
+                        setNewMemberInfo({ ...newMemberInfo, name_suffix: sanitized });
                         if (formErrors.name_suffix) {
                           const newErrors = { ...formErrors };
                           delete newErrors.name_suffix;
                           setFormErrors(newErrors);
                         }
                       }}
-                      placeholder='예: A, B, C'
+                      onBlur={() => {
+                        const error = commonValidators.requiredNameSuffix(newMemberInfo.name_suffix);
+                        if (error) {
+                          setFormErrors(prev => ({ ...prev, name_suffix: error }));
+                        }
+                      }}
+                      placeholder='예: A, B, C (영문 또는 숫자)'
                       maxLength={10}
                     />
                     {formErrors.name_suffix && <span className='form-error-message'>{formErrors.name_suffix}</span>}
@@ -884,11 +976,28 @@ const MembersManagement: React.FC = () => {
                     <label>생년월일</label>
                     <input
                       type='date'
-                      className='members-modal-input'
+                      className={`members-modal-input ${formErrors.생일연도 ? 'form-field-error' : ''}`}
                       value={newMemberInfo.생일연도}
-                      onChange={e => setNewMemberInfo({ ...newMemberInfo, 생일연도: e.target.value })}
+                      onChange={e => {
+                        setNewMemberInfo({ ...newMemberInfo, 생일연도: e.target.value });
+                        if (formErrors.생일연도) {
+                          const newErrors = { ...formErrors };
+                          delete newErrors.생일연도;
+                          setFormErrors(newErrors);
+                        }
+                      }}
+                      onBlur={() => {
+                        if (newMemberInfo.생일연도) {
+                          const error = validationRules.birthDate(newMemberInfo.생일연도);
+                          if (error) {
+                            setFormErrors(prev => ({ ...prev, 생일연도: error }));
+                          }
+                        }
+                      }}
                       max={new Date().toISOString().split('T')[0]}
+                      min='1900-01-01'
                     />
+                    {formErrors.생일연도 && <span className='form-error-message'>{formErrors.생일연도}</span>}
                   </div>
                   <div className='members-form-group'>
                     <label>성별</label>
