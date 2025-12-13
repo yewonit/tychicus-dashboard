@@ -718,7 +718,7 @@ const MembersManagement: React.FC = () => {
                 </button>
               </div>
             )}
-            <button className='add-button' onClick={handleAddMember}>
+            <button className='add-button' onClick={handleAddMember} disabled>
               + 새 구성원 추가
             </button>
             <button
