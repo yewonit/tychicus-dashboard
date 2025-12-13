@@ -513,6 +513,12 @@ const MembersManagement: React.FC = () => {
       setToast({ message: '변경할 구성원을 선택해주세요.', type: 'warning' });
       return;
     }
+
+    // 소속 변경은 1명에 대해서만 가능
+    if (selectedMembers.length > 1) {
+      alert('소속 변경은 한 번에 1명씩만 가능합니다.\n1명만 선택해주세요.');
+      return;
+    }
     // 선택된 구성원의 기존 소속 정보 가져오기
     const selectedMember = members.find(m => selectedMembers.includes(m.id));
     if (selectedMember) {
