@@ -1,6 +1,7 @@
 import {
   CreateMemberRequest,
   CreateMemberResponse,
+  FilterOptionsResponse,
   GetMemberDetailResponse,
   GetMembersRequest,
   GetMembersResponse,
@@ -38,13 +39,19 @@ export const memberService = {
 
   // 조직 목록 조회 (내부용)
   async fetchOrganizations(): Promise<OrganizationDto[]> {
-    if (this._cachedOrgs) return this._cachedOrgs;
+    // 캐시 사용 안 함 - 항상 API 호출
+    // if (this._cachedOrgs) return this._cachedOrgs;
 
     try {
       // API 엔드포인트는 가정 (백엔드 팀과 확인 필요, 명세서에는 /api/organizations 언급됨)
-      const response = await axiosClient.get<OrganizationsResponse>('/organizations');
-      this._cachedOrgs = response.data.data;
-      return this._cachedOrgs;
+      const response = await axiosClient.get<OrganizationsResponse>('/organizations', {
+        params: {
+          includeDeleted: true,
+        },
+      });
+      // 캐시 저장도 주석 처리 (항상 최신 데이터 사용)
+      // this._cachedOrgs = response.data.data;
+      return response.data.data;
     } catch (error) {
       console.error('Failed to fetch organizations:', error);
       return [];
@@ -233,12 +240,17 @@ export const memberService = {
   // 1-1. 필터 옵션 조회
   getFilterOptions: async () => {
     try {
-      // 백엔드 API: 조직 목록을 가져와서 필터 옵션 추출
-      const response = await axiosClient.get<OrganizationsResponse>('/organizations');
+      // 백엔드 API: filterOptions=true 파라미터로 필터 옵션 조회
+      // 백엔드에서 이미 파싱된 departments/groups/teams 배열을 반환
+      const response = await axiosClient.get<FilterOptionsResponse>('/organizations', {
+        params: {
+          filterOptions: 'true',
+        },
+      });
 
       // 안전한 응답 처리
-      const organizations = response.data?.data;
-      if (!organizations || !Array.isArray(organizations)) {
+      const data = response.data?.data;
+      if (!data) {
         console.warn('필터 옵션 API 응답 형식이 올바르지 않습니다. 기본값을 반환합니다.');
         return {
           departments: [],
@@ -247,49 +259,11 @@ export const memberService = {
         };
       }
 
-      // 조직명 파싱하여 필터 옵션 추출
-      // 조직명 형식: "1국_강병관그룹_강병관순" 또는 "1국", "1국_강병관그룹"
-      const departmentsSet = new Set<string>();
-      const groupsSet = new Set<string>();
-      const teamsSet = new Set<string>();
-
-      // 제외할 조직명 패턴 (소속국 필터에서 제외)
-      const excludedDepartmentPatterns = ['예원교회', '청년선교회', '코람데오 청년선교회'];
-
-      organizations.forEach(org => {
-        if (!org.name) return;
-
-        const parts = org.name.split('_');
-
-        // 국 (department) - 제외 패턴 필터링
-        if (parts.length >= 1 && parts[0]) {
-          const department = parts[0];
-          // 제외 패턴에 해당하지 않는 경우만 추가
-          if (!excludedDepartmentPatterns.some(pattern => department.includes(pattern))) {
-            departmentsSet.add(department);
-          }
-        }
-
-        // 그룹 (group)
-        if (parts.length >= 2 && parts[1]) {
-          groupsSet.add(parts[1]);
-        }
-
-        // 순 (team)
-        if (parts.length >= 3 && parts[2]) {
-          teamsSet.add(parts[2]);
-        }
-      });
-
-      // Set을 배열로 변환하고 정렬
-      const departments = Array.from(departmentsSet).sort();
-      const groups = Array.from(groupsSet).sort();
-      const teams = Array.from(teamsSet).sort();
-
+      // 백엔드에서 이미 파싱되고 정렬된 데이터 반환
       return {
-        departments,
-        groups,
-        teams,
+        departments: data.departments || [],
+        groups: data.groups || [],
+        teams: data.teams || [],
       };
     } catch (error) {
       console.error('필터 옵션 조회 실패:', error);
