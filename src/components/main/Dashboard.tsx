@@ -565,7 +565,7 @@ const Dashboard: React.FC = () => {
               color: 'var(--text-secondary)',
             }}
           >
-            최근 활동 데이터를 불러오는 중...
+            등록된 최근 활동이 없습니다.
           </div>
         </div>
 
