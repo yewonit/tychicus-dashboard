@@ -20,10 +20,17 @@ const env = {
 };
 
 // 현재 환경 결정
+// 런타임 환경 변수 (window.__ENV__)를 우선적으로 사용
+// 없으면 빌드 타임 환경 변수 (process.env) 사용
 const getCurrentEnv = () => {
-  if (process.env.NODE_ENV === 'production') {
+  // 런타임 환경 변수 확인 (Docker 컨테이너에서 주입됨)
+  const runtimeEnv = (window as any).__ENV__;
+  const nodeEnv = runtimeEnv?.NODE_ENV || process.env.NODE_ENV;
+  const reactAppEnv = runtimeEnv?.REACT_APP_ENV || process.env.REACT_APP_ENV;
+
+  if (nodeEnv === 'production') {
     return 'production';
-  } else if (process.env.REACT_APP_ENV === 'local') {
+  } else if (reactAppEnv === 'local') {
     return 'local';
   } else {
     return 'development'; // 기본값을 development로 변경

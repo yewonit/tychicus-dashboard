@@ -7,8 +7,7 @@ FROM node:18-alpine AS builder
 WORKDIR /app
 
 # 빌드 인자로 환경 설정 받기
-ARG NODE_ENV=production
-ENV NODE_ENV=${NODE_ENV}
+ARG BUILD_MODE=production
 
 # package.json과 package-lock.json 복사
 COPY package*.json ./
@@ -23,10 +22,9 @@ RUN npm ci --ignore-scripts
 COPY . .
 
 # React 앱 빌드
-# NODE_ENV에 따라 다른 설정으로 빌드됨
-# 린트 에러 무시하고 빌드
-ENV DISABLE_ESLINT_PLUGIN=true
-RUN npm run build
+# --mode 인자를 통해 환경별 빌드
+# 예: npm run build -- --mode development
+RUN npm run build -- --mode ${BUILD_MODE}
 
 # ================================
 # Stage 2: Nginx Server
@@ -39,8 +37,16 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # 빌드된 React 앱을 Nginx 서빙 디렉토리로 복사
 COPY --from=builder /app/build /usr/share/nginx/html
 
+# Entrypoint 스크립트 복사 및 실행 권한 부여
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
 # 포트 노출
 EXPOSE 80
 
-# Nginx 시작 (foreground 모드)
-CMD ["nginx", "-g", "daemon off;"]
+# 환경 변수 기본값 설정
+ENV NODE_ENV=production
+ENV REACT_APP_ENV=production
+
+# Entrypoint 스크립트 실행 (런타임 환경 변수 주입)
+ENTRYPOINT ["/docker-entrypoint.sh"]
