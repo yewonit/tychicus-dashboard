@@ -36,9 +36,14 @@ export interface FilterOptionsResponse {
 
 export interface OrganizationDto {
   id: number;
+  season_id?: number; // 회기 ID (가장 큰 값이 최신 회기)
   name: string; // 예: "1국_김민수그룹_이용걸순"
   depth: number;
   parentId: number | null;
+  upper_organization_id?: number;
+  is_deleted?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface OrganizationsResponse {
@@ -57,7 +62,7 @@ export interface Member {
   주일청년예배출석일자?: string;
   수요예배출석일자?: string;
   휴대폰번호?: string;
-  
+
   // 상세 정보용 추가 필드 (선택적)
   프로필사진?: string;
   최초등록일자?: string;

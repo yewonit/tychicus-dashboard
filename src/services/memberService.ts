@@ -44,14 +44,40 @@ export const memberService = {
 
     try {
       // API 엔드포인트는 가정 (백엔드 팀과 확인 필요, 명세서에는 /api/organizations 언급됨)
-      const response = await axiosClient.get<OrganizationsResponse>('/organizations', {
-        params: {
-          includeDeleted: true,
-        },
-      });
-      // 캐시 저장도 주석 처리 (항상 최신 데이터 사용)
-      // this._cachedOrgs = response.data.data;
-      return response.data.data;
+      const response = await axiosClient.get<OrganizationsResponse>('/organizations');
+
+      const allOrgs = response.data.data;
+
+      // 최신 회기(가장 큰 season_id)의 조직만 필터링
+      if (allOrgs && allOrgs.length > 0) {
+        // 최대 season_id 찾기
+        const maxSeasonId = Math.max(...allOrgs.map(org => org.season_id || 0));
+
+        // 최신 회기의 조직만 필터링
+        const latestSeasonOrgs = allOrgs.filter(org => org.season_id === maxSeasonId);
+
+        // 개발 환경에서 로깅
+        const isDevelopment = process.env.NODE_ENV === 'development';
+        if (isDevelopment) {
+          console.log('🔍 조직 필터링:', {
+            전체조직수: allOrgs.length,
+            최신회기_season_id: maxSeasonId,
+            필터링된조직수: latestSeasonOrgs.length,
+            season_id별조직수: allOrgs.reduce(
+              (acc, org) => {
+                const seasonId = org.season_id || 0;
+                acc[seasonId] = (acc[seasonId] || 0) + 1;
+                return acc;
+              },
+              {} as Record<number, number>
+            ),
+          });
+        }
+
+        return latestSeasonOrgs;
+      }
+
+      return [];
     } catch (error) {
       console.error('Failed to fetch organizations:', error);
       return [];
