@@ -2412,66 +2412,70 @@ html {
 }
 
 .quick-stat-card {
-  background: var(--bg-card);
-  border-radius: 10px;
+  background: #f0ebe5;
+  border-radius: 12px;
   padding: 20px 15px;
-  box-shadow: var(--shadow-light);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   text-align: center;
   transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 140px;
+  min-height: 147px;
 }
 
 .quick-stat-card:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-medium);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .quick-stat-value {
-  font-size: 2.2rem;
+  font-size: 2.5rem;
   font-weight: 900;
-  color: var(--text-primary);
-  margin-bottom: 8px;
+  color: #2c3e50;
+  margin: 12px 0;
   line-height: 1;
 }
 
 .quick-stat-label {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  font-weight: 500;
-  margin-bottom: auto;
-  padding-top: 5px;
+  font-size: 0.85rem;
+  color: #6c757d;
+  font-weight: 400;
+  margin-bottom: 0;
+  padding-top: 0;
 }
 
 .quick-stat-growth {
   font-size: 0.75rem;
-  font-weight: 600;
-  margin-top: 8px;
-  display: flex;
+  font-weight: 500;
+  margin-top: 12px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  padding: 6px 8px;
-  border-radius: 6px;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 8px;
   border: 1px solid;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .quick-stat-growth.positive {
-  color: var(--state-success);
-  background: rgba(40, 167, 69, 0.1);
-  border-color: rgba(40, 167, 69, 0.2);
+  color: #28a745;
+  background: #d4edda;
+  border-color: #c3e6cb;
 }
 
 .quick-stat-growth.negative {
-  color: var(--state-danger);
-  background: rgba(220, 53, 69, 0.1);
-  border-color: rgba(220, 53, 69, 0.2);
+  color: #dc3545;
+  background: #f8d7da;
+  border-color: #f5c6cb;
 }
 
 .growth-icon {
-  font-size: 0.7rem;
+  font-size: 0.8rem;
+  display: inline-block;
 }
 
 /* 연속 결석자 섹션 */
@@ -2654,60 +2658,56 @@ html {
 }
 
 .consecutive-card {
-  background: white;
-  border-radius: 10px;
-  padding: 16px;
-  border: 2px solid var(--border-medium);
+  background: var(--bg-elevated);
+  border-radius: 12px;
+  padding: 16px 20px 20px 20px;
+  border: 2px solid #d9cdbd;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .consecutive-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
 .consecutive-title {
   font-size: 1rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 12px;
+  margin-top: 0;
+  margin-bottom: 16px;
   display: flex;
   align-items: center;
-  gap: 6px;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  gap: 8px;
 }
 
 .consecutive-stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  gap: 12px;
 }
 
 .consecutive-stat {
   text-align: center;
-  padding: 10px;
-  background: var(--bg-card);
-  border-radius: 8px;
-  transition: all 0.2s ease;
-}
-
-.consecutive-stat:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 16px 12px;
+  background: #ede8e2;
+  border-radius: 12px;
+  border: 1px solid var(--border-light);
 }
 
 .consecutive-stat-value {
-  font-size: 1.3rem;
-  font-weight: 800;
-  color: var(--text-primary);
-  margin-bottom: 3px;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 4px;
+  line-height: 1.2;
 }
 
 .consecutive-stat-label {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-  font-weight: 500;
+  font-size: 0.875rem;
+  color: #455a64;
+  font-weight: 400;
+  line-height: 1.4;
 }
 
 .view-button {
