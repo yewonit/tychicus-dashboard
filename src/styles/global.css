@@ -7705,19 +7705,32 @@ html {
   top: 0;
   width: var(--sidebar-width-desktop);
   height: 100vh;
-  background: var(--bg-card-dugigo);
-  border-right: 1px solid var(--border-subtle);
+  background: linear-gradient(180deg, #263a99 0%, #4a6bc4 30%, #7a9bd1 60%, #97b4de 100%);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   flex-direction: column;
-  box-shadow: var(--shadow-medium-dugigo);
+  box-shadow: 4px 0 20px rgba(38, 58, 153, 0.3);
   z-index: 1000;
   transition: var(--transition-normal);
+  overflow: hidden;
 }
 
 .dugigo-sidebar-header {
   padding: var(--spacing-lg);
-  border-bottom: 1px solid var(--border-subtle);
-  background: var(--gradient-primary-dugigo);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  background: linear-gradient(135deg, #1a2c6b 0%, #263a99 50%, #4a6bc4 100%);
+  position: relative;
+  z-index: 1;
+}
+
+.dugigo-sidebar-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
 }
 
 .dugigo-sidebar-title {
@@ -7734,15 +7747,35 @@ html {
 
 .dugigo-sidebar-subtitle {
   font-size: var(--font-size-sm);
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.85);
   margin: 0;
   text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .dugigo-sidebar-content {
   flex: 1;
   overflow-y: auto;
   padding: var(--spacing-md) 0;
+  background: transparent;
+  position: relative;
+}
+
+.dugigo-sidebar-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dugigo-sidebar-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dugigo-sidebar-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.dugigo-sidebar-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .dugigo-sidebar-category {
@@ -7752,11 +7785,12 @@ html {
 .dugigo-sidebar-category-title {
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
-  color: var(--text-muted-dugigo);
+  color: rgba(255, 255, 255, 0.7);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
   padding: 0 var(--spacing-lg);
   margin-bottom: var(--spacing-sm);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .dugigo-sidebar-menu-list {
@@ -7776,24 +7810,26 @@ html {
   padding: 12px var(--spacing-lg);
   text-align: left;
   cursor: pointer;
-  transition: var(--transition-fast);
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   gap: 12px;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.85);
   font-size: var(--font-size-base);
   position: relative;
 }
 
 .dugigo-sidebar-menu-button:hover {
-  background: var(--bg-hover-dugigo);
+  background: rgba(255, 255, 255, 0.1);
   color: white;
+  transform: translateX(4px);
 }
 
 .dugigo-sidebar-menu-button.active {
-  background: var(--gradient-primary-dugigo);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
   color: white;
   font-weight: var(--font-weight-bold);
+  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.1);
 }
 
 .dugigo-sidebar-menu-button.active::before {
@@ -7803,7 +7839,8 @@ html {
   top: 0;
   bottom: 0;
   width: 4px;
-  background: var(--accent-secondary-dugigo);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.4) 100%);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
 .dugigo-sidebar-menu-icon {
@@ -7824,8 +7861,10 @@ html {
 
 .dugigo-sidebar-footer {
   padding: var(--spacing-md) var(--spacing-lg);
-  border-top: 1px solid var(--border-subtle);
-  background: var(--surface-muted);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: #1a2c6b;
+  position: relative;
+  z-index: 1;
 }
 
 .dugigo-sidebar-user-info {
@@ -7853,13 +7892,14 @@ html {
 .dugigo-sidebar-user-name {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
-  color: var(--brand-text);
+  color: rgba(255, 255, 255, 0.95);
   margin: 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .dugigo-sidebar-user-role {
   font-size: var(--font-size-xs);
-  color: var(--text-secondary-dugigo);
+  color: rgba(255, 255, 255, 0.7);
   margin: 2px 0 0 0;
 }
 

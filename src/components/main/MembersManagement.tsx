@@ -46,6 +46,7 @@ const createFilterKey = (search: string, dept: string, group: string, team: stri
 const MembersManagement: React.FC = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const [isComposing, setIsComposing] = useState(false);
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   // 검색어 유효성 검증 및 sanitization (최소 2자 이상 또는 빈 문자열)
@@ -594,7 +595,30 @@ const MembersManagement: React.FC = () => {
         setToast({ message: response.message || '소속이 변경되었습니다.', type: 'success' });
         handleCloseModal();
         setSelectedMembers([]);
-        fetchMembers(); // Refresh list
+
+        // 소속 변경 후 필터 초기화 및 페이지 리셋
+        setSearchTerm('');
+        setFilterDepartment(DEFAULT_FILTER);
+        setFilterGroup(DEFAULT_FILTER);
+        setFilterTeam(DEFAULT_FILTER);
+        setCurrentPage(1);
+        setHasMore(true);
+
+        // 필터 키를 초기 필터 상태로 설정 (빈 검색어 + 전체 필터)
+        // 이렇게 하면 useEffect가 필터 변경을 감지하여 자동으로 fetchMembers를 호출함
+        const resetFilterKey = createFilterKey('', DEFAULT_FILTER, DEFAULT_FILTER, DEFAULT_FILTER);
+        filterKeyRef.current = resetFilterKey;
+
+        // 필터 옵션도 다시 로드 (변경된 소속이 반영되도록)
+        fetchFilterOptions();
+
+        // debounce 완료를 기다린 후 명시적으로 목록 새로고침
+        // validSearchTerm이 빈 문자열로 업데이트되도록 충분한 시간 확보
+        setTimeout(() => {
+          // 필터가 모두 초기화된 상태에서 fetchMembers 호출
+          // 이 시점에서 validSearchTerm은 빈 문자열이어야 함
+          fetchMembers(false);
+        }, 350); // debounce 시간(300ms)보다 약간 길게 설정
       }
     } catch (error: any) {
       console.error('Failed to update affiliation:', error);
@@ -618,11 +642,24 @@ const MembersManagement: React.FC = () => {
                 type='text'
                 placeholder='이름으로 검색... (최소 2자 이상)'
                 value={searchTerm}
-                onChange={e => {
-                  // 검색어 sanitization
-                  const sanitized = sanitizeSearchTerm(e.target.value);
+                onCompositionStart={() => setIsComposing(true)}
+                onCompositionEnd={e => {
+                  setIsComposing(false);
+                  // 조합 완료 후 sanitization 적용
+                  const sanitized = sanitizeSearchTerm(e.currentTarget.value);
                   setSearchTerm(sanitized);
                   setCurrentPage(1);
+                }}
+                onChange={e => {
+                  // 조합 중이 아닐 때만 sanitization 적용
+                  if (!isComposing) {
+                    const sanitized = sanitizeSearchTerm(e.target.value);
+                    setSearchTerm(sanitized);
+                    setCurrentPage(1);
+                  } else {
+                    // 조합 중일 때는 그대로 설정 (sanitization 없이)
+                    setSearchTerm(e.target.value);
+                  }
                 }}
                 maxLength={50}
               />
