@@ -2939,6 +2939,29 @@ html {
   color: var(--text-primary);
 }
 
+.popup-close-button {
+  background: none;
+  border: none;
+  font-size: 28px;
+  font-weight: 300;
+  cursor: pointer;
+  color: var(--text-secondary);
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  line-height: 1;
+  min-width: 32px;
+  min-height: 32px;
+}
+
+.popup-close-button:hover {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
 .popup-content {
   padding: 0;
   max-height: 70vh;

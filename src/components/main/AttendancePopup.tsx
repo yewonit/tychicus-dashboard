@@ -15,7 +15,7 @@ const AttendancePopup: React.FC<AttendancePopupProps> = ({ isOpen, title, data, 
       <div className='popup-container' onClick={e => e.stopPropagation()}>
         <div className='popup-header'>
           <h3 className='popup-title'>{title}</h3>
-          <button className='close-button' onClick={onClose}>
+          <button className='popup-close-button' onClick={onClose}>
             ×
           </button>
         </div>
