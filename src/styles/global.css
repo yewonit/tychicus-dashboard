@@ -5095,40 +5095,6 @@ html {
   cursor: not-allowed;
 }
 
-/* 필터 초기화 버튼 */
-.filter-summary {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.filter-reset-button {
-  padding: 8px 16px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-medium);
-  border-radius: 8px;
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.filter-reset-button:hover {
-  background: var(--bg-card);
-  color: var(--text-primary);
-}
-
-.filter-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 12px;
-  background: var(--primary-light);
-  color: var(--primary-dark);
-  border-radius: 12px;
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
 .filter-error-notice {
   padding: 8px 12px;
   background: rgba(239, 83, 80, 0.1);

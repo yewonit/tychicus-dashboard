@@ -246,16 +246,6 @@ const MembersManagement: React.FC = () => {
     setSortOrder('asc');
   }, []);
 
-  // 활성 필터 개수 계산 (검색어는 제외)
-  const activeFiltersCount = useMemo(() => {
-    let count = 0;
-    // 검색어는 필터 개수에서 제외
-    if (filterDepartment !== DEFAULT_FILTER) count++;
-    if (filterGroup !== DEFAULT_FILTER) count++;
-    if (filterTeam !== DEFAULT_FILTER) count++;
-    return count;
-  }, [filterDepartment, filterGroup, filterTeam]);
-
   // Fetch members (무한 스크롤 지원)
   const fetchMembers = useCallback(
     async (append = false) => {
@@ -664,14 +654,6 @@ const MembersManagement: React.FC = () => {
             {filterOptionsError && (
               <div className='filter-error-notice'>
                 <span style={{ color: 'var(--error)', fontSize: '0.85rem' }}>⚠️ {filterOptionsError}</span>
-              </div>
-            )}
-            {activeFiltersCount > 0 && (
-              <div className='filter-summary'>
-                <span className='filter-badge'>{activeFiltersCount}개 필터 적용 중</span>
-                <button className='filter-reset-button' onClick={handleResetFilters}>
-                  필터 초기화
-                </button>
               </div>
             )}
             <select
