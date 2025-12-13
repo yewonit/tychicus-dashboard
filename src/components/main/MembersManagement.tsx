@@ -596,29 +596,25 @@ const MembersManagement: React.FC = () => {
         handleCloseModal();
         setSelectedMembers([]);
 
-        // 소속 변경 후 필터 초기화 및 페이지 리셋
-        setSearchTerm('');
-        setFilterDepartment(DEFAULT_FILTER);
-        setFilterGroup(DEFAULT_FILTER);
-        setFilterTeam(DEFAULT_FILTER);
+        // 소속 변경 후 필터를 새로운 소속으로 설정
+        // 검색어는 유지하거나 초기화할 수 있음 (현재는 유지)
+        setFilterDepartment(newDepartment);
+        setFilterGroup(newGroup);
+        setFilterTeam(newTeam);
         setCurrentPage(1);
         setHasMore(true);
 
-        // 필터 키를 초기 필터 상태로 설정 (빈 검색어 + 전체 필터)
+        // 필터 키를 새로운 소속 필터 상태로 설정
         // 이렇게 하면 useEffect가 필터 변경을 감지하여 자동으로 fetchMembers를 호출함
-        const resetFilterKey = createFilterKey('', DEFAULT_FILTER, DEFAULT_FILTER, DEFAULT_FILTER);
-        filterKeyRef.current = resetFilterKey;
+        const newFilterKey = createFilterKey(validSearchTerm, newDepartment, newGroup, newTeam);
+        filterKeyRef.current = newFilterKey;
 
         // 필터 옵션도 다시 로드 (변경된 소속이 반영되도록)
         fetchFilterOptions();
 
-        // debounce 완료를 기다린 후 명시적으로 목록 새로고침
-        // validSearchTerm이 빈 문자열로 업데이트되도록 충분한 시간 확보
-        setTimeout(() => {
-          // 필터가 모두 초기화된 상태에서 fetchMembers 호출
-          // 이 시점에서 validSearchTerm은 빈 문자열이어야 함
-          fetchMembers(false);
-        }, 350); // debounce 시간(300ms)보다 약간 길게 설정
+        // 필터 변경은 useEffect에서 자동으로 처리되므로
+        // 명시적인 fetchMembers 호출은 불필요함
+        // useEffect가 필터 변경을 감지하여 자동으로 목록을 새로고침함
       }
     } catch (error: any) {
       console.error('Failed to update affiliation:', error);

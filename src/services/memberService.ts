@@ -318,20 +318,93 @@ export const memberService = {
     // 직분 기본값 (순원) 설정 - 필요시 파라미터로 받도록 수정 가능
     const roleName = '순원';
 
-    await axiosClient.patch('/users/bulk-change-organization', {
+    const requestData = {
       data: memberIds.map(id => ({
         id,
         organizationId: orgId,
         roleName,
       })),
-    });
-
-    return {
-      success: true,
-      updatedCount: memberIds.length,
-      updatedMemberIds: memberIds,
-      message: '소속이 변경되었습니다.',
     };
+
+    // 요청 정보 로깅 (개발 환경에서만)
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    if (isDevelopment) {
+      console.log('📤 PATCH /api/users/bulk-change-organization 요청 시작:', {
+        url: '/users/bulk-change-organization',
+        memberIds,
+        affiliation,
+        organizationId: orgId,
+        roleName,
+        requestData,
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    try {
+      const requestStartTime = Date.now();
+      const response = await axiosClient.patch<{ message?: string; success?: boolean }>(
+        '/users/bulk-change-organization',
+        requestData
+      );
+      const requestDuration = Date.now() - requestStartTime;
+
+      // 응답 확인 및 검증
+      const responseData = response.data;
+
+      // 성공 응답 확인: { "message": "success" } 또는 { "message": "..." }
+      if (responseData?.success === false) {
+        // 실패 응답: { "success": false, "message": "..." }
+        const errorMessage = responseData.message || '소속 변경에 실패했습니다.';
+        if (isDevelopment) {
+          console.error('❌ PATCH /api/users/bulk-change-organization 요청 실패:', {
+            url: '/users/bulk-change-organization',
+            response: responseData,
+            duration: `${requestDuration}ms`,
+            timestamp: new Date().toISOString(),
+          });
+        }
+        throw new Error(errorMessage);
+      }
+
+      // 성공 응답 로깅 (개발 환경에서만)
+      if (isDevelopment) {
+        console.log('✅ PATCH /api/users/bulk-change-organization 요청 성공:', {
+          url: '/users/bulk-change-organization',
+          response: responseData,
+          updatedCount: memberIds.length,
+          duration: `${requestDuration}ms`,
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      return {
+        success: true,
+        updatedCount: memberIds.length,
+        updatedMemberIds: memberIds,
+        message: responseData?.message || '소속이 변경되었습니다.',
+      };
+    } catch (error: any) {
+      // 에러 응답 처리
+      if (isDevelopment) {
+        console.error('❌ PATCH /api/users/bulk-change-organization 요청 실패:', {
+          url: '/users/bulk-change-organization',
+          error: error?.response?.data || error?.message || error,
+          status: error?.response?.status,
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      // 백엔드 에러 응답 처리
+      if (error?.response?.data) {
+        const errorData = error.response.data;
+        if (errorData.success === false) {
+          throw new Error(errorData.message || '소속 변경에 실패했습니다.');
+        }
+      }
+
+      // 네트워크 에러 또는 기타 에러
+      throw error;
+    }
   },
 
   // 3. 구성원 상세 정보 조회
