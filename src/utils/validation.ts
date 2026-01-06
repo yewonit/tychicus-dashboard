@@ -125,6 +125,91 @@ export const validationRules = {
     }
     return '';
   },
+
+  /**
+   * 이름 검증 (한글/영문만 허용)
+   */
+  name: (value: string) => {
+    if (!value) return '';
+    const trimmed = value.trim();
+
+    // 최소 길이 검증
+    if (trimmed.length < 2) {
+      return '이름은 최소 2자 이상 입력해주세요.';
+    }
+
+    // 최대 길이 검증
+    if (trimmed.length > 20) {
+      return '이름은 최대 20자까지 입력 가능합니다.';
+    }
+
+    // 한글/영문/공백만 허용
+    if (!/^[가-힣a-zA-Z\s]+$/.test(trimmed)) {
+      return '이름은 한글 또는 영문만 입력 가능합니다.';
+    }
+
+    return '';
+  },
+
+  /**
+   * 동명이인 구분자 검증 (영문/숫자만 허용)
+   */
+  nameSuffix: (value: string) => {
+    if (!value) return '';
+    const trimmed = value.trim();
+
+    // 최대 길이 검증
+    if (trimmed.length > 10) {
+      return '동명이인 구분자는 최대 10자까지 입력 가능합니다.';
+    }
+
+    // 영문/숫자만 허용
+    if (!/^[a-zA-Z0-9]+$/.test(trimmed)) {
+      return '동명이인 구분자는 영문 또는 숫자만 입력 가능합니다.';
+    }
+
+    return '';
+  },
+
+  /**
+   * 생년월일 검증 (YYYY-MM-DD 형식)
+   */
+  birthDate: (value: string) => {
+    if (!value) return '';
+
+    // YYYY-MM-DD 형식 검증
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(value)) {
+      return '올바른 날짜 형식을 입력해주세요. (YYYY-MM-DD)';
+    }
+
+    // 유효한 날짜인지 확인
+    const date = new Date(value);
+    if (isNaN(date.getTime())) {
+      return '유효하지 않은 날짜입니다.';
+    }
+
+    // 입력된 날짜와 파싱된 날짜가 일치하는지 확인 (예: 2024-13-01 방지)
+    const [year, month, day] = value.split('-').map(Number);
+    if (date.getFullYear() !== year || date.getMonth() + 1 !== month || date.getDate() !== day) {
+      return '유효하지 않은 날짜입니다.';
+    }
+
+    // 미래 날짜 방지
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (date > today) {
+      return '미래 날짜는 입력할 수 없습니다.';
+    }
+
+    // 너무 오래된 날짜 방지 (1900년 이전)
+    const minDate = new Date('1900-01-01');
+    if (date < minDate) {
+      return '1900년 이후의 날짜만 입력 가능합니다.';
+    }
+
+    return '';
+  },
 };
 
 /**
@@ -152,6 +237,15 @@ export const commonValidators = {
 
   // 필수 이름
   requiredName: createValidator(value => validationRules.required(value, '이름'), validationRules.koreanOnly),
+
+  // 필수 이름 (한글/영문 허용)
+  requiredNameWithEnglish: createValidator(value => validationRules.required(value, '이름'), validationRules.name),
+
+  // 필수 동명이인 구분자
+  requiredNameSuffix: createValidator(
+    value => validationRules.required(value, '동명이인 구분자'),
+    validationRules.nameSuffix
+  ),
 
   // 필수 전화번호
   requiredPhoneNumber: createValidator(

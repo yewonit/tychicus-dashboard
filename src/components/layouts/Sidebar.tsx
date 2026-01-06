@@ -21,7 +21,7 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ dugigo = false }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const menuSections: MenuSection[] = [
     {
@@ -148,6 +148,19 @@ const Sidebar: React.FC<SidebarProps> = ({ dugigo = false }) => {
     return dugigo ? 'dugigo-sidebar-user-role' : 'sidebar-user-role';
   };
 
+  const getLogoutButtonClassName = () => {
+    return dugigo ? 'dugigo-sidebar-logout-button' : 'sidebar-logout-button';
+  };
+
+  /**
+   * 로그아웃 처리
+   */
+  const handleLogout = async () => {
+    if (window.confirm('로그아웃 하시겠습니까?')) {
+      await logout();
+    }
+  };
+
   return (
     <div className={getContainerClassName()}>
       <div className={getHeaderClassName()}>
@@ -184,6 +197,9 @@ const Sidebar: React.FC<SidebarProps> = ({ dugigo = false }) => {
             <div className={getUserNameClassName()}>{user?.name || '사용자'}</div>
             <div className={getUserRoleClassName()}>{user?.roles?.[0]?.roleName || ''}</div>
           </div>
+          <button className={getLogoutButtonClassName()} onClick={handleLogout} title='로그아웃' aria-label='로그아웃'>
+            ⏻
+          </button>
         </div>
       </div>
     </div>

@@ -146,120 +146,6 @@ const extractKeywords = (texts: string[], topN = 5): Keyword[] => {
     .map(([word, count]) => ({ word, count: count as number }));
 };
 
-// 더미 데이터
-const mockVisitations: Visitation[] = [
-  {
-    id: 1,
-    대상자_이름: '김민수',
-    대상자_국: '1국',
-    대상자_그룹: '김민수 그룹',
-    대상자_순: '김민수 순',
-    대상자_순장: '김민수',
-    대상자_생일연도: 1995,
-    심방날짜: '2024-01-20',
-    심방방법: '만남',
-    진행자_이름: '이지은',
-    진행자_직분: '부그룹장',
-    진행자_국: '1국',
-    진행자_그룹: '김민수 그룹',
-    진행자_순: '이지은 순',
-    진행자_생일연도: 1997,
-    심방내용:
-      '최근 직장에서 스트레스가 많다고 하셨습니다. 기도생활이 소홀해진 것 같아 함께 기도하고 격려했습니다. 다음 주일 예배 참석을 약속하셨습니다.',
-    대상자_사진: null,
-    작성일시: '2024-01-20 15:30',
-  },
-  {
-    id: 2,
-    대상자_이름: '박준호',
-    대상자_국: '2국',
-    대상자_그룹: '박준호 그룹',
-    대상자_순: '박준호 순',
-    대상자_순장: '박준호',
-    대상자_생일연도: 1994,
-    심방날짜: '2024-01-19',
-    심방방법: '통화',
-    진행자_이름: '정현우',
-    진행자_직분: '그룹장',
-    진행자_국: '3국',
-    진행자_그룹: '정현우 그룹',
-    진행자_순: '정현우 순',
-    진행자_생일연도: 1995,
-    심방내용:
-      '가족 문제로 고민이 많다고 하셨습니다. 함께 기도하고 성경 말씀을 나누었습니다. 정기적인 심방을 통해 지속적인 관심을 기울이기로 했습니다.',
-    대상자_사진: null,
-    작성일시: '2024-01-19 20:15',
-  },
-  {
-    id: 3,
-    대상자_이름: '최수진',
-    대상자_국: '2국',
-    대상자_그룹: '박준호 그룹',
-    대상자_순: '최수진 순',
-    대상자_순장: '최수진',
-    대상자_생일연도: 1996,
-    심방날짜: '2024-01-18',
-    심방방법: '카카오톡',
-    진행자_이름: '한소영',
-    진행자_직분: '부그룹장',
-    진행자_국: '3국',
-    진행자_그룹: '정현우 그룹',
-    진행자_순: '한소영 순',
-    진행자_생일연도: 1998,
-    심방내용:
-      '최근 시험 준비로 바쁘다고 하셨습니다. 기도생활을 잊지 말고 하나님께 의지하시라고 격려했습니다. 시험 후 정기적인 예배 참석을 약속하셨습니다.',
-    대상자_사진: null,
-    작성일시: '2024-01-18 22:45',
-  },
-];
-
-// 목업 통계 데이터
-const mockStats: Stats = {
-  total_visitations: 3,
-  method_stats: {
-    만남: 1,
-    통화: 1,
-    카카오톡: 1,
-  },
-  department_stats: {
-    '1국': 1,
-    '2국': 2,
-    '3국': 0,
-  },
-  recent_visitations: 3,
-  this_month_visitations: 3,
-  this_week_visitations: 3,
-  today_visitations: 0,
-};
-
-// 더미 구성원 데이터
-const membersData: Member[] = [
-  {
-    id: 1,
-    이름: '김철수',
-    생일연도: '1995',
-    소속국: '1국',
-    소속그룹: '김철수 그룹',
-    소속순: '1순',
-  },
-  {
-    id: 2,
-    이름: '이영희',
-    생일연도: '1996',
-    소속국: '1국',
-    소속그룹: '이영희 그룹',
-    소속순: '2순',
-  },
-  {
-    id: 3,
-    이름: '박민수',
-    생일연도: '1994',
-    소속국: '2국',
-    소속그룹: '박민수 그룹',
-    소속순: '3순',
-  },
-];
-
 const VisitationManagement: React.FC = () => {
   const navigate = useNavigate();
   const [visitations, setVisitations] = useState<Visitation[]>([]);
@@ -284,9 +170,11 @@ const VisitationManagement: React.FC = () => {
 
   const fetchVisitations = async () => {
     try {
-      setVisitations(mockVisitations);
+      // TODO: API 연동 필요 - 심방 데이터 가져오기
+      setVisitations([]);
     } catch (error) {
-      setVisitations(mockVisitations);
+      console.error('심방 데이터 조회 실패:', error);
+      setVisitations([]);
     } finally {
       setLoading(false);
     }
@@ -294,14 +182,24 @@ const VisitationManagement: React.FC = () => {
 
   const fetchStats = async () => {
     try {
-      setStats(mockStats);
+      // TODO: API 연동 필요 - 심방 통계 데이터 가져오기
+      setStats({
+        total_visitations: 0,
+        method_stats: {},
+        department_stats: {},
+        recent_visitations: 0,
+        this_month_visitations: 0,
+        this_week_visitations: 0,
+        today_visitations: 0,
+      });
     } catch (error) {
-      setStats(mockStats);
+      console.error('심방 통계 조회 실패:', error);
     }
   };
 
   const loadOrganizationData = () => {
-    const members = membersData;
+    // TODO: API 연동 필요 - 조직 데이터 가져오기
+    const members: Member[] = [];
 
     const deptSet = new Set();
     const groupSet = new Set();
@@ -412,7 +310,7 @@ const VisitationManagement: React.FC = () => {
           <div className='visitation-stat-value'>
             <div className='visitation-keywords-container'>
               {(() => {
-                const thisMonthVisitations = mockVisitations.filter(v => {
+                const thisMonthVisitations = visitations.filter(v => {
                   const visitDate = new Date(v.심방날짜);
                   const now = new Date();
                   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -442,7 +340,7 @@ const VisitationManagement: React.FC = () => {
           <div className='visitation-stat-value'>
             <div className='visitation-keywords-container'>
               {(() => {
-                const thisWeekVisitations = mockVisitations.filter(v => {
+                const thisWeekVisitations = visitations.filter(v => {
                   const visitDate = new Date(v.심방날짜);
                   const now = new Date();
                   const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));

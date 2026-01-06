@@ -509,7 +509,16 @@ const Dashboard: React.FC = () => {
         <QuickStats weeklyStats={weeklyStats} loading={loading.weeklyStats} />
 
         <AttendanceChart
-          attendanceData2025={weeklyGraphData}
+          attendanceData2025={
+            weeklyGraphData
+              ? {
+                  ...weeklyGraphData,
+                  attendanceXAxis: Array.isArray(weeklyGraphData.attendanceXAxis[0])
+                    ? (weeklyGraphData.attendanceXAxis as unknown as string[][]).flat()
+                    : weeklyGraphData.attendanceXAxis,
+                }
+              : null
+          }
           selectedGuk={selectedGukId === '전체' ? '전체' : gooks.find(g => g.id === selectedGukId)?.name || '전체'}
           selectedGroup={
             selectedGroupId === '전체' ? '전체' : groups.find(g => g.id === selectedGroupId)?.name || '전체'
@@ -556,7 +565,7 @@ const Dashboard: React.FC = () => {
               color: 'var(--text-secondary)',
             }}
           >
-            최근 활동 데이터를 불러오는 중...
+            등록된 최근 활동이 없습니다.
           </div>
         </div>
 
