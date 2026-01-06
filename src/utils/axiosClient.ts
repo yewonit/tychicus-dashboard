@@ -44,9 +44,6 @@ const config = env[currentEnv];
 const API_BASE_URL = config.API_BASE_URL;
 const AUTH_BASE_URL = config.AUTH_BASE_URL;
 
-// Mock 모드 설정 (로컬 환경에서만 사용)
-// const USE_MOCK = process.env.REACT_APP_USE_MOCK === 'true' && currentEnv === 'local';
-
 // API용 Axios 인스턴스 생성
 const axiosClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
