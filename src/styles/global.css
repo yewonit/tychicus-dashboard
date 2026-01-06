@@ -9075,3 +9075,62 @@ html {
     padding: 32px 16px;
   }
 }
+
+/* ========================
+   Sidebar 로그아웃 버튼 스타일
+   ======================== */
+.sidebar-logout-button {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid var(--border-medium);
+  color: var(--text-secondary);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.sidebar-logout-button:hover {
+  background: var(--error-light);
+  border-color: var(--error);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.sidebar-logout-button:active {
+  transform: translateY(0);
+}
+
+/* DUGIGO 사이드바 로그아웃 버튼 */
+.dugigo-sidebar-logout-button {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.dugigo-sidebar-logout-button:hover {
+  background: var(--error-light);
+  border-color: var(--error);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.dugigo-sidebar-logout-button:active {
+  transform: translateY(0);
+}
