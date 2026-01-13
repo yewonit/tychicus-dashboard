@@ -5,6 +5,18 @@ import React, { useEffect, useMemo, useRef } from 'react';
 // datalabels 플러그인 등록
 Chart.register(ChartDataLabels);
 
+// 범례와 차트 간 간격 조정 플러그인
+const legendSpacing = {
+  id: 'legendSpacing',
+  beforeInit(chart: any, args: any, opts: any) {
+    const fit = chart.legend.fit;
+    chart.legend.fit = function fitWithSpacing() {
+      fit.call(this);
+      this.height += opts?.extra ?? 0; // 범례 아래 추가 공간
+    };
+  },
+};
+
 interface AttendanceChartProps {
   attendanceData2025: {
     attendanceXAxis: string[];
@@ -194,12 +206,11 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        layout: {
-          padding: {
-            top: 16, // 범례와 차트 간 간격
-          },
-        },
         plugins: {
+          // @ts-ignore - 커스텀 플러그인
+          legendSpacing: {
+            extra: 16, // 범례와 차트 간 16px 간격 추가
+          },
           datalabels: {
             color: '#333',
             anchor: 'end',
@@ -236,6 +247,7 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
           },
         },
       },
+      plugins: [legendSpacing],
     });
 
     return () => {
