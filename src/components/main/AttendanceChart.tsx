@@ -123,23 +123,6 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
     const wednesdayYoungAdultData = filteredCounts.map(item => item.wednesdayYoungAdult);
     const fridayYoungAdultData = filteredCounts.map(item => item.fridayYoungAdult);
 
-    // 모든 데이터셋의 최대값 계산
-    const allValues = [...sundayData, ...sundayYoungAdultData, ...wednesdayYoungAdultData, ...fridayYoungAdultData];
-    const maxValue = Math.max(...allValues, 0);
-
-    // 최대값에 따른 적절한 Y축 상한값 계산 (5단위로 끊기)
-    let yAxisMax;
-    if (maxValue <= 10) {
-      yAxisMax = Math.max(maxValue + 2, 10); // 작은 값일 때는 +2 정도의 여유
-    } else {
-      // 5단위로 끊기기 위해 최대값을 5의 배수로 올림
-      yAxisMax = Math.ceil(maxValue / 5) * 5;
-      // 최소 5단위 여유 공간 확보 (막대가 그래프 영역을 벗어나지 않도록)
-      if (yAxisMax - maxValue < 5) {
-        yAxisMax += 5;
-      }
-    }
-
     return {
       labels: filteredLabels,
       datasets: [
@@ -184,7 +167,7 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
         wednesdayYoungAdult: 0,
         fridayYoungAdult: 0,
       },
-      maxValue: yAxisMax,
+      maxValue: attendanceData2025.attendanceYAxisMax || 10,
     };
   }, [attendanceData2025, chartType]);
 
@@ -211,6 +194,11 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        layout: {
+          padding: {
+            top: 16, // 범례와 차트 간 간격
+          },
+        },
         plugins: {
           datalabels: {
             color: '#333',
