@@ -28,43 +28,43 @@ const Sidebar: React.FC<SidebarProps> = ({ dugigo = false }) => {
       title: '대시보드',
       items: [
         { path: '/main/dashboard', icon: '📊', text: '전체 현황' },
-        { path: '/main/worship', icon: '⛪', text: '예배 현황' },
+        // { path: '/main/worship', icon: '⛪', text: '예배 현황' },
       ],
     },
     {
       title: '조직 관리',
       items: [
         { path: '/main/member-management', icon: '👥', text: '구성원 관리' },
-        { path: '/main/groups', icon: '🏠', text: '소그룹 관리' },
-        { path: '/main/season-update', icon: '🔄', text: '회기 변경 관리' },
+        // { path: '/main/groups', icon: '🏠', text: '소그룹 관리' },
+        // { path: '/main/season-update', icon: '🔄', text: '회기 변경 관리' },
       ],
     },
-    {
-      title: '활동 관리',
-      items: [
-        { path: '/main/attendance', icon: '📝', text: '출결 관리' },
-        { path: '/main/forum', icon: '💬', text: '포럼 관리' },
-        { path: '/main/visitation', icon: '🏠', text: '심방 관리' },
-        { path: '/main/meeting-records', icon: '📍', text: '지역모임 관리' },
-        { path: '/main/events', icon: '🎉', text: '행사 관리' },
-      ],
-    },
-    {
-      title: '커뮤니케이션',
-      items: [
-        { path: '/main/notifications', icon: '🔔', text: '공지사항' },
-        { path: '/main/messages', icon: '💌', text: '메시지 관리' },
-        { path: '/main/announcements', icon: '📢', text: '알림 관리' },
-      ],
-    },
-    {
-      title: '데이터 관리',
-      items: [
-        { path: '/main/data-export', icon: '📤', text: '데이터 내보내기' },
-        { path: '/main/backup', icon: '💾', text: '데이터 백업' },
-        { path: '/main/settings', icon: '⚙️', text: '시스템 설정' },
-      ],
-    },
+    // {
+    //   title: '활동 관리',
+    //   items: [
+    //     { path: '/main/attendance', icon: '📝', text: '출결 관리' },
+    //     { path: '/main/forum', icon: '💬', text: '포럼 관리' },
+    //     { path: '/main/visitation', icon: '🏠', text: '심방 관리' },
+    //     { path: '/main/meeting-records', icon: '📍', text: '지역모임 관리' },
+    //     { path: '/main/events', icon: '🎉', text: '행사 관리' },
+    //   ],
+    // },
+    // {
+    //   title: '커뮤니케이션',
+    //   items: [
+    //     { path: '/main/notifications', icon: '🔔', text: '공지사항' },
+    //     { path: '/main/messages', icon: '💌', text: '메시지 관리' },
+    //     { path: '/main/announcements', icon: '📢', text: '알림 관리' },
+    //   ],
+    // },
+    // {
+    //   title: '데이터 관리',
+    //   items: [
+    //     { path: '/main/data-export', icon: '📤', text: '데이터 내보내기' },
+    //     { path: '/main/backup', icon: '💾', text: '데이터 백업' },
+    //     { path: '/main/settings', icon: '⚙️', text: '시스템 설정' },
+    //   ],
+    // },
   ];
 
   const handleMenuClick = (path: string) => {
