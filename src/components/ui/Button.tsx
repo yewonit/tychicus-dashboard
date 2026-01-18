@@ -27,10 +27,10 @@ export const Button: React.FC<ButtonProps> = ({
 }) => {
   const getClassName = () => {
     let classes = [];
-    
+
     // DUGIGO 버튼 베이스 클래스
     classes.push('dugigo-button');
-    
+
     // 변형별 클래스
     switch (variant) {
       case 'primary':
@@ -54,12 +54,12 @@ export const Button: React.FC<ButtonProps> = ({
       default:
         classes.push('dugigo-button-primary');
     }
-    
+
     // 크기별 클래스
     if (size === 'small') {
       classes.push('dugigo-button-small');
     }
-    
+
     return `${classes.join(' ')} ${className}`.trim();
   };
 

@@ -48,9 +48,7 @@ export const Table: React.FC<TableProps> = ({
   if (loading) {
     return (
       <div className={getTableClassName()}>
-        <div className='dugigo-table-loading'>
-          테이블 데이터를 불러오는 중...
-        </div>
+        <div className='dugigo-table-loading'>테이블 데이터를 불러오는 중...</div>
       </div>
     );
   }
@@ -87,10 +85,7 @@ export const Table: React.FC<TableProps> = ({
               onClick={onRowClick ? () => onRowClick(record, index) : undefined}
             >
               {columns.map(column => (
-                <td
-                  key={column.key}
-                  className={`dugigo-table-cell dugigo-table-align-${column.align || 'left'}`}
-                >
+                <td key={column.key} className={`dugigo-table-cell dugigo-table-align-${column.align || 'left'}`}>
                   {column.render ? column.render(record[column.key], record, index) : record[column.key]}
                 </td>
               ))}

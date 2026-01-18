@@ -96,13 +96,3 @@ export const useInfiniteScroll = ({
 
   return observerRef;
 };
-
-
-
-
-
-
-
-
-
-

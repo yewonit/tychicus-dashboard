@@ -21,8 +21,7 @@ export const MobileRestrictionOverlay: React.FC = () => {
         <p className='mobile-restriction-message'>
           이 애플리케이션은 데이터 관리 및 분석을 위해 설계되어 태블릿 이상의 화면에서 최적화되어 있습니다.
           <br />
-          <br />
-          더 나은 사용 경험을 위해 태블릿이나 데스크톱에서 접속해 주세요.
+          <br />더 나은 사용 경험을 위해 태블릿이나 데스크톱에서 접속해 주세요.
         </p>
         <button className='mobile-restriction-button' onClick={handleAllowMobile}>
           모바일에서 계속 사용하기
