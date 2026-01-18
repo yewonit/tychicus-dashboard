@@ -19,14 +19,7 @@ interface ModalProps {
  * DUGIGO 모달 컴포넌트
  * 반투명 오버레이와 중앙 정렬된 카드 형태의 모달
  */
-export const Modal: React.FC<ModalProps> = ({
-  isOpen,
-  title,
-  children,
-  onClose,
-  size = 'medium',
-  className = '',
-}) => {
+export const Modal: React.FC<ModalProps> = ({ isOpen, title, children, onClose, size = 'medium', className = '' }) => {
   if (!isOpen) return null;
 
   const getModalClassName = () => {
@@ -57,10 +50,8 @@ export const Modal: React.FC<ModalProps> = ({
             </button>
           </div>
         )}
-        
-        <div className='dugigo-modal-body'>
-          {children}
-        </div>
+
+        <div className='dugigo-modal-body'>{children}</div>
       </div>
     </div>
   );

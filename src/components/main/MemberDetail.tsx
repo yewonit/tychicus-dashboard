@@ -16,16 +16,16 @@ const MemberDetail: React.FC = () => {
   useEffect(() => {
     const fetchMemberDetail = async () => {
       if (!id) return;
-      
+
       setLoading(true);
       try {
         const data = await memberService.getMemberDetail(parseInt(id));
         setMember(data);
 
         // 로컬 스토리지에서 사진 불러오기 (임시)
-    const savedPhoto = localStorage.getItem(`member_photo_${id}`);
-    if (savedPhoto) {
-      setPhoto(savedPhoto);
+        const savedPhoto = localStorage.getItem(`member_photo_${id}`);
+        if (savedPhoto) {
+          setPhoto(savedPhoto);
         } else if (data.프로필사진) {
           setPhoto(data.프로필사진);
         }
@@ -61,7 +61,7 @@ const MemberDetail: React.FC = () => {
         setPhoto(result);
         // 로컬 스토리지에 저장 (임시)
         if (id) {
-        localStorage.setItem(`member_photo_${id}`, result);
+          localStorage.setItem(`member_photo_${id}`, result);
         }
       };
       reader.readAsDataURL(file);
@@ -71,7 +71,7 @@ const MemberDetail: React.FC = () => {
   const handlePhotoRemove = () => {
     setPhoto(null);
     if (id) {
-    localStorage.removeItem(`member_photo_${id}`);
+      localStorage.removeItem(`member_photo_${id}`);
     }
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -102,7 +102,11 @@ const MemberDetail: React.FC = () => {
     return (
       <div className='member-detail-container'>
         <div className='members-empty-state'>{error || '구성원을 찾을 수 없습니다.'}</div>
-        <button className='member-detail-back-button' onClick={() => navigate('/main/member-management')} style={{ marginTop: '20px' }}>
+        <button
+          className='member-detail-back-button'
+          onClick={() => navigate('/main/member-management')}
+          style={{ marginTop: '20px' }}
+        >
           ← 목록으로
         </button>
       </div>
@@ -175,7 +179,9 @@ const MemberDetail: React.FC = () => {
               </div>
               <div className='member-detail-info-item'>
                 <span className='member-detail-info-label'>생년월일</span>
-                <span className='member-detail-info-value'>{member.생일연도 ? `${member.생일연도}-03-15 (임시)` : '-'}</span>
+                <span className='member-detail-info-value'>
+                  {member.생일연도 ? `${member.생일연도}-03-15 (임시)` : '-'}
+                </span>
               </div>
               <div className='member-detail-info-item'>
                 <span className='member-detail-info-label'>휴대폰 번호</span>
@@ -221,7 +227,10 @@ const MemberDetail: React.FC = () => {
       {/* 히스토리 섹션 - 추후 개발 예정으로 비활성화 */}
       <div className='member-detail-section'>
         <h2 className='member-detail-section-title'>히스토리</h2>
-        <div className='common-empty-state' style={{ padding: '40px 0', textAlign: 'center', color: 'var(--text-secondary)' }}>
+        <div
+          className='common-empty-state'
+          style={{ padding: '40px 0', textAlign: 'center', color: 'var(--text-secondary)' }}
+        >
           <div style={{ fontSize: '48px', marginBottom: '16px' }}>🚧</div>
           <h3>히스토리 기능 준비 중</h3>
           <p>구성원의 히스토리 및 영적 흐름 관리 기능은 추후 업데이트될 예정입니다.</p>
