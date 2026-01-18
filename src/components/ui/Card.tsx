@@ -24,7 +24,7 @@ export const Card: React.FC<CardProps> = ({
 }) => {
   const getClassName = () => {
     let classes = [];
-    
+
     // 기본 카드 클래스 선택
     if (dugigo) {
       classes.push('dugigo-card');
@@ -34,7 +34,7 @@ export const Card: React.FC<CardProps> = ({
       classes.push('common-card');
       if (hoverable) classes.push('hoverable');
     }
-    
+
     return `${classes.join(' ')} ${className}`.trim();
   };
 

@@ -4496,6 +4496,7 @@ html {
 }
 
 .add-button {
+  height: 47.33px;
   padding: 12px 24px;
   background: var(--gradient-primary);
   color: white;
@@ -4676,10 +4677,12 @@ html {
 
 .members-action-buttons {
   display: flex;
+  align-items: center;
   gap: 10px;
 }
 
 .change-affiliation-button {
+  height: 47.33px;
   padding: 12px 24px;
   background: linear-gradient(135deg, #28a745, #20c997);
   color: white;
@@ -5115,39 +5118,6 @@ html {
   border-left: 3px solid var(--error);
   border-radius: 6px;
   margin-bottom: 8px;
-}
-
-/* 선택된 항목 정보 */
-.selection-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  background: var(--bg-card);
-  border-radius: 8px;
-  margin-bottom: 16px;
-}
-
-.selection-info-text {
-  font-size: 0.95rem;
-  color: var(--text-primary);
-  font-weight: 600;
-}
-
-.selection-clear-button {
-  padding: 4px 12px;
-  background: none;
-  border: 1px solid var(--border-medium);
-  border-radius: 6px;
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.selection-clear-button:hover {
-  background: var(--bg-elevated);
-  color: var(--text-primary);
 }
 
 /* 정렬 가능한 테이블 헤더 */

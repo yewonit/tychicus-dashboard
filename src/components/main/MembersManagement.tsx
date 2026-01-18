@@ -716,14 +716,6 @@ const MembersManagement: React.FC = () => {
             </select>
           </div>
           <div className='members-action-buttons'>
-            {selectedMembers.length > 0 && (
-              <div className='selection-info'>
-                <span className='selection-info-text'>{selectedMembers.length}개 선택됨</span>
-                <button className='selection-clear-button' onClick={() => setSelectedMembers([])}>
-                  선택 해제
-                </button>
-              </div>
-            )}
             <button className='add-button' onClick={handleAddMember} disabled>
               + 새 구성원 추가
             </button>
