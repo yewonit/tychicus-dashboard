@@ -23,6 +23,7 @@ export interface UserData {
   email: string;
   phoneNumber: string;
   roles: UserRole[];
+  permissions?: string[]; // 사용자 권한 정보
 }
 
 export interface LoginResponse {
