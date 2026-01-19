@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks';
 
@@ -6,6 +6,7 @@ interface MenuItem {
   path: string;
   icon: string;
   text: string;
+  requiredPermission?: string; // 메뉴 표시에 필요한 권한
 }
 
 interface MenuSection {
@@ -21,56 +22,110 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ dugigo = false }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, logout, revalidateAuth } = useAuth();
 
-  const menuSections: MenuSection[] = [
-    {
-      title: '대시보드',
-      items: [
-        { path: '/main/dashboard', icon: '📊', text: '전체 현황' },
-        // { path: '/main/worship', icon: '⛪', text: '예배 현황' },
-      ],
-    },
-    {
-      title: '조직 관리',
-      items: [
-        { path: '/main/member-management', icon: '👥', text: '구성원 관리' },
-        // { path: '/main/groups', icon: '🏠', text: '소그룹 관리' },
-        // { path: '/main/season-update', icon: '🔄', text: '회기 변경 관리' },
-      ],
-    },
-    // {
-    //   title: '활동 관리',
-    //   items: [
-    //     { path: '/main/attendance', icon: '📝', text: '출결 관리' },
-    //     { path: '/main/forum', icon: '💬', text: '포럼 관리' },
-    //     { path: '/main/visitation', icon: '🏠', text: '심방 관리' },
-    //     { path: '/main/meeting-records', icon: '📍', text: '지역모임 관리' },
-    //     { path: '/main/events', icon: '🎉', text: '행사 관리' },
-    //   ],
-    // },
-    // {
-    //   title: '커뮤니케이션',
-    //   items: [
-    //     { path: '/main/notifications', icon: '🔔', text: '공지사항' },
-    //     { path: '/main/messages', icon: '💌', text: '메시지 관리' },
-    //     { path: '/main/announcements', icon: '📢', text: '알림 관리' },
-    //   ],
-    // },
-    // {
-    //   title: '데이터 관리',
-    //   items: [
-    //     { path: '/main/data-export', icon: '📤', text: '데이터 내보내기' },
-    //     { path: '/main/backup', icon: '💾', text: '데이터 백업' },
-    //     { path: '/main/settings', icon: '⚙️', text: '시스템 설정' },
-    //   ],
-    // },
-  ];
+  /**
+   * permissions가 없으면 토큰을 리프레시하여 데이터를 다시 받아오는 함수
+   */
+  useEffect(() => {
+    const checkAndRefreshPermissions = async () => {
+      // user가 없거나 이미 permissions가 있으면 리프레시 불필요
+      if (!user || (user.permissions && user.permissions.length > 0)) {
+        return;
+      }
 
+      // permissions가 없으면 토큰 리프레시
+      try {
+        await revalidateAuth();
+      } catch (error) {
+        console.error('권한 정보를 가져오는 중 오류가 발생했습니다:', error);
+      }
+    };
+
+    checkAndRefreshPermissions();
+  }, [user, revalidateAuth]);
+
+  /**
+   * 권한에 따라 메뉴를 필터링하는 함수
+   */
+  const filteredMenuSections = useMemo(() => {
+    const userPermissions = user?.permissions || [];
+
+    const menuSections: MenuSection[] = [
+      {
+        title: '대시보드',
+        items: [
+          { path: '/main/dashboard', icon: '📊', text: '전체 현황', requiredPermission: 'DASHBOARD_ACCESS' },
+          // { path: '/main/worship', icon: '⛪', text: '예배 현황' },
+        ],
+      },
+      {
+        title: '조직 관리',
+        items: [
+          {
+            path: '/main/member-management',
+            icon: '👥',
+            text: '구성원 관리',
+            requiredPermission: 'MEMBER_MANAGEMENT_ACCESS',
+          },
+          // { path: '/main/groups', icon: '🏠', text: '소그룹 관리' },
+          // { path: '/main/season-update', icon: '🔄', text: '회기 변경 관리' },
+        ],
+      },
+      // {
+      //   title: '활동 관리',
+      //   items: [
+      //     { path: '/main/attendance', icon: '📝', text: '출결 관리' },
+      //     { path: '/main/forum', icon: '💬', text: '포럼 관리' },
+      //     { path: '/main/visitation', icon: '🏠', text: '심방 관리' },
+      //     { path: '/main/meeting-records', icon: '📍', text: '지역모임 관리' },
+      //     { path: '/main/events', icon: '🎉', text: '행사 관리' },
+      //   ],
+      // },
+      // {
+      //   title: '커뮤니케이션',
+      //   items: [
+      //     { path: '/main/notifications', icon: '🔔', text: '공지사항' },
+      //     { path: '/main/messages', icon: '💌', text: '메시지 관리' },
+      //     { path: '/main/announcements', icon: '📢', text: '알림 관리' },
+      //   ],
+      // },
+      // {
+      //   title: '데이터 관리',
+      //   items: [
+      //     { path: '/main/data-export', icon: '📤', text: '데이터 내보내기' },
+      //     { path: '/main/backup', icon: '💾', text: '데이터 백업' },
+      //     { path: '/main/settings', icon: '⚙️', text: '시스템 설정' },
+      //   ],
+      // },
+    ];
+
+    return menuSections
+      .map(section => ({
+        ...section,
+        items: section.items.filter(item => {
+          // requiredPermission이 없으면 항상 표시
+          if (!item.requiredPermission) {
+            return true;
+          }
+
+          // requiredPermission이 있으면 해당 권한이 있는지 확인
+          return userPermissions.includes(item.requiredPermission);
+        }),
+      }))
+      .filter(section => section.items.length > 0); // 빈 섹션은 제거
+  }, [user?.permissions]);
+
+  /**
+   * 메뉴 클릭 핸들러
+   */
   const handleMenuClick = (path: string) => {
     navigate(path);
   };
 
+  /**
+   * 현재 경로가 활성화된 메뉴인지 확인하는 함수
+   */
   const isActive = (path: string) => {
     return location.pathname === path;
   };
@@ -172,7 +227,7 @@ const Sidebar: React.FC<SidebarProps> = ({ dugigo = false }) => {
 
       <div className={getContentClassName()}>
         <nav className='sidebar-nav'>
-          {menuSections.map((section, sectionIndex) => (
+          {filteredMenuSections.map((section, sectionIndex) => (
             <div key={sectionIndex} className={getCategoryClassName()}>
               <div className={getCategoryTitleClassName()}>{section.title}</div>
               <ul className={getMenuListClassName()}>
