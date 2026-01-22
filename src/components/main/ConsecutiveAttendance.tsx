@@ -51,7 +51,22 @@ const ConsecutiveAttendance: React.FC<ConsecutiveAttendanceProps> = ({
 
   return (
     <div className='consecutive-attendance-section'>
-      <h3 className='chart-title'>최근 4주 연속 출석 현황</h3>
+      <h3 className='chart-title'>
+        최근 4주 연속 출석 현황
+        <span className='absence-tooltip'>
+          <button type='button' className='absence-tooltip-trigger' aria-label='연속 출석 기준 안내'>
+            i
+          </button>
+          <span className='absence-tooltip-content' role='tooltip'>
+            금주를 포함하여 과거로 연속된 출석 주차를 의미합니다.
+            <br />
+            <br />
+            가장 상위 주차에만 집계되었기에 주차별 중복자는 없습니다.
+            <br />
+            (예: 4주 연속 출석자는 2, 3주차 명단에서 제외)
+          </span>
+        </span>
+      </h3>
       <div className='consecutive-grid'>
         <div className='consecutive-card'>
           <h4 className='consecutive-title'>🙏 수요제자기도회</h4>

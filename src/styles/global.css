@@ -2559,6 +2559,67 @@ html {
   margin-top: 16px;
   max-height: 200px;
   overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.absence-tooltip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+}
+
+.absence-tooltip-trigger {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid var(--primary);
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  box-shadow: 0 2px 6px rgba(78, 205, 196, 0.25);
+}
+
+.absence-tooltip-trigger:hover {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+.absence-tooltip-content {
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 8px);
+  min-width: 322px;
+  max-width: 360px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  border: 1px solid var(--border-light);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre-line;
+  z-index: 5;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-50%);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease,
+    visibility 0.2s ease;
+}
+
+.absence-tooltip:hover .absence-tooltip-content,
+.absence-tooltip:focus-within .absence-tooltip-content {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
 }
 
 .absence-list::-webkit-scrollbar {
