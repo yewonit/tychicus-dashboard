@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { useAuth, useDebounce, useInfiniteScroll, useRetry } from '../../hooks';
 import { memberService } from '../../services/memberService';
-import { Member, OrganizationDto } from '../../types/api';
+import { AccessibleOrganizationDto, Member, OrganizationDto } from '../../types/api';
 import { extractNumbers, formatPhoneNumber, validatePhoneNumber } from '../../utils/phoneUtils';
 import { sanitizeName, sanitizeNameSuffix, sanitizeSearchTerm } from '../../utils/sanitization';
 import { commonValidators, validationRules } from '../../utils/validation';
@@ -64,10 +64,7 @@ const MembersManagement: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
   // 접근 가능한 조직 (gook 1개/group 1개일 때 필터 고정용)
-  const [accessibleOrganizations, setAccessibleOrganizations] = useState<{
-    gook: string[];
-    group: string[][];
-  } | null>(null);
+  const [accessibleOrganizations, setAccessibleOrganizations] = useState<AccessibleOrganizationDto | null>(null);
   const [isLoadingAccessibleOrgs, setIsLoadingAccessibleOrgs] = useState(true);
 
   // 정렬 상태
