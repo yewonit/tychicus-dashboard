@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDebounce, useInfiniteScroll, useRetry } from '../../hooks';
+import { useAuth, useDebounce, useInfiniteScroll, useRetry } from '../../hooks';
 import { memberService } from '../../services/memberService';
 import { Member, OrganizationDto } from '../../types/api';
 import { extractNumbers, formatPhoneNumber, validatePhoneNumber } from '../../utils/phoneUtils';
@@ -45,6 +45,7 @@ const createFilterKey = (search: string, dept: string, group: string, team: stri
 
 const MembersManagement: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [isComposing, setIsComposing] = useState(false);
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
@@ -507,6 +508,11 @@ const MembersManagement: React.FC = () => {
 
   const isAllSelected = selectedMembers.length === members.length && members.length > 0;
 
+  // 권한 체크: 'MEMBER_MANAGEMENT_CONTROL' 권한이 있는지 확인
+  const hasMemberManagementControlPermission = useMemo(() => {
+    return user?.permissions?.includes('MEMBER_MANAGEMENT_CONTROL') ?? false;
+  }, [user?.permissions]);
+
   // 소속 변경 모달 핸들러
   const handleOpenModal = () => {
     if (selectedMembers.length === 0) {
@@ -722,7 +728,7 @@ const MembersManagement: React.FC = () => {
             <button
               className='change-affiliation-button'
               onClick={handleOpenModal}
-              disabled={selectedMembers.length === 0}
+              disabled={selectedMembers.length === 0 || !hasMemberManagementControlPermission}
             >
               소속 변경
             </button>
