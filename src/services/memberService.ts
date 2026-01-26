@@ -27,21 +27,12 @@ const mapUserToMember = (user: UserDto): Member => {
     소속순: user.affiliation?.team || '',
     직분: user.role || '청년',
     휴대폰번호: user.phoneNumber,
-    // 출석 정보는 현재 API에서 제공되지 않으므로 기본값 설정
-    주일청년예배출석일자: '-',
-    수요예배출석일자: '-',
   };
 };
 
 export const memberService = {
-  // 조직 목록 캐싱 (메모리)
-  _cachedOrgs: null as OrganizationDto[] | null,
-
   // 조직 목록 조회 (내부용)
   async fetchOrganizations(): Promise<OrganizationDto[]> {
-    // 캐시 사용 안 함 - 항상 API 호출
-    // if (this._cachedOrgs) return this._cachedOrgs;
-
     try {
       // API 엔드포인트는 가정 (백엔드 팀과 확인 필요, 명세서에는 /api/organizations 언급됨)
       const response = await axiosClient.get<OrganizationsResponse>('/organizations');
@@ -55,24 +46,6 @@ export const memberService = {
 
         // 최신 회기의 조직만 필터링
         const latestSeasonOrgs = allOrgs.filter(org => org.season_id === maxSeasonId);
-
-        // 개발 환경에서 로깅
-        const isDevelopment = process.env.NODE_ENV === 'development';
-        if (isDevelopment) {
-          console.log('🔍 조직 필터링:', {
-            전체조직수: allOrgs.length,
-            최신회기_season_id: maxSeasonId,
-            필터링된조직수: latestSeasonOrgs.length,
-            season_id별조직수: allOrgs.reduce(
-              (acc, org) => {
-                const seasonId = org.season_id || 0;
-                acc[seasonId] = (acc[seasonId] || 0) + 1;
-                return acc;
-              },
-              {} as Record<number, number>
-            ),
-          });
-        }
 
         return latestSeasonOrgs;
       }
@@ -91,34 +64,7 @@ export const memberService = {
     // 예: "1국_김민수그룹_이용걸순"
     const orgName = `${department}_${group}_${team}`;
 
-    // 디버깅: 찾으려는 조직명과 실제 조직 목록 로깅
-    const isDevelopment = process.env.NODE_ENV === 'development';
-    if (isDevelopment) {
-      console.log('🔍 조직 ID 찾기:', {
-        찾는조직명: orgName,
-        부서: department,
-        그룹: group,
-        순: team,
-        전체조직수: orgs.length,
-        일치하는조직: orgs.find(o => o.name === orgName),
-        유사한조직들: orgs
-          .filter(o => o.name.includes(department) || o.name.includes(group) || o.name.includes(team))
-          .slice(0, 5)
-          .map(o => o.name),
-      });
-    }
-
     const org = orgs.find(o => o.name === orgName);
-
-    if (!org && isDevelopment) {
-      console.warn('⚠️ 조직을 찾을 수 없습니다:', {
-        찾는조직명: orgName,
-        가능한조직들: orgs
-          .filter(o => o.name.startsWith(department + '_'))
-          .slice(0, 10)
-          .map(o => ({ name: o.name, id: o.id })),
-      });
-    }
 
     return org ? org.id : null;
   },
@@ -135,8 +81,6 @@ export const memberService = {
       limit: request.limit || 10,
     };
 
-    // 요청 정보 로깅 (개발 환경에서만)
-    const isDevelopment = process.env.NODE_ENV === 'development';
     const fullUrl = `${axiosClient.defaults.baseURL}/users`;
     const queryString = new URLSearchParams(
       Object.entries(params).reduce(
@@ -150,15 +94,6 @@ export const memberService = {
       )
     ).toString();
     const requestUrl = queryString ? `${fullUrl}?${queryString}` : fullUrl;
-
-    if (isDevelopment) {
-      console.log('📤 GET /api/users 요청 시작:', {
-        url: '/users',
-        fullUrl: requestUrl,
-        params,
-        timestamp: new Date().toISOString(),
-      });
-    }
 
     try {
       const requestStartTime = Date.now();
@@ -179,28 +114,6 @@ export const memberService = {
         totalCount: 0,
         limit: 10,
       };
-
-      // 성공 응답 로깅 (개발 환경에서만)
-      if (isDevelopment) {
-        console.log('✅ GET /api/users 요청 성공:', {
-          url: '/users',
-          fullUrl: requestUrl,
-          status: response.status,
-          statusText: response.statusText,
-          duration: `${requestDuration}ms`,
-          응답데이터: {
-            구성원수: members.length,
-            페이지네이션: {
-              현재페이지: pagination.currentPage,
-              전체페이지: pagination.totalPages,
-              전체개수: pagination.totalCount,
-              페이지당개수: pagination.limit,
-            },
-          },
-          원본응답: response.data,
-          timestamp: new Date().toISOString(),
-        });
-      }
 
       return {
         members: members.map(mapUserToMember),
@@ -228,36 +141,6 @@ export const memberService = {
         },
         timestamp: new Date().toISOString(),
       };
-
-      // 에러 로깅 (개발 환경에서만 상세 로그)
-      const isDevelopment = process.env.NODE_ENV === 'development';
-      console.error('❌ GET /api/users 요청 실패:', errorDetails);
-
-      // Sequelize 데이터베이스 에러인 경우 상세 정보 출력 (개발 환경에서만)
-      if (
-        isDevelopment &&
-        (errorDetails.errorType === 'SequelizeDatabaseError' || errorDetails.errorMessage?.includes('Unknown column'))
-      ) {
-        console.error('🔴 백엔드 Sequelize 쿼리 에러 감지:', {
-          문제: 'Sequelize가 잘못된 SQL 쿼리를 생성했습니다.',
-          에러메시지: errorDetails.errorMessage,
-          가능한원인: [
-            'User 모델의 association 설정 오류',
-            'include 옵션에서 잘못된 모델 참조',
-            '모델 alias 설정 문제',
-            '자기 자신과의 association 처리 오류',
-          ],
-          백엔드확인사항: [
-            'User 모델의 associations 설정 확인',
-            'GET /api/users 엔드포인트의 Sequelize 쿼리 확인',
-            'include 옵션에서 User 모델을 중복 참조하지 않는지 확인',
-          ],
-          요청정보: {
-            엔드포인트: errorDetails.fullUrl,
-            파라미터객체: errorDetails.params,
-          },
-        });
-      }
 
       throw error;
     }
@@ -326,20 +209,6 @@ export const memberService = {
       })),
     };
 
-    // 요청 정보 로깅 (개발 환경에서만)
-    const isDevelopment = process.env.NODE_ENV === 'development';
-    if (isDevelopment) {
-      console.log('📤 PATCH /api/users/bulk-change-organization 요청 시작:', {
-        url: '/users/bulk-change-organization',
-        memberIds,
-        affiliation,
-        organizationId: orgId,
-        roleName,
-        requestData,
-        timestamp: new Date().toISOString(),
-      });
-    }
-
     try {
       const requestStartTime = Date.now();
       const response = await axiosClient.patch<{ message?: string; success?: boolean }>(
@@ -355,26 +224,7 @@ export const memberService = {
       if (responseData?.success === false) {
         // 실패 응답: { "success": false, "message": "..." }
         const errorMessage = responseData.message || '소속 변경에 실패했습니다.';
-        if (isDevelopment) {
-          console.error('❌ PATCH /api/users/bulk-change-organization 요청 실패:', {
-            url: '/users/bulk-change-organization',
-            response: responseData,
-            duration: `${requestDuration}ms`,
-            timestamp: new Date().toISOString(),
-          });
-        }
         throw new Error(errorMessage);
-      }
-
-      // 성공 응답 로깅 (개발 환경에서만)
-      if (isDevelopment) {
-        console.log('✅ PATCH /api/users/bulk-change-organization 요청 성공:', {
-          url: '/users/bulk-change-organization',
-          response: responseData,
-          updatedCount: memberIds.length,
-          duration: `${requestDuration}ms`,
-          timestamp: new Date().toISOString(),
-        });
       }
 
       return {
@@ -384,16 +234,6 @@ export const memberService = {
         message: responseData?.message || '소속이 변경되었습니다.',
       };
     } catch (error: any) {
-      // 에러 응답 처리
-      if (isDevelopment) {
-        console.error('❌ PATCH /api/users/bulk-change-organization 요청 실패:', {
-          url: '/users/bulk-change-organization',
-          error: error?.response?.data || error?.message || error,
-          status: error?.response?.status,
-          timestamp: new Date().toISOString(),
-        });
-      }
-
       // 백엔드 에러 응답 처리
       if (error?.response?.data) {
         const errorData = error.response.data;
