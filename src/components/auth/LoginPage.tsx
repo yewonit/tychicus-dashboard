@@ -59,10 +59,7 @@ const LoginPage: React.FC = () => {
         {/* 헤더 영역 */}
         <div className='header-box'>
           <Typography variant='h4' className='auth-title'>
-            로그인
-          </Typography>
-          <Typography variant='body1' className='auth-subtitle'>
-            교회 출석 관리 시스템에 로그인하세요
+            두기고 대시보드
           </Typography>
         </div>
 

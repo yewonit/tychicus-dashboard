@@ -46,6 +46,12 @@ export interface OrganizationDto {
   updated_at?: string;
 }
 
+/** 사용자가 접근 가능한 조직 구조 (예: group은 2중 배열 [["강병관"]] 형태) */
+export interface AccessibleOrganizationDto {
+  gook: string[];
+  group: string[][];
+}
+
 export interface OrganizationsResponse {
   data: OrganizationDto[];
 }
