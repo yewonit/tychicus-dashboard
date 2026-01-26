@@ -81,25 +81,8 @@ export const memberService = {
       limit: request.limit || 10,
     };
 
-    const fullUrl = `${axiosClient.defaults.baseURL}/users`;
-    const queryString = new URLSearchParams(
-      Object.entries(params).reduce(
-        (acc, [key, value]) => {
-          if (value !== undefined && value !== null) {
-            acc[key] = String(value);
-          }
-          return acc;
-        },
-        {} as Record<string, string>
-      )
-    ).toString();
-    const requestUrl = queryString ? `${fullUrl}?${queryString}` : fullUrl;
-
     try {
-      const requestStartTime = Date.now();
-      // 백엔드 API 변경: /api/users/list → /api/users (쿼리스트링으로 필터링)
       const response = await axiosClient.get<UserListResponse>('/users', { params });
-      const requestDuration = Date.now() - requestStartTime;
 
       // 안전한 응답 처리
       const data = response.data?.data;
@@ -125,23 +108,6 @@ export const memberService = {
         },
       };
     } catch (error: any) {
-      // 에러 응답 상세 정보 로깅 (백엔드 디버깅용)
-      const errorDetails = {
-        url: '/users',
-        fullUrl: requestUrl,
-        params,
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        errorMessage: error.response?.data?.error?.message || error.response?.data?.message || error.message,
-        errorType: error.response?.data?.error?.name || 'Unknown',
-        errorData: error.response?.data,
-        requestConfig: {
-          method: 'GET',
-          headers: error.config?.headers,
-        },
-        timestamp: new Date().toISOString(),
-      };
-
       throw error;
     }
   },
@@ -210,12 +176,10 @@ export const memberService = {
     };
 
     try {
-      const requestStartTime = Date.now();
       const response = await axiosClient.patch<{ message?: string; success?: boolean }>(
         '/users/bulk-change-organization',
         requestData
       );
-      const requestDuration = Date.now() - requestStartTime;
 
       // 응답 확인 및 검증
       const responseData = response.data;
