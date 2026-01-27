@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth, useDebounce, useInfiniteScroll, useRetry } from '../../hooks';
 import { memberService } from '../../services/memberService';
 import { AccessibleOrganizationDto, Member, OrganizationDto } from '../../types/api';
+import { getAccessibleOrganizations } from '../../utils/authService';
 import { extractNumbers, formatPhoneNumber, validatePhoneNumber } from '../../utils/phoneUtils';
 import { sanitizeName, sanitizeNameSuffix, sanitizeSearchTerm } from '../../utils/sanitization';
 import { commonValidators, validationRules } from '../../utils/validation';
-import { getAccessibleOrganizations } from '../../utils/authService';
 import { ComboBox } from '../ui/ComboBox';
 import { Toast } from '../ui/Toast';
 
@@ -320,12 +320,12 @@ const MembersManagement: React.FC = () => {
         setAccessibleOrganizations(data);
 
         if (data.gook?.length === 1) {
-          setFilterDepartment(data.gook[0]);
+          setFilterDepartment(`${data.gook[0]}국`);
         }
         // group은 2중 배열 (예: [["강병관"]]) → 내부 요소가 1개일 때만 필터 고정
         const flatGroup = data.group?.flat() ?? [];
         if (flatGroup.length === 1) {
-          setFilterGroup(flatGroup[0]);
+          setFilterGroup(`${flatGroup[0]}그룹`);
         }
         await fetchFilterOptions();
       } catch (error: any) {
@@ -382,11 +382,9 @@ const MembersManagement: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, fetchMembers, validSearchTerm, filterDepartment, filterGroup, filterTeam, isLoadingAccessibleOrgs]);
 
-  // gook/group 1개일 때 고정값 (리셋 및 셀렉트 비활성화용)
-  // group은 2중 배열 (예: [["강병관"]]) → flat 후 요소가 1개이면 고정
-  const singleDepartment = accessibleOrganizations?.gook?.length === 1 ? accessibleOrganizations.gook[0] : null;
+  const singleDepartment = accessibleOrganizations?.gook?.length === 1 ? `${accessibleOrganizations.gook[0]}국` : null;
   const flatGroups = accessibleOrganizations?.group?.flat() ?? [];
-  const singleGroup = flatGroups.length === 1 ? flatGroups[0] : null;
+  const singleGroup = flatGroups.length === 1 ? `${flatGroups[0]}그룹` : null;
 
   // 사이드바 메뉴 클릭 시 화면 초기화 (고정 필터는 유지)
   useEffect(() => {
