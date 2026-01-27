@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDebounce, useInfiniteScroll, useRetry } from '../../hooks';
+import { useAuth, useDebounce, useInfiniteScroll, useRetry } from '../../hooks';
 import { memberService } from '../../services/memberService';
-import { Member, OrganizationDto } from '../../types/api';
+import { AccessibleOrganizationDto, Member, OrganizationDto } from '../../types/api';
+import { getAccessibleOrganizations } from '../../utils/authService';
 import { extractNumbers, formatPhoneNumber, validatePhoneNumber } from '../../utils/phoneUtils';
 import { sanitizeName, sanitizeNameSuffix, sanitizeSearchTerm } from '../../utils/sanitization';
 import { commonValidators, validationRules } from '../../utils/validation';
@@ -45,6 +46,7 @@ const createFilterKey = (search: string, dept: string, group: string, team: stri
 
 const MembersManagement: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [isComposing, setIsComposing] = useState(false);
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
@@ -60,6 +62,10 @@ const MembersManagement: React.FC = () => {
   const [filterGroup, setFilterGroup] = useState(DEFAULT_FILTER);
   const [filterTeam, setFilterTeam] = useState(DEFAULT_FILTER);
   const [currentPage, setCurrentPage] = useState(1);
+
+  // 접근 가능한 조직 (gook 1개/group 1개일 때 필터 고정용)
+  const [accessibleOrganizations, setAccessibleOrganizations] = useState<AccessibleOrganizationDto | null>(null);
+  const [isLoadingAccessibleOrgs, setIsLoadingAccessibleOrgs] = useState(true);
 
   // 정렬 상태
   const [sortField, setSortField] = useState<string>('');
@@ -113,12 +119,6 @@ const MembersManagement: React.FC = () => {
       const options = await executeWithRetry('filterOptions', () => memberService.getFilterOptions(), {
         maxRetries: 3,
         retryDelay: 1000,
-        onRetry: (attempt: number) => {
-          if (process.env.NODE_ENV === 'development') {
-            // eslint-disable-next-line no-console
-            console.log(`필터 옵션 로딩 재시도 중... (${attempt}/3)`);
-          }
-        },
       });
       setFilterOptions(options);
 
@@ -235,17 +235,6 @@ const MembersManagement: React.FC = () => {
     [sortField]
   );
 
-  // 필터 초기화
-  const handleResetFilters = useCallback(() => {
-    setSearchTerm('');
-    setFilterDepartment(DEFAULT_FILTER);
-    setFilterGroup(DEFAULT_FILTER);
-    setFilterTeam(DEFAULT_FILTER);
-    setCurrentPage(1);
-    setSortField('');
-    setSortOrder('asc');
-  }, []);
-
   // Fetch members (무한 스크롤 지원)
   const fetchMembers = useCallback(
     async (append = false) => {
@@ -281,12 +270,6 @@ const MembersManagement: React.FC = () => {
           {
             maxRetries: append ? 1 : 3, // append 모드에서는 재시도 최소화
             retryDelay: 1000,
-            onRetry: (attempt: number) => {
-              if (!append && process.env.NODE_ENV === 'development') {
-                // eslint-disable-next-line no-console
-                console.log(`구성원 목록 로딩 재시도 중... (${attempt}/3)`);
-              }
-            },
           }
         );
 
@@ -327,14 +310,39 @@ const MembersManagement: React.FC = () => {
     onLoadMore: loadMore,
   });
 
-  // Initial Load: Filter Options & First Data Load
+  // Initial Load: 접근 가능 조직 조회 → 필터 초기값 설정(1개일 때 고정) → 필터 옵션 로드
   useEffect(() => {
-    fetchFilterOptions();
-    // 초기 데이터 로드 (currentPage가 1이고 필터 키가 비어있을 때)
-    if (currentPage === 1 && filterKeyRef.current === '') {
-      filterKeyRef.current = createFilterKey(validSearchTerm, filterDepartment, filterGroup, filterTeam);
-      fetchMembers(false);
-    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await getAccessibleOrganizations();
+        if (cancelled) return;
+        setAccessibleOrganizations(data);
+
+        if (data.gook?.length === 1) {
+          setFilterDepartment(`${data.gook[0]}국`);
+        }
+        // group은 2중 배열 (예: [["강병관"]]) → 내부 요소가 1개일 때만 필터 고정
+        const flatGroup = data.group?.flat() ?? [];
+        if (flatGroup.length === 1) {
+          setFilterGroup(`${flatGroup[0]}그룹`);
+        }
+        await fetchFilterOptions();
+      } catch (error: any) {
+        if (!cancelled) {
+          console.error('Failed to load accessible organizations:', error);
+          setToast({
+            message: error?.response?.data?.message ?? error?.message ?? '접근 가능한 조직을 불러오는데 실패했습니다.',
+            type: 'error',
+          });
+        }
+      } finally {
+        if (!cancelled) setIsLoadingAccessibleOrgs(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -356,8 +364,10 @@ const MembersManagement: React.FC = () => {
     }
   }, [validSearchTerm, filterDepartment, filterGroup, filterTeam]);
 
-  // 페이지 변경 시 데이터 로드 (무한 스크롤)
+  // 페이지 변경 시 데이터 로드 (무한 스크롤) — 접근 가능 조직 로드 완료 후에만 실행
   useEffect(() => {
+    if (isLoadingAccessibleOrgs) return;
+
     const isFirstPage = currentPage === 1;
     const isFilterChanged =
       filterKeyRef.current !== createFilterKey(validSearchTerm, filterDepartment, filterGroup, filterTeam);
@@ -370,14 +380,18 @@ const MembersManagement: React.FC = () => {
       fetchMembers(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, fetchMembers, validSearchTerm, filterDepartment, filterGroup, filterTeam]);
+  }, [currentPage, fetchMembers, validSearchTerm, filterDepartment, filterGroup, filterTeam, isLoadingAccessibleOrgs]);
 
-  // 사이드바 메뉴 클릭 시 화면 초기화
+  const singleDepartment = accessibleOrganizations?.gook?.length === 1 ? `${accessibleOrganizations.gook[0]}국` : null;
+  const flatGroups = accessibleOrganizations?.group?.flat() ?? [];
+  const singleGroup = flatGroups.length === 1 ? `${flatGroups[0]}그룹` : null;
+
+  // 사이드바 메뉴 클릭 시 화면 초기화 (고정 필터는 유지)
   useEffect(() => {
     const handleResetPage = () => {
       setSearchTerm('');
-      setFilterDepartment(DEFAULT_FILTER);
-      setFilterGroup(DEFAULT_FILTER);
+      setFilterDepartment(singleDepartment ?? DEFAULT_FILTER);
+      setFilterGroup(singleGroup ?? DEFAULT_FILTER);
       setFilterTeam(DEFAULT_FILTER);
       setCurrentPage(1);
       setHasMore(true);
@@ -399,8 +413,7 @@ const MembersManagement: React.FC = () => {
     return () => {
       window.removeEventListener('resetMembersPage', handleResetPage);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [singleDepartment, singleGroup]);
 
   // 페이지 변경 시 선택 해제
   useEffect(() => {
@@ -506,6 +519,11 @@ const MembersManagement: React.FC = () => {
   };
 
   const isAllSelected = selectedMembers.length === members.length && members.length > 0;
+
+  // 권한 체크: 'MEMBER_MANAGEMENT_CONTROL' 권한이 있는지 확인
+  const hasMemberManagementControlPermission = useMemo(() => {
+    return user?.permissions?.includes('MEMBER_MANAGEMENT_CONTROL') ?? false;
+  }, [user?.permissions]);
 
   // 소속 변경 모달 핸들러
   const handleOpenModal = () => {
@@ -672,6 +690,7 @@ const MembersManagement: React.FC = () => {
                 setFilterTeam(DEFAULT_FILTER);
                 setCurrentPage(1);
               }}
+              disabled={!!singleDepartment}
             >
               <option value={DEFAULT_FILTER}>소속국 선택</option>
               {(filteredOptions.departments || []).map(dept => (
@@ -689,7 +708,7 @@ const MembersManagement: React.FC = () => {
                 setFilterTeam(DEFAULT_FILTER);
                 setCurrentPage(1);
               }}
-              disabled={filterDepartment === DEFAULT_FILTER}
+              disabled={!!singleGroup || filterDepartment === DEFAULT_FILTER}
             >
               <option value={DEFAULT_FILTER}>소속그룹 선택</option>
               {(filteredOptions.groups || []).map(group => (
@@ -722,7 +741,7 @@ const MembersManagement: React.FC = () => {
             <button
               className='change-affiliation-button'
               onClick={handleOpenModal}
-              disabled={selectedMembers.length === 0}
+              disabled={selectedMembers.length === 0 || !hasMemberManagementControlPermission}
             >
               소속 변경
             </button>

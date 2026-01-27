@@ -1,3 +1,4 @@
+import { AccessibleOrganizationDto } from '../types/api';
 import { LoginRequest, LoginResponse, TokenData, TokenValidationResponse, UserData } from '../types';
 import { clearAuthData, getAccessToken, getRefreshToken, saveTokens, saveUserData } from './authUtils';
 import axiosClient, { authClient } from './axiosClient';
@@ -122,15 +123,9 @@ export const validateOrRefreshToken = async (): Promise<UserData> => {
 /**
  * 사용자가 접근 가능한 조직 구조 조회
  */
-export const getAccessibleOrganizations = async (): Promise<{
-  gook: string[];
-  group: string[][];
-}> => {
+export const getAccessibleOrganizations = async (): Promise<AccessibleOrganizationDto> => {
   try {
-    const response = await axiosClient.get<{
-      gook: string[];
-      group: string[][];
-    }>('/users/accessible');
+    const response = await axiosClient.get<AccessibleOrganizationDto>('/users/accessible');
     return response.data;
   } catch (error) {
     throw error;
