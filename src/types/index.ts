@@ -13,6 +13,7 @@ export interface TokenData {
 
 export interface UserRole {
   roleName: string;
+  roleLevel: number; // 역할 레벨 (낮을수록 상위 권한)
   organizationId: number;
   organizationName: string;
 }

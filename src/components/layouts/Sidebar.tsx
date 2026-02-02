@@ -46,6 +46,23 @@ const Sidebar: React.FC<SidebarProps> = ({ dugigo = false }) => {
   }, [user, revalidateAuth]);
 
   /**
+   * roleLevel이 가장 낮은 역할의 이름을 반환하는 함수
+   * roleLevel이 낮을수록 상위 권한을 의미함
+   */
+  const lowestLevelRoleName = useMemo(() => {
+    if (!user?.roles || user.roles.length === 0) {
+      return '';
+    }
+
+    // roleLevel이 가장 낮은 역할 찾기
+    const lowestRole = user.roles.reduce((lowest, current) => {
+      return current.roleLevel < lowest.roleLevel ? current : lowest;
+    }, user.roles[0]);
+
+    return lowestRole.roleName;
+  }, [user?.roles]);
+
+  /**
    * 권한에 따라 메뉴를 필터링하는 함수
    */
   const filteredMenuSections = useMemo(() => {
@@ -250,7 +267,7 @@ const Sidebar: React.FC<SidebarProps> = ({ dugigo = false }) => {
           <div className={getUserAvatarClassName()}>👤</div>
           <div className={getUserDetailsClassName()}>
             <div className={getUserNameClassName()}>{user?.name || '사용자'}</div>
-            <div className={getUserRoleClassName()}>{user?.roles?.[0]?.roleName || ''}</div>
+            <div className={getUserRoleClassName()}>{lowestLevelRoleName}</div>
           </div>
           <button className={getLogoutButtonClassName()} onClick={handleLogout} title='로그아웃' aria-label='로그아웃'>
             ⏻
