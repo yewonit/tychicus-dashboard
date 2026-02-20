@@ -27,15 +27,18 @@ jobs:
         run: |
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/tychicus-dashboard:dev
 
-      - name: Install sshpass
-        run: sudo apt-get install -y sshpass
-
-      - name: Deploy
+      - name: Setup SSH Key
         run: |
-          DOCKER_IMAGE="${{ secrets.DOCKER_HUB_USERNAME }}/tychicus-dashboard:dev"
-          sshpass -p ${{ secrets.DEV_MACHINE_SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no -t ${{ secrets.DEV_MACHINE_SSH_USER }}@${{ secrets.DEV_MACHINE_SSH_HOST }} -p ${{ secrets.DEV_MACHINE_SSH_PORT }} "
-            docker rm -f tychicus-dashboard-dev || true
-            docker rmi ${DOCKER_IMAGE} || true
-            docker pull ${DOCKER_IMAGE}
-            docker run -d -p 8181:80 --name tychicus-dashboard-dev --network hephai-bridge --restart unless-stopped -e NODE_ENV=development -e REACT_APP_ENV=development ${DOCKER_IMAGE}
-          "
+          mkdir -p ~/.ssh
+          echo "${{ secrets.AWS_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.AWS_SSH_FRONTEND_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to Docker Swarm on AWS EC2
+        run: |
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.AWS_SSH_USER }}@${{ secrets.AWS_SSH_FRONTEND_HOST }} << 'EOF'
+            cd ~/src/deployment/ec2-deploy/frontend
+            docker compose pull tychicus-dashboard-dev
+            docker compose up -d tychicus-dashboard-dev
+            docker image prune -f
+          EOF
