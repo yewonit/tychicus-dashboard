@@ -62,6 +62,9 @@ const authClient: AxiosInstance = axios.create({
   },
 });
 
+/** POST, PUT, PATCH 요청에 Content-Type 헤더 보장이 필요한 메서드 목록 */
+const METHODS_REQUIRING_CONTENT_TYPE = ['post', 'put', 'patch'];
+
 // 공통 요청 인터셉터 함수
 const addRequestInterceptor = (instance: AxiosInstance) => {
   instance.interceptors.request.use(
@@ -72,6 +75,15 @@ const addRequestInterceptor = (instance: AxiosInstance) => {
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
       }
+
+      // POST, PUT, PATCH 요청에 Content-Type: application/json 명시적 보장
+      // 인스턴스 기본값이 있더라도 개별 요청에서 누락될 수 있으므로 인터셉터에서 강제 적용
+      if (config.method && METHODS_REQUIRING_CONTENT_TYPE.includes(config.method.toLowerCase())) {
+        if (config.headers && !config.headers['Content-Type']) {
+          config.headers['Content-Type'] = 'application/json';
+        }
+      }
+
       return config;
     },
     error => {
