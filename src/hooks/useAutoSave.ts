@@ -41,7 +41,8 @@ export function useAutoSave<T>(data: T | null, options: UseAutoSaveOptions<T>) {
       setHasUnsavedChanges(false);
       prevDataRef.current = data;
     } catch (error) {
-      console.error('저장 오류:', error);
+      // 보안: 에러 객체 전체를 출력하지 않고 메시지만 기록
+      console.error('저장 오류:', error instanceof Error ? error.message : '알 수 없는 오류');
       throw error;
     } finally {
       setIsSaving(false);

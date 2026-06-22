@@ -90,7 +90,8 @@ export const logout = async (): Promise<void> => {
       );
     }
   } catch (error) {
-    console.error('로그아웃 API 오류:', error);
+    // 보안: 에러 객체 전체(인증 헤더에 토큰 포함 가능)를 출력하지 않고 메시지만 기록
+    console.error('로그아웃 API 오류:', error instanceof Error ? error.message : '알 수 없는 오류');
     // 서버 로그아웃 실패해도 클라이언트에서는 데이터 삭제
   } finally {
     // 로컬 인증 데이터 삭제

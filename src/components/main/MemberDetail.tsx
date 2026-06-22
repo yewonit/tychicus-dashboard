@@ -30,7 +30,8 @@ const MemberDetail: React.FC = () => {
           setPhoto(data.프로필사진);
         }
       } catch (err) {
-        console.error('Failed to fetch member detail:', err);
+        // 보안: 에러 객체 전체(구성원 개인정보 포함 가능)를 출력하지 않고 메시지만 기록
+        console.error('Failed to fetch member detail:', err instanceof Error ? err.message : '알 수 없는 오류');
         setError('구성원 정보를 불러오는데 실패했습니다.');
       } finally {
         setLoading(false);

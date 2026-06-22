@@ -173,7 +173,8 @@ const VisitationManagement: React.FC = () => {
       // TODO: API 연동 필요 - 심방 데이터 가져오기
       setVisitations([]);
     } catch (error) {
-      console.error('심방 데이터 조회 실패:', error);
+      // 보안: 에러 객체 전체(심방 개인정보 포함 가능)를 출력하지 않고 메시지만 기록
+      console.error('심방 데이터 조회 실패:', error instanceof Error ? error.message : '알 수 없는 오류');
       setVisitations([]);
     } finally {
       setLoading(false);
@@ -193,7 +194,8 @@ const VisitationManagement: React.FC = () => {
         today_visitations: 0,
       });
     } catch (error) {
-      console.error('심방 통계 조회 실패:', error);
+      // 보안: 에러 객체 전체를 출력하지 않고 메시지만 기록
+      console.error('심방 통계 조회 실패:', error instanceof Error ? error.message : '알 수 없는 오류');
     }
   };
 

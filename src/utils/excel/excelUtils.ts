@@ -40,7 +40,8 @@ export async function convertExcelToJson(file: File, options: ExcelConversionOpt
 
     return sheets;
   } catch (error) {
-    console.error('엑셀 파일 변환 오류:', error);
+    // 보안: 에러 객체 전체(파일 데이터 포함 가능)를 출력하지 않고 메시지만 기록
+    console.error('엑셀 파일 변환 오류:', error instanceof Error ? error.message : '알 수 없는 오류');
     throw new Error('엑셀 파일을 읽는 중 오류가 발생했습니다.');
   }
 }
@@ -61,7 +62,8 @@ export function downloadExcelFile(data: SheetData[], fileName: string = 'downloa
 
     XLSX.writeFile(workbook, `${fileName}.xlsx`);
   } catch (error) {
-    console.error('엑셀 다운로드 오류:', error);
+    // 보안: 에러 객체 전체(파일 데이터 포함 가능)를 출력하지 않고 메시지만 기록
+    console.error('엑셀 다운로드 오류:', error instanceof Error ? error.message : '알 수 없는 오류');
     throw new Error('엑셀 파일 다운로드 중 오류가 발생했습니다.');
   }
 }

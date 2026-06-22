@@ -13,7 +13,8 @@ export async function fetchAllUsers(): Promise<UserData[]> {
     const response = await axiosClient.get('/users');
     return response.data.data as UserData[];
   } catch (error) {
-    console.error('전체 유저 데이터 조회 오류:', error);
+    // 보안: 에러 객체 전체(유저 개인정보 포함 가능)를 출력하지 않고 메시지만 기록
+    console.error('전체 유저 데이터 조회 오류:', error instanceof Error ? error.message : '알 수 없는 오류');
     throw new Error('전체 유저 데이터를 가져오는 중 오류가 발생했습니다.');
   }
 }
@@ -36,7 +37,8 @@ export async function applySeasonUpdate(payload: SeasonUpdatePayload): Promise<b
 
     return response.status === 200 || response.status === 201;
   } catch (error) {
-    console.error('회기 변경 적용 API 오류:', error);
+    // 보안: 에러 객체 전체(요청 본문에 유저 개인정보 포함 가능)를 출력하지 않고 메시지만 기록
+    console.error('회기 변경 적용 API 오류:', error instanceof Error ? error.message : '알 수 없는 오류');
     throw new Error('회기 변경 적용 중 오류가 발생했습니다.');
   }
 }

@@ -76,7 +76,8 @@ export const getUserData = (): UserData | null => {
   try {
     return JSON.parse(userDataStr);
   } catch (error) {
-    console.error('사용자 데이터 파싱 오류:', error);
+    // 보안: 파싱 대상 사용자 데이터(개인정보)가 노출되지 않도록 메시지만 기록
+    console.error('사용자 데이터 파싱 오류:', error instanceof Error ? error.message : '알 수 없는 오류');
     localStorage.removeItem(USER_DATA_KEY);
     return null;
   }

@@ -33,7 +33,8 @@ export function useSeasonData() {
         setData(parsedData);
       }
     } catch (error) {
-      console.error('저장된 데이터 파싱 오류:', error);
+      // 보안: 파싱 대상 데이터(개인정보 포함 가능)가 노출되지 않도록 메시지만 기록
+      console.error('저장된 데이터 파싱 오류:', error instanceof Error ? error.message : '알 수 없는 오류');
       // 파싱 실패 시 localStorage 클리어
       localStorage.removeItem(STORAGE_KEY);
       setData(null);
@@ -50,7 +51,8 @@ export function useSeasonData() {
       setData(newData);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newData));
     } catch (error) {
-      console.error('데이터 저장 오류:', error);
+      // 보안: 에러 객체 전체를 출력하지 않고 메시지만 기록
+      console.error('데이터 저장 오류:', error instanceof Error ? error.message : '알 수 없는 오류');
       throw new Error('데이터 저장 중 오류가 발생했습니다.');
     }
   };

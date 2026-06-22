@@ -38,7 +38,11 @@ const Sidebar: React.FC<SidebarProps> = ({ dugigo = false }) => {
       try {
         await revalidateAuth();
       } catch (error) {
-        console.error('권한 정보를 가져오는 중 오류가 발생했습니다:', error);
+        // 보안: 에러 객체 전체를 출력하지 않고 메시지만 기록
+        console.error(
+          '권한 정보를 가져오는 중 오류가 발생했습니다:',
+          error instanceof Error ? error.message : '알 수 없는 오류'
+        );
       }
     };
 

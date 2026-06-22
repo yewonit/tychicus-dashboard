@@ -52,7 +52,8 @@ export const memberService = {
 
       return [];
     } catch (error) {
-      console.error('Failed to fetch organizations:', error);
+      // 보안: 에러 객체 전체를 출력하지 않고 메시지만 기록
+      console.error('Failed to fetch organizations:', error instanceof Error ? error.message : '알 수 없는 오류');
       return [];
     }
   },
@@ -141,7 +142,8 @@ export const memberService = {
         teams: data.teams || [],
       };
     } catch (error) {
-      console.error('필터 옵션 조회 실패:', error);
+      // 보안: 에러 객체 전체를 출력하지 않고 메시지만 기록
+      console.error('필터 옵션 조회 실패:', error instanceof Error ? error.message : '알 수 없는 오류');
       // 에러 발생 시 빈 배열 반환하여 앱이 크래시되지 않도록 함
       return {
         departments: [],
