@@ -27,7 +27,8 @@ const LoginPage: React.FC = () => {
         await login(data);
         // 로그인 성공 시 navigate는 useEffect에서 처리
       } catch (error) {
-        console.error('로그인 실패:', error);
+        // 보안: 에러 객체 전체(요청 본문에 비밀번호 포함 가능)를 출력하지 않고 메시지만 기록
+        console.error('로그인 실패:', error instanceof Error ? error.message : '알 수 없는 오류');
       } finally {
         setIsSubmitting(false);
       }

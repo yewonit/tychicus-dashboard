@@ -112,7 +112,8 @@ export const useAuth = () => {
       setAuthState(prev => ({ ...prev, loading: true }));
       await logout();
     } catch (error) {
-      console.error('로그아웃 오류:', error);
+      // 보안: 에러 객체 전체를 출력하지 않고 메시지만 기록
+      console.error('로그아웃 오류:', error instanceof Error ? error.message : '알 수 없는 오류');
     } finally {
       // 로그아웃 시 초기화 플래그 리셋 (다음에 다시 초기화 가능하도록)
       initializationRef.current = false;
@@ -142,7 +143,8 @@ export const useAuth = () => {
         error: null,
       }));
     } catch (error) {
-      console.error('토큰 재검증 오류:', error);
+      // 보안: 에러 객체 전체(인증 헤더에 토큰 포함 가능)를 출력하지 않고 메시지만 기록
+      console.error('토큰 재검증 오류:', error instanceof Error ? error.message : '알 수 없는 오류');
       setAuthState({
         isAuthenticated: false,
         user: null,

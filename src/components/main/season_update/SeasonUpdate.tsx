@@ -136,7 +136,8 @@ const SeasonUpdate: React.FC = () => {
         }
       }, 500);
     } catch (error) {
-      console.error('서버 동기화 오류:', error);
+      // 보안: 에러 객체 전체를 출력하지 않고 메시지만 기록
+      console.error('서버 동기화 오류:', error instanceof Error ? error.message : '알 수 없는 오류');
       alert(error instanceof Error ? error.message : '서버 동기화 중 오류가 발생했습니다.');
       setIsSyncing(false);
       setSyncProgressStep(0);
@@ -172,7 +173,8 @@ const SeasonUpdate: React.FC = () => {
       setIsApplying(false);
       setIsApplyComplete(true);
     } catch (error) {
-      console.error('회기 변경 적용 오류:', error);
+      // 보안: 에러 객체 전체를 출력하지 않고 메시지만 기록
+      console.error('회기 변경 적용 오류:', error instanceof Error ? error.message : '알 수 없는 오류');
       setIsApplying(false);
       alert(error instanceof Error ? error.message : '회기 변경 적용 중 오류가 발생했습니다.');
     }

@@ -17,7 +17,11 @@ export function useLocalStorage<T>(
       const item = window.localStorage.getItem(key);
       return item ? JSON.parse(item) : initialValue;
     } catch (error) {
-      console.error(`Error reading localStorage key "${key}":`, error);
+      // 보안: 저장된 값(개인정보 포함 가능)이 노출되지 않도록 메시지만 기록
+      console.error(
+        `Error reading localStorage key "${key}":`,
+        error instanceof Error ? error.message : '알 수 없는 오류'
+      );
       return initialValue;
     }
   });
@@ -33,7 +37,11 @@ export function useLocalStorage<T>(
         // 로컬 스토리지에 저장
         window.localStorage.setItem(key, JSON.stringify(valueToStore));
       } catch (error) {
-        console.error(`Error setting localStorage key "${key}":`, error);
+        // 보안: 저장하려는 값(개인정보 포함 가능)이 노출되지 않도록 메시지만 기록
+        console.error(
+          `Error setting localStorage key "${key}":`,
+          error instanceof Error ? error.message : '알 수 없는 오류'
+        );
       }
     },
     [key, storedValue]
@@ -45,7 +53,11 @@ export function useLocalStorage<T>(
       setStoredValue(initialValue);
       window.localStorage.removeItem(key);
     } catch (error) {
-      console.error(`Error removing localStorage key "${key}":`, error);
+      // 보안: 에러 객체 전체를 출력하지 않고 메시지만 기록
+      console.error(
+        `Error removing localStorage key "${key}":`,
+        error instanceof Error ? error.message : '알 수 없는 오류'
+      );
     }
   }, [key, initialValue]);
 
@@ -56,7 +68,11 @@ export function useLocalStorage<T>(
         try {
           setStoredValue(JSON.parse(e.newValue));
         } catch (error) {
-          console.error(`Error parsing localStorage value for key "${key}":`, error);
+          // 보안: 파싱 대상 값(개인정보 포함 가능)이 노출되지 않도록 메시지만 기록
+          console.error(
+            `Error parsing localStorage value for key "${key}":`,
+            error instanceof Error ? error.message : '알 수 없는 오류'
+          );
         }
       }
     };

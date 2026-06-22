@@ -129,8 +129,9 @@ const MembersManagement: React.FC = () => {
       });
       setAllOrganizations(orgs);
     } catch (error: any) {
-      console.error('Failed to fetch filter options:', error);
       const errorMessage = error?.response?.data?.message || error?.message || '필터 옵션을 불러오는데 실패했습니다.';
+      // 보안: 에러 객체 전체를 출력하지 않고 메시지만 기록
+      console.error('Failed to fetch filter options:', errorMessage);
       setFilterOptionsError(errorMessage);
       setToast({
         message: `${errorMessage} 페이지를 새로고침해주세요.`,
@@ -283,10 +284,12 @@ const MembersManagement: React.FC = () => {
         // 더 불러올 데이터가 있는지 확인
         setHasMore(currentPage < response.pagination.totalPages);
       } catch (error: any) {
-        console.error('Failed to fetch members:', error);
+        // 보안: 에러 객체 전체(구성원 개인정보 포함 가능)를 출력하지 않고 메시지만 기록
+        const fetchErrorMessage =
+          error?.response?.data?.message || error?.message || '구성원 목록을 불러오는데 실패했습니다.';
+        console.error('Failed to fetch members:', fetchErrorMessage);
         if (!append) {
-          const errorMessage =
-            error?.response?.data?.message || error?.message || '구성원 목록을 불러오는데 실패했습니다.';
+          const errorMessage = fetchErrorMessage;
           setToast({ message: `${errorMessage} 잠시 후 다시 시도해주세요.`, type: 'error' });
         }
       } finally {
@@ -330,7 +333,11 @@ const MembersManagement: React.FC = () => {
         await fetchFilterOptions();
       } catch (error: any) {
         if (!cancelled) {
-          console.error('Failed to load accessible organizations:', error);
+          // 보안: 에러 객체 전체를 출력하지 않고 메시지만 기록
+          console.error(
+            'Failed to load accessible organizations:',
+            error?.response?.data?.message ?? error?.message ?? '알 수 없는 오류'
+          );
           setToast({
             message: error?.response?.data?.message ?? error?.message ?? '접근 가능한 조직을 불러오는데 실패했습니다.',
             type: 'error',
@@ -499,8 +506,9 @@ const MembersManagement: React.FC = () => {
         fetchMembers(); // Refresh list
       }
     } catch (error: any) {
-      console.error('Failed to create member:', error);
       const errorMessage = error?.response?.data?.message || error?.message || '구성원 추가에 실패했습니다.';
+      // 보안: 에러 객체 전체(구성원 개인정보 포함 가능)를 출력하지 않고 메시지만 기록
+      console.error('Failed to create member:', errorMessage);
       setToast({ message: errorMessage, type: 'error' });
     }
   };
@@ -631,8 +639,9 @@ const MembersManagement: React.FC = () => {
         // useEffect가 필터 변경을 감지하여 자동으로 목록을 새로고침함
       }
     } catch (error: any) {
-      console.error('Failed to update affiliation:', error);
       const errorMessage = error?.response?.data?.message || error?.message || '소속 변경에 실패했습니다.';
+      // 보안: 에러 객체 전체(구성원 개인정보 포함 가능)를 출력하지 않고 메시지만 기록
+      console.error('Failed to update affiliation:', errorMessage);
       setToast({ message: errorMessage, type: 'error' });
     }
   };

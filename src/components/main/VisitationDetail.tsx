@@ -66,7 +66,8 @@ const VisitationDetail: React.FC = () => {
 
       setError('심방 기록을 찾을 수 없습니다.');
     } catch (error) {
-      console.error('심방 상세 정보 조회 오류:', error);
+      // 보안: 에러 객체 전체(심방 개인정보 포함 가능)를 출력하지 않고 메시지만 기록
+      console.error('심방 상세 정보 조회 오류:', error instanceof Error ? error.message : '알 수 없는 오류');
       setError('심방 상세 정보를 불러오는데 실패했습니다.');
     } finally {
       setLoading(false);

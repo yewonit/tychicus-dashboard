@@ -74,7 +74,8 @@ const ExcelDownloadButton: React.FC<ExcelDownloadButtonProps> = ({
         onAfterDownload();
       }
     } catch (error) {
-      console.error('엑셀 다운로드 오류:', error);
+      // 보안: 에러 객체 전체(파일 데이터 포함 가능)를 출력하지 않고 메시지만 기록
+      console.error('엑셀 다운로드 오류:', error instanceof Error ? error.message : '알 수 없는 오류');
       alert('엑셀 파일 다운로드 중 오류가 발생했습니다.');
     }
   };
