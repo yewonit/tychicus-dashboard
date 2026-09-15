@@ -1,17 +1,22 @@
 // 구성원 관리 관련 API 타입 정의
 
+import { AssignableRoleName } from '../utils/constants';
+
 // 백엔드 API 응답 타입 (DTO)
 export interface UserDto {
   id: number;
   name: string;
-  birthYear: string;
+  birthYear: string | null;
   phoneNumber: string;
   affiliation: {
-    department: string;
-    group: string;
-    team: string;
+    department: string | null;
+    group: string | null;
+    team: string | null;
   } | null;
   role: string | null;
+  // GET /users/:id 에서만 내려오는 필드
+  birthDate?: string | null;
+  registrationDate?: string | null;
 }
 
 export interface UserListResponse {
@@ -34,16 +39,15 @@ export interface FilterOptionsResponse {
   };
 }
 
+/** 현재 회기의 조직 (GET /organizations 는 현재 회기 + 삭제되지 않은 조직만 반환) */
 export interface OrganizationDto {
   id: number;
-  season_id?: number; // 회기 ID (가장 큰 값이 최신 회기)
+  seasonId: number | null;
   name: string; // 예: "1국_김민수그룹_이용걸순"
-  depth: number;
-  parentId: number | null;
-  upper_organization_id?: number;
-  is_deleted?: boolean;
-  created_at?: string;
-  updated_at?: string;
+  upperOrganizationId: number | null;
+  isDeleted: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 /** 사용자가 접근 가능한 조직 구조 (예: group은 2중 배열 [["강병관"]] 형태) */
@@ -102,25 +106,16 @@ export interface GetMembersResponse {
   };
 }
 
-// 2. 구성원 소속 일괄 변경
+// 2. 구성원 소속/직분 변경
 export interface UpdateMembersAffiliationRequest {
   memberIds: number[];
-  affiliation: {
-    department: string;
-    group: string;
-    team: string;
-  };
-}
-
-export interface UpdateMembersAffiliationResponse {
-  success: boolean;
-  updatedCount: number;
-  updatedMemberIds: number[];
-  message?: string;
+  organizationId: number;
+  roleName: AssignableRoleName;
 }
 
 // 3. 구성원 상세 정보 조회
 export interface GetMemberDetailResponse extends Member {
+  생년월일?: string;
   히스토리?: {
     departmentHistory?: Array<{
       year: string;
@@ -154,18 +149,9 @@ export interface GetMemberDetailResponse extends Member {
 export interface CreateMemberRequest {
   이름: string;
   name_suffix: string; // 동명이인 구분자 (필수)
-  생일연도?: string;
-  휴대폰번호: string; // 필수
+  생일연도?: string; // YYYY-MM-DD
+  휴대폰번호: string; // 필수 (숫자만)
   gender_type?: 'M' | 'F'; // 성별 (선택, 기본값: M)
-  소속국: string;
-  소속그룹: string;
-  소속순: string;
+  organizationId: number; // 소속 순 조직 ID
   is_new_member?: boolean; // 새가족 여부 (선택, 기본값: false)
-  직분?: string;
-}
-
-export interface CreateMemberResponse {
-  success: boolean;
-  member: Member;
-  message?: string;
 }

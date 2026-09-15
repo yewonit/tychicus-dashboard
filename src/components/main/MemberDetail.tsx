@@ -180,9 +180,7 @@ const MemberDetail: React.FC = () => {
               </div>
               <div className='member-detail-info-item'>
                 <span className='member-detail-info-label'>생년월일</span>
-                <span className='member-detail-info-value'>
-                  {member.생일연도 ? `${member.생일연도}-03-15 (임시)` : '-'}
-                </span>
+                <span className='member-detail-info-value'>{member.생년월일 || '-'}</span>
               </div>
               <div className='member-detail-info-item'>
                 <span className='member-detail-info-label'>휴대폰 번호</span>
@@ -200,7 +198,7 @@ const MemberDetail: React.FC = () => {
               </div>
               <div className='member-detail-info-item'>
                 <span className='member-detail-info-label'>최초 등록일자</span>
-                <span className='member-detail-info-value'>{member.최초등록일자 || '2022-01-15'}</span>
+                <span className='member-detail-info-value'>{member.최초등록일자 || '-'}</span>
               </div>
               <div className='member-detail-info-item'>
                 <span className='member-detail-info-label'>출석 구분</span>
