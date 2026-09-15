@@ -4945,6 +4945,14 @@ html {
   background: #5a6268;
 }
 
+.members-modal-button:disabled,
+.members-modal-button:disabled:hover {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 /* 알림 스타일 */
 .members-alert {
   position: fixed;

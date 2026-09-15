@@ -78,3 +78,10 @@ export const DATE_FORMATS = {
   API: 'yyyy-MM-dd',
   TIME: 'HH:mm',
 } as const;
+
+// 구성원 관리 > 소속 변경에서 선택할 수 있는 직분
+export const ASSIGNABLE_ROLE_NAMES = ['그룹장', '순장', '부순장', '순원'] as const;
+export type AssignableRoleName = (typeof ASSIGNABLE_ROLE_NAMES)[number];
+
+export const isAssignableRoleName = (value?: string | null): value is AssignableRoleName =>
+  ASSIGNABLE_ROLE_NAMES.some(roleName => roleName === value);
