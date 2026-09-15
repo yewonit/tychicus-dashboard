@@ -496,7 +496,7 @@ const MembersManagement: React.FC = () => {
     [members, selectedMemberId]
   );
 
-  // 선택 가능한 직분(그룹장/순장/부순장/순원)이 아닌 구성원은 이 화면에서 변경 불가
+  // 선택 가능한 직분(그룹장/부그룹장/순장/부순장/순원)이 아닌 구성원은 이 화면에서 변경 불가
   const isSelectedRoleLocked = !!selectedMember && !isAssignableRoleName(selectedMember.직분);
 
   // 권한 체크: 'MEMBER_MANAGEMENT_CONTROL' 권한이 있는지 확인
