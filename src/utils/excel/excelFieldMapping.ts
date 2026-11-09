@@ -7,10 +7,10 @@ export const EXCEL_TO_API_FIELD_MAPPING: Record<string, string> = {
   그룹: 'group',
   순: 'soon',
   이름: 'name',
-  구분: 'name_suffix',
-  번호: 'phone_number', // 서버 필드명: phone_number
+  구분: 'nameSuffix',
+  번호: 'phoneNumber',
   직분: 'role',
-  기수: 'birth_date',
+  기수: 'birthDate',
 };
 
 /**

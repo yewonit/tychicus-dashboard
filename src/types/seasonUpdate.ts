@@ -15,9 +15,10 @@ export interface SyncIdentifier {
  */
 export interface UserData {
   name: string; // 이름
-  name_suffix?: string; // 구분 (A, B, C 등)
-  phone_number?: string; // 번호 (서버 필드명: phone_number)
-  birth_date?: string; // 생년월일 (YYYY-MM-DD 형식)
+  nameSuffix?: string | null; // 구분 (A, B, C 등)
+  phoneNumber?: string | null; // 번호 (하이픈 없는 숫자)
+  birthDate?: string | null; // 생년월일 (UTC ISO 문자열, 예: 1996-01-01 KST → 1995-12-31T15:00:00.000Z)
+  isDeleted?: boolean; // 삭제(탈퇴) 여부
   [key: string]: any; // 추가 필드 허용
 }
 
@@ -59,10 +60,10 @@ export interface SeasonMemberData {
   group: string;
   soon: string;
   name: string;
-  name_suffix: string;
-  phone_number: string; // 서버 필드명: phone_number
-  role: string;
-  birth_date: string;
+  nameSuffix?: string;
+  phoneNumber?: string;
+  role?: string;
+  birthDate?: string; // 기수 (두 자리 연도, 예: "96")
 }
 
 /**

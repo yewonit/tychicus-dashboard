@@ -4,6 +4,7 @@
  */
 import { SheetData } from '../../types';
 import { SeasonMemberData, UserData } from '../../types/seasonUpdate';
+import { formatPhoneNumber } from '../phoneUtils';
 import { EXCEL_TO_API_FIELD_MAPPING } from './excelFieldMapping';
 
 /**
@@ -46,14 +47,22 @@ export function mapExcelRowToApiData(excelRow: Record<string, any>): Record<stri
   return apiData;
 }
 
+const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
+
 /**
- * 생년월일에서 연도의 끝 두자리만 추출
- * @param birthDate 생년월일 (YYYY-MM-DD 형식)
- * @returns 연도 끝 두자리 (예: 1999 -> "99")
+ * 생년월일에서 한국 시간 기준 연도의 끝 두자리만 추출
+ * 서버는 DATE를 UTC ISO 문자열로 내려주므로(1996-01-01 KST → "1995-12-31T15:00:00.000Z")
+ * 문자열을 그대로 자르면 1월 1일생이 한 해 앞으로 밀립니다. KST로 보정해 연도를 구합니다.
+ * @param birthDate 생년월일 (ISO 문자열 또는 YYYY-MM-DD)
+ * @returns 연도 끝 두자리 (예: 1999 -> "99"), 파싱 불가 시 빈 문자열
  */
 function extractYearSuffix(birthDate: string): string {
-  const year = birthDate.split('-')[0];
-  return year.slice(-2);
+  const time = new Date(birthDate).getTime();
+  if (Number.isNaN(time)) {
+    return '';
+  }
+  const year = new Date(time + KST_OFFSET_MS).getUTCFullYear();
+  return String(year).slice(-2);
 }
 
 /**
@@ -122,6 +131,8 @@ export function syncExcelDataWithUserData(
   allUsers: UserData[]
 ): { updatedData: SheetData[]; errorRows: Set<string> } {
   const errorRows = new Set<string>();
+  // 삭제된 유저는 회기 배치 대상이 아니므로(백엔드도 제외) 동명이인 판단에서 뺍니다.
+  const activeUsers = allUsers.filter(user => !user.isDeleted);
 
   const updatedData = excelData.map((sheet, sheetIndex) => {
     const updatedRows = sheet.rows.map((row, rowIndex) => {
@@ -131,7 +142,7 @@ export function syncExcelDataWithUserData(
       }
 
       // 1. 이름으로 서버 데이터에서 검색
-      const matchedUsers = allUsers.filter(user => user.name === rowName);
+      const matchedUsers = activeUsers.filter(user => user.name === rowName);
 
       if (matchedUsers.length === 0) {
         // 서버에 해당 이름이 없으면 그대로 반환
@@ -152,18 +163,18 @@ export function syncExcelDataWithUserData(
         const parsedBirthDate = parseBirthDate(rowBirthDate);
 
         if (parsedBirthDate) {
-          // 서버의 birth_date에서 연도 뒤 두 자리 추출하여 비교
-          const birthDateMatch = matchedUsers.find(user => {
-            if (!user.birth_date) {
+          // 서버의 birthDate에서 연도 뒤 두 자리 추출하여 비교
+          const birthDateMatches = matchedUsers.filter(user => {
+            if (!user.birthDate) {
               return false; // 서버에 기수 데이터가 없으면 건너뛰기
             }
-            const serverYearSuffix = extractYearSuffix(user.birth_date);
-            return serverYearSuffix === parsedBirthDate;
+            return extractYearSuffix(user.birthDate) === parsedBirthDate;
           });
 
-          if (birthDateMatch) {
+          if (birthDateMatches.length === 1) {
             // '이름 + 기수'로 정확히 한 명 찾음: 빈칸 채우기
-            return fillEmptyFields(row, birthDateMatch);
+            // (같은 기수의 동명이인이 여럿이면 엉뚱한 사람 번호가 채워지지 않도록 '구분' 확인으로 넘김)
+            return fillEmptyFields(row, birthDateMatches[0]);
           }
         }
       }
@@ -178,7 +189,7 @@ export function syncExcelDataWithUserData(
       }
 
       // '이름' + '구분'으로 검색
-      const exactMatch = matchedUsers.find(user => user.name_suffix === rowNameSuffix);
+      const exactMatch = matchedUsers.find(user => user.nameSuffix === rowNameSuffix);
 
       if (exactMatch) {
         // 정확히 한 명 찾음: 빈칸 채우기
@@ -207,19 +218,23 @@ export function syncExcelDataWithUserData(
 function fillEmptyFields(row: Record<string, any>, userData: UserData): Record<string, any> {
   const updatedRow = { ...row };
 
-  // '구분' (name_suffix) - 빈칸인 경우만 채우기
-  if (!updatedRow['구분'] && userData.name_suffix) {
-    updatedRow['구분'] = userData.name_suffix;
+  // '구분' (nameSuffix) - 빈칸인 경우만 채우기
+  if (!updatedRow['구분'] && userData.nameSuffix) {
+    updatedRow['구분'] = userData.nameSuffix;
   }
 
-  // '번호' (phone_number) - 빈칸인 경우만 채우기
-  if (!updatedRow['번호'] && userData.phone_number) {
-    updatedRow['번호'] = userData.phone_number;
+  // '번호' (phoneNumber) - 빈칸인 경우만 채우기
+  // 서버는 하이픈 없는 숫자로 내려주므로 셀 검증 형식(010-0000-0000)에 맞춰 포맷 (전송 시 하이픈은 다시 제거됨)
+  if (!updatedRow['번호'] && userData.phoneNumber) {
+    updatedRow['번호'] = formatPhoneNumber(userData.phoneNumber);
   }
 
-  // '기수' (birth_date) - 빈칸인 경우만 연도 끝 두자리 채우기
-  if (!updatedRow['기수'] && userData.birth_date) {
-    updatedRow['기수'] = extractYearSuffix(userData.birth_date);
+  // '기수' (birthDate) - 빈칸인 경우만 연도 끝 두자리 채우기
+  if (!updatedRow['기수'] && userData.birthDate) {
+    const yearSuffix = extractYearSuffix(userData.birthDate);
+    if (yearSuffix) {
+      updatedRow['기수'] = yearSuffix;
+    }
   }
 
   return updatedRow;
