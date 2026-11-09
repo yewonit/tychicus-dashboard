@@ -1,6 +1,7 @@
 import React from 'react';
 import * as XLSX from 'xlsx';
 import { SheetData } from '../../../types';
+import { stripInternalFields } from '../../../utils/excel/excelUtils';
 
 interface ExcelDownloadButtonProps {
   /** 다운로드할 데이터 (sheets 배열) */
@@ -49,7 +50,8 @@ const ExcelDownloadButton: React.FC<ExcelDownloadButtonProps> = ({
       const workbook = XLSX.utils.book_new();
 
       // 각 시트 추가
-      data.forEach(sheet => {
+      // 매칭 결과 등 내부 필드는 엑셀에 넣지 않음
+      stripInternalFields(data).forEach(sheet => {
         const { sheetName, rows } = sheet;
 
         // rows가 비어있으면 빈 시트 추가
