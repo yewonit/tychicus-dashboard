@@ -1,7 +1,13 @@
 /**
  * 회기 변경 관리 API 서비스
  */
-import { CurrentSeasonMember, SeasonApplySummary, SeasonUpdatePayload, UserData } from '../types/seasonUpdate';
+import {
+  CurrentSeasonMember,
+  RematchCandidate,
+  SeasonApplySummary,
+  SeasonUpdatePayload,
+  UserData,
+} from '../types/seasonUpdate';
 import { getApiErrorMessage } from '../utils/apiError';
 import axiosClient from '../utils/axiosClient';
 
@@ -31,6 +37,20 @@ export async function fetchCurrentSeasonMembers(): Promise<CurrentSeasonMember[]
   } catch (error) {
     console.error('현재 회기 구성원 조회 오류:', error instanceof Error ? error.message : '알 수 없는 오류');
     throw new Error(getApiErrorMessage(error, '현재 회기 구성원을 가져오는 중 오류가 발생했습니다.'));
+  }
+}
+
+/**
+ * 재매칭 후보 가져오기: 같은 이름(공백 무시)의 사용자와 각자의 현재 회기 소속
+ * @param name 찾을 이름
+ */
+export async function fetchRematchCandidates(name: string): Promise<RematchCandidate[]> {
+  try {
+    const response = await axiosClient.get('/seasons/rematch-candidates', { params: { name } });
+    return response.data.data as RematchCandidate[];
+  } catch (error) {
+    console.error('재매칭 후보 조회 오류:', error instanceof Error ? error.message : '알 수 없는 오류');
+    throw new Error(getApiErrorMessage(error, '같은 이름의 사람을 불러오는 중 오류가 발생했습니다.'));
   }
 }
 

@@ -1,17 +1,20 @@
 /**
  * 재매칭 다이얼로그
- * 자동 매칭에 실패한 행을, 그 사람의 현재 회기 소속(국/그룹/순)이나 이름으로 기존 인원 중에서 직접 골라 연결합니다.
+ * 열면 현재 회기(DB) 기준으로 같은 이름의 사람과 각자의 국/그룹/순을 불러오고,
+ * 맞는 사람을 클릭하면 바로 그 행에 연결합니다.
  */
-import React, { useEffect, useMemo, useState } from 'react';
-import { CurrentSeasonMember, UserData } from '../../../types/seasonUpdate';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { fetchRematchCandidates } from '../../../services/seasonUpdateService';
+import { RematchCandidate } from '../../../types/seasonUpdate';
 import { ROW_USER_ID_FIELD } from '../../../utils/excel/excelFieldMapping';
 import {
   describeMatchFailure,
-  extractYearSuffix,
   getRowCurrentOrg,
   getRowMatch,
-  normalizeGook,
+  isSameOrg,
   normalizeName,
+  phoneDigits,
+  toBirthYearSuffix,
 } from '../../../utils/excel/seasonMatching';
 import { formatPhoneNumber } from '../../../utils/phoneUtils';
 import { Modal } from '../../ui';
@@ -23,243 +26,163 @@ interface RematchModalProps {
   /** 행 위치 표시용 */
   sheetName: string;
   rowNumber: number;
-  /** 서버 전체 유저 (불러오는 중이면 null) */
-  allUsers: UserData[] | null;
-  /** 현재 회기 구성원 (불러오는 중이면 null) */
-  currentMembers: CurrentSeasonMember[] | null;
-  isLoading: boolean;
-  loadError: string | null;
-  onRetryLoad: () => void;
   onClose: () => void;
-  onConfirm: (user: UserData) => void;
+  /** 사람을 클릭하면 바로 호출 */
+  onConfirm: (candidate: RematchCandidate) => void;
 }
 
-type SearchMode = 'org' | 'name';
-
-interface Candidate {
-  user: UserData;
-  memberships: CurrentSeasonMember[];
-  birthYear: string;
-  nameMatches: boolean;
+interface AnnotatedCandidate {
+  candidate: RematchCandidate;
+  orgMatch: boolean;
+  phoneMatch: boolean;
+  birthMatch: boolean;
+  linked: boolean;
 }
 
-const NAME_SEARCH_LIMIT = 50;
+const joinOrg = (org: RematchCandidate['organizations'][number]) =>
+  [org.gook, org.group, org.soon].filter(Boolean).join(' · ');
 
-const sortKo = (values: string[]) =>
-  [...new Set(values)].sort((a, b) => a.localeCompare(b, 'ko-KR', { numeric: true }));
-
-const formatOrg = (m: CurrentSeasonMember) => [m.gook, m.group, m.soon].filter(Boolean).join(' · ');
-
-const RematchModal: React.FC<RematchModalProps> = ({
-  isOpen,
-  row,
-  sheetName,
-  rowNumber,
-  allUsers,
-  currentMembers,
-  isLoading,
-  loadError,
-  onRetryLoad,
-  onClose,
-  onConfirm,
-}) => {
-  const [mode, setMode] = useState<SearchMode>('org');
-  const [gook, setGook] = useState('');
-  const [group, setGroup] = useState('');
-  const [soon, setSoon] = useState('');
-  const [nameQuery, setNameQuery] = useState('');
-  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
-
-  const members = useMemo(() => currentMembers ?? [], [currentMembers]);
-  const usersById = useMemo(
-    () => new Map((allUsers ?? []).filter(u => !u.isDeleted && u.id !== undefined).map(u => [u.id as number, u])),
-    [allUsers]
-  );
-  const membershipsByUserId = useMemo(() => {
-    const map = new Map<number, CurrentSeasonMember[]>();
-    members.forEach(m => map.set(m.userId, [...(map.get(m.userId) ?? []), m]));
-    return map;
-  }, [members]);
-
-  const gookOptions = useMemo(() => sortKo(members.map(m => m.gook ?? '').filter(Boolean)), [members]);
-  const groupOptions = useMemo(
-    () =>
-      sortKo(
-        members
-          .filter(m => m.gook === gook)
-          .map(m => m.group ?? '')
-          .filter(Boolean)
-      ),
-    [members, gook]
-  );
-  const soonOptions = useMemo(
-    () =>
-      sortKo(
-        members
-          .filter(m => m.gook === gook && m.group === group)
-          .map(m => m.soon ?? '')
-          .filter(Boolean)
-      ),
-    [members, gook, group]
-  );
-
+const RematchModal: React.FC<RematchModalProps> = ({ isOpen, row, sheetName, rowNumber, onClose, onConfirm }) => {
   const rowName = String(row?.['이름'] ?? '').trim();
-  const match = row ? getRowMatch(row) : undefined;
+  const [query, setQuery] = useState('');
+  const [searchInput, setSearchInput] = useState('');
+  const [candidates, setCandidates] = useState<RematchCandidate[] | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const requestIdRef = useRef(0);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // 열 때마다 엑셀의 현재 소속으로 미리 선택
+  const search = useCallback(async (name: string) => {
+    const requestId = ++requestIdRef.current;
+    setQuery(name);
+    setIsLoading(true);
+    setError(null);
+    try {
+      const result = await fetchRematchCandidates(name);
+      if (requestId === requestIdRef.current) setCandidates(result);
+    } catch (e) {
+      if (requestId === requestIdRef.current) {
+        setCandidates(null);
+        setError(e instanceof Error ? e.message : '같은 이름의 사람을 불러오지 못했어요.');
+      }
+    } finally {
+      if (requestId === requestIdRef.current) setIsLoading(false);
+    }
+  }, []);
+
+  // 열릴 때마다 행의 이름으로 동명이인 조회
   useEffect(() => {
-    if (!isOpen || !row) return;
-    const org = getRowCurrentOrg(row);
-    const pickedGook = gookOptions.find(o => org.gook && normalizeGook(o) === normalizeGook(org.gook)) ?? '';
-    const groupsOfGook = sortKo(
-      members
-        .filter(m => m.gook === pickedGook)
-        .map(m => m.group ?? '')
-        .filter(Boolean)
-    );
-    const pickedGroup = groupsOfGook.find(o => org.group && normalizeName(o) === normalizeName(org.group)) ?? '';
-    const soonsOfGroup = sortKo(
-      members
-        .filter(m => m.gook === pickedGook && m.group === pickedGroup)
-        .map(m => m.soon ?? '')
-        .filter(Boolean)
-    );
-    const pickedSoon = soonsOfGroup.find(o => org.soon && normalizeName(o) === normalizeName(org.soon)) ?? '';
+    if (!isOpen || !rowName) return;
+    setSearchInput('');
+    setCandidates(null);
+    search(rowName);
+  }, [isOpen, rowName, search]);
 
-    setGook(pickedGook);
-    setGroup(pickedGroup);
-    setSoon(pickedSoon);
-    setNameQuery(String(row['이름'] ?? '').trim());
-    setSelectedUserId(typeof row[ROW_USER_ID_FIELD] === 'number' ? row[ROW_USER_ID_FIELD] : null);
-    // 현재 소속을 알 수 없으면 이름으로 찾기부터 보여줌
-    setMode(pickedGook ? 'org' : 'name');
-  }, [isOpen, row, gookOptions, members]);
+  // 같은 이름이 없으면 바로 다른 이름을 입력할 수 있게 포커스
+  useEffect(() => {
+    if (candidates && candidates.length === 0) searchInputRef.current?.focus();
+  }, [candidates]);
 
-  const toCandidate = (user: UserData, memberships: CurrentSeasonMember[]): Candidate => ({
-    user,
-    memberships,
-    birthYear: memberships[0]?.birthYear ?? (user.birthDate ? extractYearSuffix(user.birthDate) : ''),
-    nameMatches: normalizeName(user.name) === normalizeName(rowName),
-  });
-
-  const sortCandidates = (list: Candidate[]) =>
-    list.sort(
-      (a, b) => Number(b.nameMatches) - Number(a.nameMatches) || a.user.name.localeCompare(b.user.name, 'ko-KR')
-    );
-
-  const orgCandidates = useMemo(() => {
-    if (!gook || !group) return [];
-    const inOrg = members.filter(m => m.gook === gook && m.group === group && (!soon || m.soon === soon));
-    const userIds = [...new Set(inOrg.map(m => m.userId))];
-    return sortCandidates(
-      userIds.map(userId => {
-        const memberships = inOrg.filter(m => m.userId === userId);
-        const first = memberships[0];
-        const user = usersById.get(userId) ?? {
-          id: userId,
-          name: first.name,
-          nameSuffix: first.nameSuffix,
-          phoneNumber: first.phoneNumber,
-        };
-        return toCandidate(user, membershipsByUserId.get(userId) ?? memberships);
-      })
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [members, gook, group, soon, usersById, membershipsByUserId, rowName]);
-
-  const nameCandidates = useMemo(() => {
-    const query = normalizeName(nameQuery);
-    if (!query) return [];
-    const found = [...usersById.values()].filter(u => normalizeName(u.name).includes(query));
-    return sortCandidates(found.map(u => toCandidate(u, membershipsByUserId.get(u.id as number) ?? []))).slice(
-      0,
-      NAME_SEARCH_LIMIT
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nameQuery, usersById, membershipsByUserId, rowName]);
-
-  const candidates = mode === 'org' ? orgCandidates : nameCandidates;
-  const selected =
-    selectedUserId !== null
-      ? (candidates.find(c => c.user.id === selectedUserId) ??
-        (usersById.has(selectedUserId)
-          ? toCandidate(usersById.get(selectedUserId) as UserData, membershipsByUserId.get(selectedUserId) ?? [])
-          : undefined))
-      : undefined;
-  const willRename = !!selected && normalizeName(selected.user.name) !== normalizeName(rowName);
+  const annotated = useMemo<AnnotatedCandidate[]>(() => {
+    if (!row || !candidates) return [];
+    const rowOrg = getRowCurrentOrg(row);
+    const rowPhone = phoneDigits(row['번호']);
+    const rowBirth = toBirthYearSuffix(row['기수']);
+    const linkedId = row[ROW_USER_ID_FIELD];
+    return candidates
+      .map(candidate => ({
+        candidate,
+        orgMatch: candidate.organizations.some(org => isSameOrg(org, rowOrg)),
+        phoneMatch: !!rowPhone && phoneDigits(candidate.phoneNumber) === rowPhone,
+        birthMatch: !!rowBirth && candidate.birthYear === rowBirth,
+        linked: candidate.userId === linkedId,
+      }))
+      .sort(
+        (a, b) =>
+          Number(b.orgMatch) - Number(a.orgMatch) ||
+          Number(b.phoneMatch) - Number(a.phoneMatch) ||
+          Number(b.birthMatch) - Number(a.birthMatch) ||
+          Number(b.candidate.organizations.length > 0) - Number(a.candidate.organizations.length > 0)
+      );
+  }, [row, candidates]);
 
   if (!row) return null;
 
-  const renderCandidates = () => {
-    if (isLoading) return <p className='rematch-empty'>기존 인원 정보를 불러오는 중이에요...</p>;
-    if (loadError)
+  const match = getRowMatch(row);
+  const currentOrg = getRowCurrentOrg(row);
+  const excelCurrentOrg = [currentOrg.gook, currentOrg.group, currentOrg.soon].filter(Boolean).join(' · ');
+  const searchingOtherName = normalizeName(query) !== normalizeName(rowName);
+
+  const submitSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const name = searchInput.trim();
+    if (name) search(name);
+  };
+
+  const renderList = () => {
+    if (isLoading) return <p className='rematch-empty'>‘{query}’ 이름의 사람을 불러오는 중이에요...</p>;
+    if (error)
       return (
         <div className='rematch-empty'>
-          <p>{loadError}</p>
-          <button type='button' className='sync-modal-cancel-button' onClick={onRetryLoad}>
+          <p>{error}</p>
+          <button type='button' className='sync-modal-cancel-button' onClick={() => search(query)}>
             다시 불러오기
           </button>
         </div>
       );
-    if (mode === 'org' && (!gook || !group))
-      return (
-        <p className='rematch-empty'>국과 그룹을 선택하면 그 소속의 구성원이 보여요. (순까지 고르면 더 좁혀져요)</p>
-      );
-    if (mode === 'name' && !normalizeName(nameQuery))
-      return <p className='rematch-empty'>찾을 이름을 입력해 주세요.</p>;
-    if (candidates.length === 0)
+    if (!candidates) return null;
+    if (annotated.length === 0)
       return (
         <p className='rematch-empty'>
-          {mode === 'org'
-            ? '이 소속에 구성원이 없어요. 소속을 바꾸거나 이름으로 찾아보세요.'
-            : '일치하는 사람이 없어요. 아직 등록되지 않았다면 구성원 관리에서 먼저 등록한 뒤 정보 동기화를 다시 해주세요.'}
+          현재 DB에 ‘{query}’과(와) 이름이 같은 사람이 없어요.
+          <br />
+          이름이 다르게 등록되어 있다면 아래에서 다른 이름으로 찾아보세요.
         </p>
       );
 
     return (
-      <div className='rematch-candidates' role='radiogroup' aria-label='매칭할 사람 선택'>
-        <div className='rematch-candidate rematch-candidate-head' aria-hidden='true'>
-          <span />
-          <span>이름</span>
-          <span>기수</span>
-          <span>연락처</span>
-          <span>현재 소속 · 직분</span>
-        </div>
-        {candidates.map(c => {
-          const id = c.user.id as number;
-          const isSelected = id === selectedUserId;
-          return (
-            <label key={id} className={`rematch-candidate ${isSelected ? 'selected' : ''}`}>
-              <input
-                type='radio'
-                name='rematch-candidate'
-                checked={isSelected}
-                onChange={() => setSelectedUserId(id)}
-              />
-              <span className='rematch-candidate-name'>
-                {c.user.name}
-                {c.user.nameSuffix ? <span className='rematch-suffix'>{c.user.nameSuffix}</span> : null}
-                {c.nameMatches && <span className='rematch-badge'>이름 일치</span>}
+      <ul className='rematch-card-list'>
+        {annotated.map(({ candidate: c, orgMatch, phoneMatch, birthMatch, linked }) => (
+          <li key={c.userId}>
+            <button
+              type='button'
+              className={`rematch-card ${orgMatch ? 'recommended' : ''} ${linked ? 'linked' : ''}`}
+              onClick={() => onConfirm(c)}
+            >
+              <span className='rematch-card-name'>
+                {c.name}
+                {c.nameSuffix && <span className='rematch-suffix'>{c.nameSuffix}</span>}
               </span>
-              <span>{c.birthYear || '-'}</span>
-              <span>{c.user.phoneNumber ? formatPhoneNumber(c.user.phoneNumber) : '-'}</span>
-              <span className='rematch-candidate-org'>
-                {c.memberships.length > 0
-                  ? c.memberships.map(m => `${formatOrg(m)} · ${m.role}`).join(' / ')
-                  : '현재 회기 소속 없음'}
+              <span className='rematch-card-orgs'>
+                {c.organizations.length > 0 ? (
+                  c.organizations.map((org, i) => (
+                    <span key={i} className='rematch-card-org'>
+                      {joinOrg(org)}
+                      <span className='rematch-card-role'>{org.role}</span>
+                    </span>
+                  ))
+                ) : (
+                  <span className='rematch-card-org none'>현재 회기 소속 없음</span>
+                )}
               </span>
-            </label>
-          );
-        })}
-        {mode === 'name' && candidates.length === NAME_SEARCH_LIMIT && (
-          <p className='rematch-more'>최대 {NAME_SEARCH_LIMIT}명까지 보여요. 이름을 더 정확히 입력해 주세요.</p>
-        )}
-      </div>
+              <span className='rematch-card-meta'>
+                기수 {c.birthYear || '-'} · {c.phoneNumber ? formatPhoneNumber(c.phoneNumber) : '연락처 없음'}
+              </span>
+              <span className='rematch-card-badges'>
+                {linked && <span className='rematch-badge linked'>현재 연결됨</span>}
+                {orgMatch && <span className='rematch-badge'>엑셀 현재 소속과 같음</span>}
+                {phoneMatch && <span className='rematch-badge'>연락처 일치</span>}
+                {birthMatch && <span className='rematch-badge'>기수 일치</span>}
+              </span>
+              <span className='rematch-card-action' aria-hidden='true'>
+                이 사람으로 연결 →
+              </span>
+            </button>
+          </li>
+        ))}
+      </ul>
     );
   };
-
-  const currentOrg = getRowCurrentOrg(row);
-  const excelCurrentOrg = [currentOrg.gook, currentOrg.group, currentOrg.soon].filter(Boolean).join(' · ');
 
   return (
     <Modal isOpen={isOpen} title='재매칭' onClose={onClose} size='large' className='rematch-modal'>
@@ -267,7 +190,7 @@ const RematchModal: React.FC<RematchModalProps> = ({
         {/* 엑셀 행 요약 */}
         <div className='rematch-row-summary'>
           <div className='rematch-row-title'>
-            <strong>{rowName || '(이름 없음)'}</strong>
+            <strong>{rowName}</strong>
             {row['구분'] && <span className='rematch-suffix'>{row['구분']}</span>}
             <span className='rematch-row-location'>
               {sheetName} · {rowNumber}행
@@ -283,11 +206,11 @@ const RematchModal: React.FC<RematchModalProps> = ({
               <dd>{row['번호'] || '-'}</dd>
             </div>
             <div>
-              <dt>다음 회기 소속</dt>
+              <dt>다음 회기 소속 (엑셀)</dt>
               <dd>{[row['국'], row['그룹'], row['순']].filter(Boolean).join(' · ') || '-'}</dd>
             </div>
             <div>
-              <dt>엑셀의 현재 소속</dt>
+              <dt>현재 소속 (엑셀)</dt>
               <dd>{excelCurrentOrg || '없음'}</dd>
             </div>
           </dl>
@@ -296,147 +219,51 @@ const RematchModal: React.FC<RematchModalProps> = ({
         {match?.status === 'failed' && (
           <p className='rematch-reason'>❗ {describeMatchFailure(match.reason, match.candidateCount)}</p>
         )}
-        {match?.status === 'matched' && (
-          <p className='rematch-reason matched'>
-            이미 {match.source === 'manual' ? '직접' : '자동으로'} 매칭된 행이에요. 다른 사람으로 바꾸려면 아래에서
-            선택하세요.
+
+        {(searchingOtherName || annotated.length > 0) && (
+          <p className='rematch-instruction'>
+            {searchingOtherName ? (
+              <>
+                ‘{query}’ 이름으로 찾은 사람들이에요. 선택하면 엑셀의 이름도 그 사람 이름으로 바뀌어요.{' '}
+                <button type='button' className='rematch-link' onClick={() => search(rowName)}>
+                  ‘{rowName}’(으)로 다시 보기
+                </button>
+              </>
+            ) : (
+              <>
+                <strong>현재 회기(DB)</strong> 기준으로 ‘{rowName}’과(와) 이름이 같은 사람들이에요. 국 · 그룹 · 순을
+                보고 맞는 사람을 <strong>클릭하면 바로 연결</strong>돼요.
+              </>
+            )}
           </p>
         )}
 
-        {/* 재매칭 안내 */}
-        <details className='rematch-guide' open={match?.status === 'failed'}>
-          <summary>💡 재매칭은 이렇게 해요</summary>
-          <ol>
-            <li>
-              이 사람이 <strong>현재 회기(지금 다니는)</strong> 국 · 그룹 · 순을 고르면, 그 소속 구성원 목록에서 같은
-              사람을 찾을 수 있어요. 엑셀에 현재 소속이 적혀 있으면 미리 선택해 두었어요.
-            </li>
-            <li>
-              새가족이나 오랜만에 돌아온 사람처럼 현재 회기 소속이 없으면 <strong>이름으로 찾기</strong>를 이용하세요.
-            </li>
-            <li>
-              목록에서 사람을 고르고 <strong>이 사람으로 매칭</strong>을 누르면 빨간 줄이 사라져요. 고른 사람은 정보
-              동기화를 다시 해도 유지돼요.
-            </li>
-            <li>
-              목록에 없다면 아직 등록되지 않은 사람이에요. 구성원 관리에서 먼저 등록한 뒤 정보 동기화를 다시 해주세요.
-            </li>
-          </ol>
-        </details>
+        {renderList()}
 
-        {/* 찾기 방식 */}
-        <div className='rematch-tabs' role='tablist'>
-          <button
-            type='button'
-            role='tab'
-            aria-selected={mode === 'org'}
-            className={`rematch-tab ${mode === 'org' ? 'active' : ''}`}
-            onClick={() => setMode('org')}
-          >
-            현재 소속으로 찾기
-          </button>
-          <button
-            type='button'
-            role='tab'
-            aria-selected={mode === 'name'}
-            className={`rematch-tab ${mode === 'name' ? 'active' : ''}`}
-            onClick={() => setMode('name')}
-          >
-            이름으로 찾기
-          </button>
-        </div>
-
-        {mode === 'org' ? (
-          <div className='rematch-filters'>
-            <label>
-              <span>국</span>
-              <select
-                value={gook}
-                onChange={e => {
-                  setGook(e.target.value);
-                  setGroup('');
-                  setSoon('');
-                }}
-              >
-                <option value=''>선택</option>
-                {gookOptions.map(o => (
-                  <option key={o} value={o}>
-                    {o}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              <span>그룹</span>
-              <select
-                value={group}
-                disabled={!gook}
-                onChange={e => {
-                  setGroup(e.target.value);
-                  setSoon('');
-                }}
-              >
-                <option value=''>선택</option>
-                {groupOptions.map(o => (
-                  <option key={o} value={o}>
-                    {o}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              <span>순</span>
-              <select value={soon} disabled={!group} onChange={e => setSoon(e.target.value)}>
-                <option value=''>전체</option>
-                {soonOptions.map(o => (
-                  <option key={o} value={o}>
-                    {o}
-                  </option>
-                ))}
-              </select>
-            </label>
+        {/* 다른 이름으로 찾기 */}
+        <form className='rematch-search' onSubmit={submitSearch}>
+          <label htmlFor='rematch-search-input'>찾는 사람이 없나요? 다른 이름으로 찾기</label>
+          <div className='rematch-search-row'>
+            <input
+              id='rematch-search-input'
+              ref={searchInputRef}
+              type='text'
+              value={searchInput}
+              placeholder='DB에 등록된 이름 (예: 오타를 고친 이름)'
+              onChange={e => setSearchInput(e.target.value)}
+            />
+            <button type='submit' className='sync-modal-cancel-button' disabled={!searchInput.trim()}>
+              찾기
+            </button>
           </div>
-        ) : (
-          <div className='rematch-filters'>
-            <label className='rematch-name-search'>
-              <span>이름</span>
-              <input
-                type='text'
-                value={nameQuery}
-                placeholder='이름 일부만 입력해도 돼요'
-                onChange={e => setNameQuery(e.target.value)}
-              />
-            </label>
-          </div>
-        )}
-
-        {renderCandidates()}
-
-        {selected && (
-          <p className='rematch-selected'>
-            선택한 사람: <strong>{selected.user.name}</strong>
-            {selected.user.nameSuffix ? ` (${selected.user.nameSuffix})` : ''} · 기수 {selected.birthYear || '-'} ·{' '}
-            {selected.memberships.length > 0 ? selected.memberships.map(formatOrg).join(' / ') : '현재 회기 소속 없음'}
+          <p className='rematch-search-note'>
+            그래도 없다면 아직 등록되지 않은 사람이에요. 구성원 관리에서 먼저 등록한 뒤 정보 동기화를 다시 해주세요.
           </p>
-        )}
-        {willRename && selected && (
-          <p className='rematch-rename-note'>
-            ✏️ 엑셀의 이름 &apos;{rowName}&apos;이(가) 선택한 사람의 이름 &apos;{selected.user.name}&apos;(으)로
-            바뀌어요.
-          </p>
-        )}
+        </form>
 
         <div className='sync-modal-buttons'>
           <button type='button' className='sync-modal-cancel-button' onClick={onClose}>
-            취소
-          </button>
-          <button
-            type='button'
-            className='sync-modal-confirm-button'
-            disabled={!selected}
-            onClick={() => selected && onConfirm(selected.user)}
-          >
-            이 사람으로 매칭
+            닫기
           </button>
         </div>
       </div>

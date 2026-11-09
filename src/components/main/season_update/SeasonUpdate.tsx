@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAutoSave, useSeasonData } from '../../../hooks';
 import { applySeasonUpdate, fetchAllUsers, fetchCurrentSeasonMembers } from '../../../services/seasonUpdateService';
 import { SheetData } from '../../../types';
-import { CurrentSeasonMember, IssueLocation, SeasonApplySummary, UserData } from '../../../types/seasonUpdate';
+import { IssueLocation, RematchCandidate, SeasonApplySummary } from '../../../types/seasonUpdate';
 import {
   applyManualMatch,
   clearRowMatch,
@@ -29,17 +29,6 @@ import SyncModal from './SyncModal';
 import UploadGuide from './UploadGuide';
 import UsageGuide from './UsageGuide';
 import WarningNotice from './WarningNotice';
-
-/** 매칭에 필요한 기준 데이터 (서버 전체 유저 + 현재 회기 구성원) */
-interface ReferenceData {
-  allUsers: UserData[];
-  currentMembers: CurrentSeasonMember[];
-}
-
-const loadReferenceData = async (): Promise<ReferenceData> => {
-  const [allUsers, currentMembers] = await Promise.all([fetchAllUsers(), fetchCurrentSeasonMembers()]);
-  return { allUsers, currentMembers };
-};
 
 const formatApplySummary = (summary: SeasonApplySummary | null): string => {
   if (!summary) return '회기 변경이 성공적으로 적용되었습니다.';
@@ -78,9 +67,6 @@ const SeasonUpdate: React.FC = () => {
   // 테이블 이동/재매칭 상태
   const [activeSheetIndex, setActiveSheetIndex] = useState(0);
   const [focusTarget, setFocusTarget] = useState<TableFocusTarget | null>(null);
-  const [referenceData, setReferenceData] = useState<ReferenceData | null>(null);
-  const [isLoadingReference, setIsLoadingReference] = useState(false);
-  const [referenceError, setReferenceError] = useState<string | null>(null);
   const [rematchTarget, setRematchTarget] = useState<{ sheetIndex: number; rowIndex: number } | null>(null);
 
   // savedData 변경 시 excelData 동기화 (localStorage에서 로드될 때)
@@ -176,16 +162,14 @@ const SeasonUpdate: React.FC = () => {
     setSyncProgressStep(1);
 
     try {
-      // 1단계: 서버에서 전체 유저 + 현재 회기 구성원 가져오기
-      const reference = await loadReferenceData();
-      setReferenceData(reference);
-      setReferenceError(null);
+      // 1단계: 서버에서 전체 유저 + 현재 회기 구성원(현재 소속으로 동명이인 구분용) 가져오기
+      const [allUsers, currentMembers] = await Promise.all([fetchAllUsers(), fetchCurrentSeasonMembers()]);
 
       // 2단계: 매칭 적용
       setSyncProgressStep(2);
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      const { sheets, summary } = matchSheetsWithUsers(excelData, reference.allUsers, reference.currentMembers);
+      const { sheets, summary } = matchSheetsWithUsers(excelData, allUsers, currentMembers);
       updateData(sheets); // 동기화 후 즉시 저장
       resetSaveState();
 
@@ -217,33 +201,16 @@ const SeasonUpdate: React.FC = () => {
     }
   };
 
-  /** 재매칭 다이얼로그용 기준 데이터를 (없으면) 불러옴 — 새로고침 후 동기화 없이 재매칭할 때 */
-  const ensureReferenceData = useCallback(async () => {
-    if (referenceData || isLoadingReference) return;
-    setIsLoadingReference(true);
-    setReferenceError(null);
-    try {
-      setReferenceData(await loadReferenceData());
-    } catch (error) {
-      setReferenceError(error instanceof Error ? error.message : '기존 인원 정보를 불러오지 못했습니다.');
-    } finally {
-      setIsLoadingReference(false);
-    }
-  }, [referenceData, isLoadingReference]);
+  const openRematch = (sheetIndex: number, rowIndex: number) => setRematchTarget({ sheetIndex, rowIndex });
 
-  const openRematch = (sheetIndex: number, rowIndex: number) => {
-    setRematchTarget({ sheetIndex, rowIndex });
-    ensureReferenceData();
-  };
-
-  /** 재매칭 확정: 고른 사람으로 행을 연결 */
-  const handleRematchConfirm = (user: UserData) => {
+  /** 재매칭 확정: 다이얼로그에서 클릭한 사람으로 행을 연결 */
+  const handleRematchConfirm = (candidate: RematchCandidate) => {
     if (!excelData || !rematchTarget) return;
     const { sheetIndex, rowIndex } = rematchTarget;
     const updated = excelData.map((sheet, si) =>
       si !== sheetIndex
         ? sheet
-        : { ...sheet, rows: sheet.rows.map((row, ri) => (ri === rowIndex ? applyManualMatch(row, user) : row)) }
+        : { ...sheet, rows: sheet.rows.map((row, ri) => (ri === rowIndex ? applyManualMatch(row, candidate) : row)) }
     );
     updateData(updated);
     setRematchTarget(null);
@@ -432,11 +399,6 @@ const SeasonUpdate: React.FC = () => {
         row={rematchRow}
         sheetName={rematchTarget && excelData ? (excelData[rematchTarget.sheetIndex]?.sheetName ?? '') : ''}
         rowNumber={(rematchTarget?.rowIndex ?? 0) + 1}
-        allUsers={referenceData?.allUsers ?? null}
-        currentMembers={referenceData?.currentMembers ?? null}
-        isLoading={isLoadingReference}
-        loadError={referenceError}
-        onRetryLoad={ensureReferenceData}
         onClose={() => setRematchTarget(null)}
         onConfirm={handleRematchConfirm}
       />

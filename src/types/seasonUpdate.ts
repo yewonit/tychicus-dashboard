@@ -108,6 +108,19 @@ export interface CurrentSeasonMember {
   role: string;
 }
 
+/**
+ * 재매칭 후보 (GET /seasons/rematch-candidates)
+ * 이름이 같은 사용자와 각자의 현재 회기 소속. 현재 회기 소속이 없으면 organizations가 빈 배열.
+ */
+export interface RematchCandidate {
+  userId: number;
+  name: string;
+  nameSuffix: string | null;
+  phoneNumber: string;
+  birthYear: string | null; // 기수 (두 자리)
+  organizations: { gook: string | null; group: string | null; soon: string | null; role: string }[];
+}
+
 /** 매칭 실패 사유 */
 export type MatchFailureReason =
   | 'not_found' // 같은 이름의 구성원이 없음

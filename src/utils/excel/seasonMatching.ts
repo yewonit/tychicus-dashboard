@@ -5,7 +5,13 @@
  * 매칭된 행은 userId가 서버로 전송되어 서버가 이름으로 다시 찾지 않습니다.
  */
 import { SheetData } from '../../types';
-import { CurrentSeasonMember, MatchFailureReason, RowMatch, UserData } from '../../types/seasonUpdate';
+import {
+  CurrentSeasonMember,
+  MatchFailureReason,
+  RematchCandidate,
+  RowMatch,
+  UserData,
+} from '../../types/seasonUpdate';
 import { formatPhoneNumber } from '../phoneUtils';
 import { CURRENT_ORG_COLUMNS, ROW_MATCH_FIELD, ROW_USER_ID_FIELD } from './excelFieldMapping';
 
@@ -162,16 +168,28 @@ function matchRow(row: Row, ctx: MatchContext): MatchResult {
   return { status: 'matched', user: pool[0] };
 }
 
+/** 행 빈 칸을 채울 때 쓰는 기존 인원 정보 */
+interface PersonInfo {
+  nameSuffix?: string | null;
+  phoneNumber?: string | null;
+  birthYear?: string | null;
+}
+
+const toPersonInfo = (user: UserData): PersonInfo => ({
+  nameSuffix: user.nameSuffix,
+  phoneNumber: user.phoneNumber,
+  birthYear: user.birthDate ? extractYearSuffix(user.birthDate) : null,
+});
+
 /** 행의 빈 칸(구분/번호/기수)만 서버 정보로 채웁니다. */
-function fillEmptyFields(row: Row, user: UserData): Row {
+function fillEmptyFields(row: Row, person: PersonInfo): Row {
   const updated = { ...row };
-  if (!String(updated['구분'] ?? '').trim() && user.nameSuffix) updated['구분'] = user.nameSuffix;
+  if (!String(updated['구분'] ?? '').trim() && person.nameSuffix) updated['구분'] = person.nameSuffix;
   // 서버는 하이픈 없는 숫자로 내려주므로 셀 검증 형식(010-0000-0000)에 맞춰 포맷 (전송 시 하이픈은 다시 제거됨)
-  if (!String(updated['번호'] ?? '').trim() && user.phoneNumber) updated['번호'] = formatPhoneNumber(user.phoneNumber);
-  if (!String(updated['기수'] ?? '').trim() && user.birthDate) {
-    const yearSuffix = extractYearSuffix(user.birthDate);
-    if (yearSuffix) updated['기수'] = yearSuffix;
+  if (!String(updated['번호'] ?? '').trim() && person.phoneNumber) {
+    updated['번호'] = formatPhoneNumber(person.phoneNumber);
   }
+  if (!String(updated['기수'] ?? '').trim() && person.birthYear) updated['기수'] = person.birthYear;
   return updated;
 }
 
@@ -187,10 +205,10 @@ export function clearRowMatch(row: Row): Row {
  * 재매칭 다이얼로그에서 사용자가 고른 사람으로 행을 확정합니다.
  * 이름과 구분은 선택한 사람 기준으로 맞추고, 연락처·기수는 빈 칸만 채웁니다.
  */
-export function applyManualMatch(row: Row, user: UserData): Row {
-  const updated = fillEmptyFields({ ...row, 이름: user.name }, user);
-  if (user.nameSuffix) updated['구분'] = user.nameSuffix;
-  updated[ROW_USER_ID_FIELD] = user.id;
+export function applyManualMatch(row: Row, candidate: RematchCandidate): Row {
+  const updated = fillEmptyFields({ ...row, 이름: candidate.name }, candidate);
+  if (candidate.nameSuffix) updated['구분'] = candidate.nameSuffix;
+  updated[ROW_USER_ID_FIELD] = candidate.userId;
   const match: RowMatch = { status: 'matched', source: 'manual' };
   updated[ROW_MATCH_FIELD] = match;
   return updated;
@@ -230,7 +248,11 @@ export function matchSheetsWithUsers(
       if (result.status === 'matched') {
         summary.matched++;
         const match: RowMatch = { status: 'matched', source: 'auto' };
-        return { ...fillEmptyFields(row, result.user), [ROW_USER_ID_FIELD]: result.user.id, [ROW_MATCH_FIELD]: match };
+        return {
+          ...fillEmptyFields(row, toPersonInfo(result.user)),
+          [ROW_USER_ID_FIELD]: result.user.id,
+          [ROW_MATCH_FIELD]: match,
+        };
       }
       summary.failed++;
       const match: RowMatch = { status: 'failed', reason: result.reason, candidateCount: result.candidateCount };

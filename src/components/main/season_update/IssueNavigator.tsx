@@ -115,8 +115,9 @@ const IssueNavigator: React.FC<IssueNavigatorProps> = ({ issues, hasMatchResult,
           {hasMatchResult && issues.matchFailures.length > 0 && (
             <li>
               <span className='legend-swatch legend-swatch-match' aria-hidden='true' />
-              <strong>빨간 줄</strong>은 기존 인원과 매칭되지 않은 사람이에요. 행 앞의 <strong>[재매칭]</strong>을 눌러
-              현재 회기 소속(국·그룹·순)으로 다시 찾아 연결해 주세요. 모두 해결해야 적용할 수 있어요.
+              <strong>빨간 줄</strong>은 기존 인원과 매칭되지 않은 사람이에요. 행 앞의 <strong>[재매칭]</strong>을
+              누르면 같은 이름의 사람과 현재 회기 국·그룹·순이 보이고, 맞는 사람을 클릭하면 바로 연결돼요. 모두 해결해야
+              적용할 수 있어요.
             </li>
           )}
           {issues.valueWarnings.length > 0 && (

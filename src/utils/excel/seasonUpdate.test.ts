@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 import { SheetData } from '../../types';
-import { CurrentSeasonMember, UserData } from '../../types/seasonUpdate';
+import { CurrentSeasonMember, RematchCandidate, UserData } from '../../types/seasonUpdate';
 import { convertToSeasonUpdateData, toSeasonMemberData } from './dataMappingUtils';
 import { ROW_MATCH_FIELD, ROW_USER_ID_FIELD } from './excelFieldMapping';
 import { collectSeasonIssues, hasBlockingIssues } from './seasonIssues';
@@ -159,16 +159,38 @@ describe('matchSheetsWithUsers', () => {
     });
   });
 
+  // 재매칭 다이얼로그가 받는 후보 (GET /seasons/rematch-candidates)
+  const candidate: RematchCandidate = {
+    userId: 1,
+    name: '홍길동',
+    nameSuffix: 'A',
+    phoneNumber: '01011112222',
+    birthYear: '96',
+    organizations: [{ gook: '2국', group: '보람그룹', soon: '보람순', role: '순원' }],
+  };
+
+  it('재매칭으로 고른 사람의 이름·구분으로 맞추고 빈 연락처·기수만 채운다', () => {
+    const manual = applyManualMatch({ 이름: '홍길둥', 기수: '' }, candidate);
+    expect(manual).toMatchObject({
+      이름: '홍길동',
+      구분: 'A',
+      번호: '010-1111-2222',
+      기수: '96',
+      [ROW_USER_ID_FIELD]: 1,
+    });
+    expect(getRowMatch(manual)).toEqual({ status: 'matched', source: 'manual' });
+    expect(applyManualMatch({ 이름: '홍길동', 번호: '010-9999-9999' }, candidate)['번호']).toBe('010-9999-9999');
+  });
+
   it('직접 매칭한 행은 다시 동기화해도 유지한다', () => {
-    const manual = applyManualMatch({ 이름: '홍길둥', 기수: '96' }, users[0]);
-    expect(manual).toMatchObject({ 이름: '홍길동', 구분: 'A', [ROW_USER_ID_FIELD]: 1 });
+    const manual = applyManualMatch({ 이름: '홍길둥', 기수: '96' }, candidate);
     const result = matchSheetsWithUsers(sheet([manual]), users, members);
     expect(result.summary.keptManual).toBe(1);
     expect(result.sheets[0].rows[0][ROW_USER_ID_FIELD]).toBe(1);
   });
 
   it('이름을 고치면(clearRowMatch) 매칭 결과가 지워진다', () => {
-    const cleared = clearRowMatch(applyManualMatch({ 이름: '홍길동' }, users[0]));
+    const cleared = clearRowMatch(applyManualMatch({ 이름: '홍길동' }, candidate));
     expect(cleared[ROW_MATCH_FIELD]).toBeUndefined();
     expect(cleared[ROW_USER_ID_FIELD]).toBeUndefined();
   });

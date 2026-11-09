@@ -9410,84 +9410,21 @@ html {
   border-radius: 4px;
 }
 
-.rematch-reason.matched {
-  color: #1e7b34;
-  background: rgba(40, 167, 69, 0.08);
-  border-left-color: var(--state-success);
-}
-
-.rematch-guide {
-  padding: 10px 14px;
-  font-size: 0.85rem;
+.rematch-instruction {
+  margin: 0;
+  font-size: 0.9rem;
   line-height: 1.6;
   color: var(--text-primary);
-  background: rgba(151, 180, 222, 0.16);
-  border-radius: 8px;
 }
 
-.rematch-guide summary {
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.rematch-guide ol {
-  margin: 8px 0 0;
-  padding-left: 20px;
-}
-
-.rematch-tabs {
-  display: flex;
-  gap: 4px;
-  border-bottom: 1px solid var(--border-medium);
-}
-
-.rematch-tab {
-  padding: 8px 14px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  background: transparent;
-  border: none;
-  border-bottom: 3px solid transparent;
-  cursor: pointer;
-}
-
-.rematch-tab.active {
+.rematch-link {
+  padding: 0;
+  font: inherit;
   color: var(--royal-blue);
-  border-bottom-color: var(--royal-blue);
-}
-
-.rematch-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.rematch-filters label {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  flex: 1 1 160px;
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-}
-
-.rematch-filters select,
-.rematch-filters input {
-  padding: 8px 10px;
-  font-size: 0.9rem;
-  color: var(--text-primary);
-  background: var(--bg-card);
-  border: 1px solid var(--border-medium);
-  border-radius: 6px;
-}
-
-.rematch-filters select:disabled {
-  background: var(--surface-muted);
-}
-
-.rematch-name-search {
-  flex: 1 1 100%;
+  text-decoration: underline;
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 
 .rematch-empty {
@@ -9495,6 +9432,7 @@ html {
   padding: 20px;
   text-align: center;
   font-size: 0.9rem;
+  line-height: 1.6;
   color: var(--text-secondary);
   background: var(--surface-muted);
   border-radius: 8px;
@@ -9504,100 +9442,187 @@ html {
   margin-top: 10px;
 }
 
-.rematch-candidates {
-  max-height: 320px;
-  overflow-y: auto;
-  border: 1px solid var(--border-medium);
-  border-radius: 8px;
-}
-
-.rematch-candidate {
-  display: grid;
-  grid-template-columns: 28px minmax(120px, 1.3fr) 48px 120px minmax(160px, 2fr);
-  align-items: center;
+/* 동명이인 카드 (클릭하면 바로 연결) */
+.rematch-card-list {
+  display: flex;
+  flex-direction: column;
   gap: 8px;
-  padding: 8px 12px;
-  font-size: 0.875rem;
-  border-bottom: 1px solid var(--border-light);
+  max-height: 360px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.rematch-card {
+  display: grid;
+  grid-template-columns: minmax(110px, auto) 1fr auto;
+  grid-template-areas:
+    'name orgs action'
+    'meta meta action'
+    'badges badges action';
+  align-items: center;
+  gap: 4px 16px;
+  width: 100%;
+  padding: 12px 16px;
+  font: inherit;
+  text-align: left;
+  color: var(--text-primary);
+  background: var(--bg-card);
+  border: 1px solid var(--border-medium);
+  border-radius: 10px;
   cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
 }
 
-.rematch-candidate:last-child {
-  border-bottom: none;
+.rematch-card:hover,
+.rematch-card:focus-visible {
+  border-color: var(--royal-blue);
+  background: rgba(38, 58, 153, 0.04);
+  box-shadow: 0 2px 10px rgba(38, 58, 153, 0.12);
+  outline: none;
 }
 
-.rematch-candidate:hover {
-  background: var(--bg-hover-dugigo);
+.rematch-card.recommended {
+  border-color: rgba(40, 167, 69, 0.6);
+  box-shadow: inset 4px 0 0 var(--state-success);
 }
 
-.rematch-candidate.selected {
-  background: rgba(38, 58, 153, 0.08);
-  box-shadow: inset 3px 0 0 var(--royal-blue);
+.rematch-card.linked {
+  background: rgba(38, 58, 153, 0.06);
 }
 
-.rematch-candidate-head {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--text-secondary);
-  background: var(--surface-muted);
-  cursor: default;
-}
-
-.rematch-candidate-head:hover {
-  background: var(--surface-muted);
-}
-
-.rematch-candidate-name {
+.rematch-card-name {
+  grid-area: name;
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 4px;
-  font-weight: 600;
+  gap: 6px;
+  font-size: 1rem;
+  font-weight: 700;
 }
 
-.rematch-candidate-org {
-  font-size: 0.8rem;
+.rematch-card-orgs {
+  grid-area: orgs;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rematch-card-org {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.rematch-card-org.none {
+  font-weight: 500;
   color: var(--text-secondary);
+}
+
+.rematch-card-role {
+  margin-left: 8px;
+  padding: 1px 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--surface-muted);
+  border-radius: 4px;
+}
+
+.rematch-card-meta {
+  grid-area: meta;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.rematch-card-badges {
+  grid-area: badges;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.rematch-card-badges:empty {
+  display: none;
 }
 
 .rematch-badge {
   padding: 1px 6px;
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 700;
   color: #1e7b34;
   background: rgba(40, 167, 69, 0.12);
   border-radius: 4px;
 }
 
-.rematch-more {
+.rematch-badge.linked {
+  color: var(--royal-blue);
+  background: rgba(38, 58, 153, 0.1);
+}
+
+.rematch-card-action {
+  grid-area: action;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--royal-blue);
+  white-space: nowrap;
+  opacity: 0.35;
+  transition: opacity 0.15s ease;
+}
+
+.rematch-card:hover .rematch-card-action,
+.rematch-card:focus-visible .rematch-card-action {
+  opacity: 1;
+}
+
+/* 다른 이름으로 찾기 */
+.rematch-search {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border-medium);
+}
+
+.rematch-search label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.rematch-search-row {
+  display: flex;
+  gap: 8px;
+}
+
+.rematch-search-row input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  background: var(--bg-card);
+  border: 1px solid var(--border-medium);
+  border-radius: 6px;
+}
+
+.rematch-search-note {
   margin: 0;
-  padding: 8px 12px;
   font-size: 0.8rem;
   color: var(--text-secondary);
 }
 
-.rematch-selected,
-.rematch-rename-note {
-  margin: 0;
-  font-size: 0.85rem;
-  color: var(--text-primary);
-}
-
-.rematch-rename-note {
-  color: #8a4b00;
-}
-
 @media (max-width: 640px) {
-  .rematch-candidate {
-    grid-template-columns: 28px 1fr 40px;
+  .rematch-card {
+    grid-template-columns: 1fr;
+    grid-template-areas: 'name' 'orgs' 'meta' 'badges' 'action';
   }
 
-  .rematch-candidate > :nth-child(4),
-  .rematch-candidate > :nth-child(5) {
-    grid-column: 2 / -1;
+  .rematch-card-action {
+    opacity: 1;
   }
 }
 
