@@ -4,6 +4,31 @@
 import * as XLSX from 'xlsx';
 import { SheetData } from '../../types';
 import { ExcelConversionOptions } from '../../types/seasonUpdate';
+import { isInternalField } from './excelFieldMapping';
+import { MergeRange, parseSheetRows } from './sheetParser';
+
+/**
+ * 워크북의 각 시트를 SheetData로 변환합니다.
+ * 헤더 행을 자동으로 찾고, 병합된 그룹 헤더로 다음/현재 회기 소속을 구분합니다.
+ */
+export function workbookToSheets(workbook: XLSX.WorkBook): SheetData[] {
+  return workbook.SheetNames.map(sheetName => {
+    const worksheet = workbook.Sheets[sheetName];
+    // 엑셀 화면에 보이는 텍스트 그대로(raw: false) 읽고, 병합 범위와 행 번호가 맞도록 빈 행도 유지
+    const rows = XLSX.utils.sheet_to_json<unknown[]>(worksheet, {
+      header: 1,
+      defval: '',
+      raw: false,
+      blankrows: true,
+    });
+    const origin = worksheet['!ref'] ? XLSX.utils.decode_range(worksheet['!ref']).s : { r: 0, c: 0 };
+    const merges: MergeRange[] = (worksheet['!merges'] ?? []).map(m => ({
+      s: { r: m.s.r - origin.r, c: m.s.c - origin.c },
+      e: { r: m.e.r - origin.r, c: m.e.c - origin.c },
+    }));
+    return { sheetName, rows: parseSheetRows(rows, merges) };
+  });
+}
 
 /**
  * 엑셀 파일을 SheetData 배열로 변환
@@ -21,16 +46,7 @@ export async function convertExcelToJson(file: File, options: ExcelConversionOpt
     const arrayBuffer = await file.arrayBuffer();
     const workbook = XLSX.read(arrayBuffer, { type: 'array' });
 
-    // 각 시트를 JSON으로 변환
-    const sheets: SheetData[] = workbook.SheetNames.map(sheetName => {
-      const worksheet = workbook.Sheets[sheetName];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet) as Record<string, any>[];
-
-      return {
-        sheetName,
-        rows: jsonData,
-      };
-    });
+    const sheets = workbookToSheets(workbook);
 
     // 최소 로딩 시간 보장
     const elapsedTime = Date.now() - startTime;
@@ -55,7 +71,7 @@ export function downloadExcelFile(data: SheetData[], fileName: string = 'downloa
   try {
     const workbook = XLSX.utils.book_new();
 
-    data.forEach(sheetData => {
+    stripInternalFields(data).forEach(sheetData => {
       const worksheet = XLSX.utils.json_to_sheet(sheetData.rows);
       XLSX.utils.book_append_sheet(workbook, worksheet, sheetData.sheetName);
     });
@@ -78,4 +94,14 @@ export function getExcelDataStats(data: SheetData[]): { sheetCount: number; rowC
     sheetCount: data.length,
     rowCount: data.reduce((sum, sheet) => sum + sheet.rows.length, 0),
   };
+}
+
+/**
+ * 매칭 결과 등 내부 필드(_로 시작)를 뺀 시트 데이터를 반환합니다. (엑셀 다운로드용)
+ */
+export function stripInternalFields(data: SheetData[]): SheetData[] {
+  return data.map(sheet => ({
+    ...sheet,
+    rows: sheet.rows.map(row => Object.fromEntries(Object.entries(row).filter(([key]) => !isInternalField(key)))),
+  }));
 }

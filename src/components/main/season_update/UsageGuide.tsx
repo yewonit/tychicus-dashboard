@@ -10,8 +10,8 @@ import React from 'react';
 const UsageGuide: React.FC = () => {
   const steps = [
     { number: 1, text: '회기 변경 엑셀 파일 업로드하기', icon: '📤' },
-    { number: 2, text: '데이터 동기화 버튼 누르기', icon: '🔄' },
-    { number: 3, text: '붉은색 셀이나 줄을 알맞게 수정하기', icon: '✏️' },
+    { number: 2, text: '정보 동기화로 기존 인원과 매칭하기', icon: '🔄' },
+    { number: 3, text: "'남아있는 확인이 필요한 부분'에서 빨간 줄은 재매칭, 노란 칸은 수정하기", icon: '✏️' },
     { number: 4, text: '회기 변경 적용 버튼 누르기', icon: '✅' },
   ];
 

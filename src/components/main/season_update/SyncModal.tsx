@@ -19,9 +19,12 @@ const SyncModal: React.FC<SyncModalProps> = ({ isOpen, onClose, onConfirm }) => 
     <Modal isOpen={isOpen} title='정보 동기화' onClose={onClose} size='medium'>
       <div className='sync-modal-content'>
         <p className='sync-modal-message'>
-          서버 데이터를 가져와 현재 엑셀을 업데이트 할까요?
+          기존 인원 정보를 가져와 엑셀의 각 행을 기존 인원과 매칭할까요?
           <br />
-          <span className='sync-modal-note'>(이름, 전화번호 기준)</span>
+          <span className='sync-modal-note'>
+            (이름으로 찾고, 동명이인은 연락처 → 기수 → 구분 → 현재 소속 순서로 구분해요. 빈 구분·연락처·기수는 기존
+            정보로 채워져요.)
+          </span>
         </p>
         <div className='sync-modal-buttons'>
           <button className='sync-modal-cancel-button' onClick={onClose}>
